@@ -2,6 +2,7 @@ import { Plugin, Notice } from "obsidian";
 import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
+import { CircuitManager } from "./services/CircuitManager";
 
 /**
  * Switchboard - Context Manager for Obsidian
@@ -9,9 +10,13 @@ import { PatchInModal } from "./modals/PatchInModal";
  */
 export default class SwitchboardPlugin extends Plugin {
     settings: SwitchboardSettings;
+    circuitManager: CircuitManager;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
+
+        // Initialize circuit manager
+        this.circuitManager = new CircuitManager(this.app);
 
         await this.loadSettings();
 
@@ -41,10 +46,19 @@ export default class SwitchboardPlugin extends Plugin {
             },
         });
 
+        // Restore active line state on plugin load (don't refocus folders)
+        const activeLine = this.getActiveLine();
+        if (activeLine) {
+            this.circuitManager.activate(activeLine, false);
+            console.log(`Switchboard: Restored connection to "${activeLine.name}"`);
+        }
+
         console.log("Switchboard: Plugin loaded successfully.");
     }
 
     onunload() {
+        // Clean up circuit when plugin is disabled
+        this.circuitManager.deactivate();
         console.log("Switchboard: Unloading plugin...");
     }
 
@@ -76,6 +90,9 @@ export default class SwitchboardPlugin extends Plugin {
         this.settings.activeLine = line.id;
         await this.saveSettings();
 
+        // Activate the circuit (CSS injection)
+        this.circuitManager.activate(line);
+
         // Show notice
         new Notice(`📞 Patched in: ${line.name}`);
 
@@ -90,7 +107,6 @@ export default class SwitchboardPlugin extends Plugin {
             }
         }
 
-        // TODO (Phase 2): Apply CSS injection for visual changes
         console.log(`Switchboard: ✅ Now connected to "${line.name}"`);
     }
 
@@ -110,6 +126,9 @@ export default class SwitchboardPlugin extends Plugin {
         // Clear active line
         this.settings.activeLine = null;
         await this.saveSettings();
+
+        // Deactivate the circuit (remove CSS)
+        this.circuitManager.deactivate();
 
         // Show notice
         new Notice(`🔌 Disconnected from: ${activeLine.name}`);

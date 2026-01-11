@@ -247,3 +247,154 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+/* ========================================
+   Incoming Call Modal
+   ======================================== */
+
+.switchboard-incoming-call-modal .modal-content {
+	padding: 1.5rem;
+	text-align: center;
+}
+
+.incoming-call-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.incoming-call-icon {
+	font-size: 2.5rem;
+}
+
+.incoming-call-icon.ringing {
+	animation: ring 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes ring {
+	0% {
+		transform: rotate(-15deg);
+	}
+
+	100% {
+		transform: rotate(15deg);
+	}
+}
+
+.incoming-call-header h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	color: var(--text-normal);
+}
+
+.incoming-call-line {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 1rem;
+	background: var(--background-secondary);
+	border-radius: 8px;
+	margin-bottom: 1rem;
+}
+
+.incoming-call-color-dot {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.incoming-call-line-name {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--text-normal);
+}
+
+.incoming-call-task {
+	text-align: left;
+	padding: 1rem;
+	background: var(--background-primary-alt);
+	border-radius: 8px;
+	margin-bottom: 1.5rem;
+}
+
+.incoming-call-task-title {
+	font-weight: 600;
+	margin: 0 0 0.5rem 0;
+	color: var(--text-normal);
+}
+
+.incoming-call-task-time,
+.incoming-call-task-file {
+	margin: 0.25rem 0;
+	font-size: 0.9em;
+	color: var(--text-muted);
+}
+
+.incoming-call-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.incoming-call-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 20px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: 600;
+	transition: all 0.15s ease;
+}
+
+.incoming-call-btn-connect {
+	color: white;
+}
+
+.incoming-call-btn-connect:hover {
+	filter: brightness(1.1);
+	transform: scale(1.02);
+}
+
+.incoming-call-hold-container {
+	display: flex;
+	gap: 8px;
+}
+
+.incoming-call-btn-hold {
+	flex: 1;
+	background: var(--background-secondary);
+	color: var(--text-normal);
+}
+
+.incoming-call-btn-hold:hover {
+	background: var(--background-secondary-alt);
+}
+
+.incoming-call-snooze-select {
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	cursor: pointer;
+}
+
+.incoming-call-btn-decline {
+	background: transparent;
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.incoming-call-btn-decline:hover {
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+	border-color: transparent;
+}

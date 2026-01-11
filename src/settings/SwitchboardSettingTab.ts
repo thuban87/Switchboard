@@ -24,10 +24,57 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             cls: "setting-item-description",
         });
 
+        // Chronos Integration Section
+        containerEl.createEl("h2", { text: "Chronos Google Calendar Sync Integration" });
+
+        const chronosDesc = containerEl.createEl("p", {
+            cls: "setting-item-description",
+        });
+        chronosDesc.createSpan({ text: "Integrates with the Chronos plugin for task-to-calendar sync. " });
+        chronosDesc.createEl("a", {
+            text: "GitHub",
+            href: "https://github.com/thuban87/Chronos",
+        });
+
+        new Setting(containerEl)
+            .setName("Enable Incoming Calls")
+            .setDesc(
+                "When enabled, Switchboard will show an \"Incoming Call\" modal when Chronos tasks with #switchboard tags start."
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.chronosIntegrationEnabled)
+                    .onChange(async (value) => {
+                        this.plugin.settings.chronosIntegrationEnabled = value;
+                        await this.plugin.saveSettings();
+                        // Restart wire service if toggled
+                        this.plugin.restartWireService();
+                    })
+            );
+
+        new Setting(containerEl)
+            .setName("Default Snooze Time")
+            .setDesc("Default duration for the \"Hold\" action on incoming calls.")
+            .addDropdown((dropdown) =>
+                dropdown
+                    .addOption("5", "5 minutes")
+                    .addOption("10", "10 minutes")
+                    .addOption("15", "15 minutes")
+                    .addOption("30", "30 minutes")
+                    .setValue(this.plugin.settings.defaultSnoozeMinutes.toString())
+                    .onChange(async (value) => {
+                        this.plugin.settings.defaultSnoozeMinutes = parseInt(value);
+                        await this.plugin.saveSettings();
+                    })
+            );
+
+        // Lines Section
+        containerEl.createEl("h2", { text: "Lines" });
+
         // Add new line button
         new Setting(containerEl)
-            .setName("Lines")
-            .setDesc("Your configured focus contexts")
+            .setName("Configure Lines")
+            .setDesc("Your focus contexts - each Line represents a different area of work.")
             .addButton((btn) =>
                 btn
                     .setButtonText("+ Add Line")

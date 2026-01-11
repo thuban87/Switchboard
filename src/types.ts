@@ -27,6 +27,10 @@ export interface SwitchboardSettings {
     lines: SwitchboardLine[];
     /** Currently active line ID, or null if disconnected */
     activeLine: string | null;
+    /** Enable Chronos integration for "Incoming Calls" */
+    chronosIntegrationEnabled: boolean;
+    /** Default snooze time in minutes for "Hold" action */
+    defaultSnoozeMinutes: number;
 }
 
 /**
@@ -35,6 +39,8 @@ export interface SwitchboardSettings {
 export const DEFAULT_SETTINGS: SwitchboardSettings = {
     lines: [],
     activeLine: null,
+    chronosIntegrationEnabled: true,
+    defaultSnoozeMinutes: 5,
 };
 
 /**

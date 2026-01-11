@@ -1,0 +1,249 @@
+/**
+ * Switchboard Styles
+ * CSS for settings UI, modals, and color picker
+ */
+
+/* ========================================
+   Settings Tab - Lines List
+   ======================================== */
+
+.switchboard-lines-list {
+	margin-top: 1rem;
+}
+
+.switchboard-line-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px;
+	background: var(--background-secondary);
+	border-radius: 8px;
+	margin-bottom: 8px;
+	transition: background-color 0.15s ease;
+}
+
+.switchboard-line-item:hover {
+	background: var(--background-secondary-alt);
+}
+
+.switchboard-line-color {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	flex-shrink: 0;
+	box-shadow: 0 0 0 2px var(--background-modifier-border);
+}
+
+.switchboard-line-info {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.switchboard-line-name {
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.switchboard-line-paths {
+	font-size: 0.85em;
+	color: var(--text-muted);
+}
+
+.switchboard-line-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.switchboard-line-btn {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	opacity: 0.6;
+	transition: opacity 0.15s ease;
+}
+
+.switchboard-line-btn:hover {
+	opacity: 1;
+	background: var(--background-modifier-hover);
+}
+
+.switchboard-empty-state {
+	color: var(--text-muted);
+	font-style: italic;
+	text-align: center;
+	padding: 2rem;
+}
+
+/* ========================================
+   Line Editor Modal
+   ======================================== */
+
+.switchboard-line-editor {
+	padding: 0.5rem;
+}
+
+.switchboard-line-editor h2 {
+	margin-bottom: 1rem;
+}
+
+.switchboard-modal-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 1.5rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Color Picker Swatches */
+.switchboard-color-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.switchboard-color-swatch {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	cursor: pointer;
+	border: 2px solid transparent;
+	transition: all 0.15s ease;
+}
+
+.switchboard-color-swatch:hover {
+	transform: scale(1.1);
+}
+
+.switchboard-color-swatch.is-selected {
+	border-color: var(--text-normal);
+	box-shadow: 0 0 0 2px var(--background-primary);
+}
+
+/* Safe Paths */
+.switchboard-paths-container .setting-item:first-child {
+	border-top: 1px solid var(--background-modifier-border);
+	padding-top: 1rem;
+	margin-top: 0.5rem;
+}
+
+.switchboard-path-input {
+	padding: 4px 0;
+}
+
+.switchboard-path-input .setting-item-control {
+	flex: 1;
+}
+
+.switchboard-path-input input {
+	width: 100%;
+}
+
+/* ========================================
+   Patch In Modal
+   ======================================== */
+
+.switchboard-patch-modal {
+	padding: 0.5rem;
+}
+
+.switchboard-patch-modal h2 {
+	margin-bottom: 0.25rem;
+}
+
+.switchboard-patch-subtitle {
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+}
+
+.switchboard-patch-lines {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.switchboard-patch-line {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	background: var(--background-secondary);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	border: 2px solid transparent;
+}
+
+.switchboard-patch-line:hover {
+	background: var(--background-secondary-alt);
+	transform: translateX(4px);
+}
+
+.switchboard-patch-line.is-active {
+	border-color: var(--interactive-accent);
+	background: var(--background-secondary-alt);
+}
+
+.switchboard-patch-line-color {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.switchboard-patch-line-name {
+	flex: 1;
+	font-weight: 600;
+}
+
+.switchboard-patch-line-status {
+	font-size: 0.85em;
+	color: var(--interactive-accent);
+}
+
+.switchboard-disconnect-btn {
+	width: 100%;
+	margin-top: 1rem;
+	padding: 10px;
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-weight: 600;
+	transition: opacity 0.15s ease;
+}
+
+.switchboard-disconnect-btn:hover {
+	opacity: 0.9;
+}
+
+/* ========================================
+   Path/File Suggestions Dropdown
+   ======================================== */
+
+.switchboard-folder-suggestion,
+.switchboard-file-suggestion {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+}
+
+.switchboard-folder-suggestion .suggestion-icon,
+.switchboard-file-suggestion .suggestion-icon {
+	flex-shrink: 0;
+}
+
+.switchboard-folder-suggestion .suggestion-content,
+.switchboard-file-suggestion .suggestion-content {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

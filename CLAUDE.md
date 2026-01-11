@@ -68,11 +68,14 @@ interface SwitchboardLine {
 *   **Explain Why:** Briefly justify architectural choices.
 *   **Celebrate:** Acknowledge when a feature works.
 
-### 2. Session Handoff
-At the end of a session:
-1.  Update `docs/Feature Priority List.md` (Mark as Completed).
-2.  Suggest a `git commit` message.
-3.  List the *immediate* next step for the next session.
+### Session Handoff Protocol
+At the end of each session:
+1. Perform and confirm testing before updating any documentation
+2. Update `docs/Handoff Log.md` with what was done
+3. Update `docs/Feature Priority List.md` (Mark as Completed).
+4.  Suggest a `git commit` message.
+5. Leave a "Next Session Prompt" in the Handoff Log
+6. Note any bugs or issues discovered
 
 ---
 

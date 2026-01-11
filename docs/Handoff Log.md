@@ -8,9 +8,9 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** January 11, 2026
-**Current Phase:** Phase 0 - Planning
-**Current Branch:** N/A (not yet created)
-**Version:** 0.0.0 (Pre-Development)
+**Current Phase:** Phase 1 - The Panel (Complete)
+**Current Branch:** feat/phase-1-panel-config
+**Version:** 0.1.0
 
 ---
 
@@ -43,12 +43,12 @@ Initial planning session for "Switchboard," a context manager for Obsidian. Move
 ## Next Session Prompt
 
 ```
-Switchboard - v0.0.0 → Phase 1: The Panel
+Switchboard - v0.1.0 → Phase 2: The Circuit
 
 **Source Directory:** C:\Users\bwales\projects\obsidian-plugins\switchboard
 **Deploy Target:** G:\My Drive\IT\Obsidian Vault\My Notebooks\.obsidian\plugins\switchboard
-**Current branch:** N/A
-**Version:** 0.0.0
+**Current branch:** feat/phase-1-panel-config (merge to main, then create phase-2 branch)
+**Version:** 0.1.0
 
 **Docs:**
 - docs/Handoff Log.md - (START HERE)
@@ -57,22 +57,22 @@ Switchboard - v0.0.0 → Phase 1: The Panel
 - CLAUDE.md - Instructions for the AI
 
 **Last Session:** January 11, 2026
-- Planning complete. Architecture and roadmap defined.
-- Project structure created in Obsidian.
+- Phase 1 complete. Plugin scaffold and settings UI working.
+- Lines can be created/edited with color picker, multiple safe paths, landing page.
+- Ribbon icon opens Patch In modal, Disconnect command registered.
 
-**PRIORITY: Phase 1 - The Panel (Configuration)**
+**PRIORITY: Phase 2 - The Circuit (Environment Control)**
 
 | Task | Status |
 |------|--------|
-| Create project scaffold | Pending |
-| Initialize Git repo | Pending |
-| Set up TypeScript + esbuild | Pending |
-| Implement Settings UI ("Lines") | Pending |
-| Implement Manual Trigger (Ribbon) | Pending |
+| Body class injection (switchboard-active-{id}) | Pending |
+| Dynamic CSS for Signal Isolation (fade folders) | Pending |
+| Accent color shift (--interactive-accent) | Pending |
+| Landing page auto-open logic | Pending |
 
 **Before Starting:**
-1. Check GitHub and ensure we are on a fresh branch.
-2. Initialize the local directory at C:\Users\bwales\projects\obsidian-plugins\switchboard.
+1. Merge phase-1 branch to main.
+2. Create feat/phase-2-circuit branch.
 ```
 
 ---

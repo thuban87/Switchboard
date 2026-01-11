@@ -1,0 +1,10 @@
+{
+	"id": "switchboard",
+	"name": "Switchboard",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Context manager for the ADHD brain. Patch into your focus.",
+	"author": "Brad Wales",
+	"authorUrl": "",
+	"isDesktopOnly": false
+}

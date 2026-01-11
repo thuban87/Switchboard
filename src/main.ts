@@ -3,6 +3,7 @@ import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types"
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
 import { CircuitManager } from "./services/CircuitManager";
+import { WireService } from "./services/WireService";
 
 /**
  * Switchboard - Context Manager for Obsidian
@@ -11,12 +12,16 @@ import { CircuitManager } from "./services/CircuitManager";
 export default class SwitchboardPlugin extends Plugin {
     settings: SwitchboardSettings;
     circuitManager: CircuitManager;
+    wireService: WireService;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
 
         // Initialize circuit manager
         this.circuitManager = new CircuitManager(this.app);
+
+        // Initialize wire service for Chronos integration
+        this.wireService = new WireService(this.app, this);
 
         await this.loadSettings();
 
@@ -53,13 +58,34 @@ export default class SwitchboardPlugin extends Plugin {
             console.log(`Switchboard: Restored connection to "${activeLine.name}"`);
         }
 
+        // Start wire service if Chronos integration is enabled
+        if (this.settings.chronosIntegrationEnabled) {
+            // Delay to allow Chronos to load first
+            setTimeout(() => {
+                this.wireService.start();
+            }, 2000);
+        }
+
         console.log("Switchboard: Plugin loaded successfully.");
     }
 
     onunload() {
+        // Stop wire service
+        this.wireService.stop();
+
         // Clean up circuit when plugin is disabled
         this.circuitManager.deactivate();
         console.log("Switchboard: Unloading plugin...");
+    }
+
+    /**
+     * Restart the wire service (called when settings change)
+     */
+    restartWireService(): void {
+        this.wireService.stop();
+        if (this.settings.chronosIntegrationEnabled) {
+            this.wireService.start();
+        }
     }
 
     /**

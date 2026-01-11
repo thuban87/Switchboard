@@ -19,3 +19,6 @@ npm-debug.log*
 
 # Optional: lock file (some prefer to commit it)
 # package-lock.json
+
+# Chronos Archive
+Chronos Archive/

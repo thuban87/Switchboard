@@ -2,8 +2,11 @@ import { Plugin, Notice } from "obsidian";
 import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
+import { CallLogModal } from "./modals/CallLogModal";
+import { OperatorModal } from "./modals/OperatorModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
+import { SessionLogger } from "./services/SessionLogger";
 
 /**
  * Switchboard - Context Manager for Obsidian
@@ -13,6 +16,7 @@ export default class SwitchboardPlugin extends Plugin {
     settings: SwitchboardSettings;
     circuitManager: CircuitManager;
     wireService: WireService;
+    sessionLogger: SessionLogger;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
@@ -22,6 +26,9 @@ export default class SwitchboardPlugin extends Plugin {
 
         // Initialize wire service for Chronos integration
         this.wireService = new WireService(this.app, this);
+
+        // Initialize session logger
+        this.sessionLogger = new SessionLogger(this.app, this);
 
         await this.loadSettings();
 
@@ -49,6 +56,20 @@ export default class SwitchboardPlugin extends Plugin {
             callback: () => {
                 this.openPatchInModal();
             },
+        });
+
+        // Register operator menu command
+        this.addCommand({
+            id: "operator-menu",
+            name: "Open Operator Menu",
+            callback: () => {
+                this.openOperatorModal();
+            },
+        });
+
+        // Add operator menu ribbon icon
+        this.addRibbonIcon("headphones", "Operator Menu", () => {
+            this.openOperatorModal();
         });
 
         // Restore active line state on plugin load (don't refocus folders)
@@ -107,6 +128,18 @@ export default class SwitchboardPlugin extends Plugin {
     }
 
     /**
+     * Opens the Operator Menu modal
+     */
+    openOperatorModal() {
+        const activeLine = this.getActiveLine();
+        if (!activeLine) {
+            new Notice("Switchboard: Patch into a line first");
+            return;
+        }
+        new OperatorModal(this.app, this, activeLine).open();
+    }
+
+    /**
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
@@ -118,6 +151,9 @@ export default class SwitchboardPlugin extends Plugin {
 
         // Activate the circuit (CSS injection)
         this.circuitManager.activate(line);
+
+        // Start session tracking
+        this.sessionLogger.startSession(line);
 
         // Show notice
         new Notice(`📞 Patched in: ${line.name}`);
@@ -156,10 +192,21 @@ export default class SwitchboardPlugin extends Plugin {
         // Deactivate the circuit (remove CSS)
         this.circuitManager.deactivate();
 
+        // End session and check for call log
+        const sessionInfo = this.sessionLogger.endSession();
+        if (sessionInfo) {
+            // Session was 5+ minutes, show call log modal
+            new CallLogModal(this.app, sessionInfo, async (summary) => {
+                if (summary) {
+                    await this.sessionLogger.logSession(sessionInfo, summary);
+                    new Notice("📝 Session logged");
+                }
+            }).open();
+        }
+
         // Show notice
         new Notice(`🔌 Disconnected from: ${activeLine.name}`);
 
-        // TODO (Phase 4): Show call log modal
         console.log("Switchboard: ✅ Disconnected");
     }
 

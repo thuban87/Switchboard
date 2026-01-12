@@ -4,6 +4,24 @@
  */
 
 /**
+ * Represents a scheduled time block for a Line
+ */
+export interface ScheduledBlock {
+    /** Unique ID for this block */
+    id: string;
+    /** Start time in 24h format (e.g., "09:00") */
+    startTime: string;
+    /** End time in 24h format, informational only (e.g., "10:30") */
+    endTime: string;
+    /** For one-time blocks: specific date "YYYY-MM-DD" */
+    date?: string;
+    /** For recurring blocks: true if recurring */
+    recurring?: boolean;
+    /** Days of week for recurring (0=Sun, 1=Mon, etc.) */
+    days?: number[];
+}
+
+/**
  * Represents a single "Line" (context/focus area)
  */
 export interface SwitchboardLine {
@@ -17,6 +35,26 @@ export interface SwitchboardLine {
     safePaths: string[];
     /** File to open when patching in (optional) */
     landingPage: string;
+    /** Path to session log file for this Line (optional) */
+    sessionLogFile: string;
+    /** Heading to append logs under (default: "## Session Log") */
+    sessionLogHeading: string;
+    /** Scheduled time blocks for this Line */
+    scheduledBlocks: ScheduledBlock[];
+}
+
+/**
+ * Represents a command in the Operator Menu
+ */
+export interface OperatorCommand {
+    /** Display name */
+    name: string;
+    /** Emoji or icon */
+    icon: string;
+    /** Type of action */
+    action: "command" | "insert" | "open";
+    /** Command ID, snippet text, or file path */
+    value: string;
 }
 
 /**

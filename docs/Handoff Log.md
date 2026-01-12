@@ -7,73 +7,111 @@ tags:
 ---
 # Switchboard Handoff Log
 
-**Last Updated:** January 11, 2026
-**Current Phase:** Phase 1 - The Panel (Complete)
-**Current Branch:** feat/phase-1-panel-config
-**Version:** 0.1.0
+**Last Updated:** January 12, 2026
+**Status:** All Phases Complete ✅
+**Version:** 1.0.0
 
 ---
 
-## Session: January 11, 2026 - Project Inception & Planning
+## Project Overview
 
-### Session Summary
-Initial planning session for "Switchboard," a context manager for Obsidian. Moved away from the initial "Phantom/Ghost" metaphor to a tactile "Switchboard Operator" concept. Defined the core architecture, visual isolation mechanics, and integration with the Chronos plugin.
-
-### What Was Done
-
-| Item | Details |
-|------|---------|
-| Concept Pivot | Renamed "Phantom" to "Switchboard." Metaphor changed from "Haunting" to "Patching In." |
-| Architecture Definition | Defined "Signal Isolation" (CSS fading) and "Line" schema. |
-| Hybrid Trigger Logic | Established manual (Ribbon) + automated (Chronos task) triggers. |
-| Project Docs Created | ADR-001, Feature Priority List, Project Summary, CLAUDE.md. |
-| Handoff Log Framework | Created this log to track future progress. |
-
-### Key Decisions Made
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Metaphor | Switchboard Operator | Tactile, intentional, user-as-operator. |
-| Visuals | CSS Injection | Performance + granular control over opacity/color. |
-| Automation | Chronos Hook | Reuses existing task parsing logic; efficient. |
-| Ritual | Incoming Call Modal | Provides agency (Connect vs. Hold). |
+**Switchboard** is a context-management plugin for Obsidian, designed for the ADHD brain. It uses a "telephone switchboard operator" metaphor where users "patch in" to different contexts (Lines), transforming their workspace visually and functionally.
 
 ---
 
-## Next Session Prompt
+## Phase 1: The Panel (Configuration)
+**Branch:** `feat/phase-1-panel-config`
+**Date:** January 11, 2026
 
-```
-Switchboard - v0.1.0 → Phase 2: The Circuit
+### What Was Built
+| Component | Description |
+|-----------|-------------|
+| Plugin Scaffold | TypeScript + esbuild setup with auto-deploy to vault |
+| Settings UI | `SwitchboardSettingTab` for creating/editing Lines |
+| Line Schema | Interface with `id`, `name`, `color`, `safePaths[]`, `landingPage` |
+| Manual Trigger | Ribbon icon opens "Patch In" modal to select Line |
 
-**Source Directory:** C:\Users\bwales\projects\obsidian-plugins\switchboard
-**Deploy Target:** G:\My Drive\IT\Obsidian Vault\My Notebooks\.obsidian\plugins\switchboard
-**Current branch:** feat/phase-1-panel-config (merge to main, then create phase-2 branch)
-**Version:** 0.1.0
+### Key Files
+- `src/main.ts` - Plugin entry point
+- `src/types.ts` - Core interfaces
+- `src/settings/SwitchboardSettingTab.ts` - Settings UI
+- `src/modals/PatchInModal.ts` - Line selection modal
 
-**Docs:**
-- docs/Handoff Log.md - (START HERE)
-- docs/ADR-001-Architecture.md - Tech Blueprint
-- docs/Feature Priority List.md - Feature roadmap
-- CLAUDE.md - Instructions for the AI
+---
 
-**Last Session:** January 11, 2026
-- Phase 1 complete. Plugin scaffold and settings UI working.
-- Lines can be created/edited with color picker, multiple safe paths, landing page.
-- Ribbon icon opens Patch In modal, Disconnect command registered.
+## Phase 2: The Circuit (Environment Control)
+**Branch:** `feat/phase-2-circuit`
+**Date:** January 11, 2026
 
-**PRIORITY: Phase 2 - The Circuit (Environment Control)**
+### What Was Built
+| Component | Description |
+|-----------|-------------|
+| Body Injection | Adds `body.switchboard-active-{id}` class when patched in |
+| Signal Isolation | Dynamic CSS fades non-safe folders in file explorer |
+| Accent Shift | Updates `--interactive-accent` CSS variable to Line color |
+| Landing Page | Auto-opens configured landing page on patch-in |
+| Disconnect Command | Command palette + ribbon to end session |
 
-| Task | Status |
-|------|--------|
-| Body class injection (switchboard-active-{id}) | Pending |
-| Dynamic CSS for Signal Isolation (fade folders) | Pending |
-| Accent color shift (--interactive-accent) | Pending |
-| Landing page auto-open logic | Pending |
+### Key Decisions
+- CSS injection uses specificity over `!important` where possible
+- Folder fading applies to file-explorer tree items recursively
 
-**Before Starting:**
-1. Merge phase-1 branch to main.
-2. Create feat/phase-2-circuit branch.
-```
+---
+
+## Phase 3: The Wire (Chronos Integration)
+**Branch:** `feat/phase-3-wire`
+**Date:** January 11, 2026
+
+### What Was Built
+| Component | Description |
+|-----------|-------------|
+| WireService | Monitors Chronos tasks for `#switchboard/{line-id}` tags |
+| Task Parsing | Extracts Line ID from tags or `/line-name` in title |
+| Incoming Call Modal | "Math is calling" with Connect, Snooze, Decline options |
+| Timer System | Schedules calls at task start times |
+| Snooze Logic | Re-shows modal after configurable delay |
+
+### Integration Points
+- Plugin ID: `chronos-google-calendar-sync`
+- Data access: `chronos.syncManager.getSyncData().syncedTasks`
+- Event: `sync-complete` triggers timer refresh
+
+---
+
+## Phase 4: The Operator (Tools & Logging)
+**Branch:** `feat/phase-4-tools-and-logging`
+**Date:** January 11-12, 2026
+
+### What Was Built
+| Component | Description |
+|-----------|-------------|
+| Session Logger | Tracks session duration, writes logs to per-Line file |
+| Call Log Modal | Prompts for summary after 5+ minute sessions |
+| Operator Menu | Context-specific command palette (Math, Bio, ENG defaults) |
+| Native Scheduling | `ScheduledBlock` interface for recurring/one-time blocks |
+| Schedule Overview | Collapsible settings section showing all blocks |
+
+### Session Logging
+- Per-Line configuration: `sessionLogFile` and `sessionLogHeading`
+- Default: Creates `{Line Name} - Session Log.md` in landing page folder
+- Format: `### 📞 {Line} | {time range} ({duration})\n- {summary}`
+
+### Native Scheduling
+- Block types: Recurring (days of week) or One-time (specific date)
+- Start time triggers Incoming Call modal
+- End time is informational only (no auto-disconnect)
+- `restartWireService()` called on Line add/edit/delete
+
+### Schedule Overview Features
+- Combines native blocks + Chronos tasks with `#switchboard` tags
+- Clickable blocks navigate to source notes
+- Past tasks filtered (today/future only)
+- 🔁 emoji for recurring, 📆 for one-time
+
+### Chronos Compatibility
+- Fixed plugin ID from `chronos` to `chronos-google-calendar-sync`
+- Tag parsing strips `#` prefix before matching
+- Compatible with Chronos recurring task succession logic
 
 ---
 
@@ -81,17 +119,45 @@ Switchboard - v0.1.0 → Phase 2: The Circuit
 
 ### Development Commands
 ```bash
-cd [project-directory]
+cd C:\Users\bwales\projects\obsidian-plugins\switchboard
 npm run build                    # Production build
 npm run dev                      # Watch mode
 ```
 
-### Required Files in Deploy Directory
-- `manifest.json`
-- `main.js`
-- `styles.css`
+### Deploy Target
+```
+G:\My Drive\IT\Obsidian Vault\My Notebooks\.obsidian\plugins\switchboard
+```
+
+### Key Files Summary
+| File | Purpose |
+|------|---------|
+| `src/main.ts` | Plugin entry, ribbon, commands |
+| `src/types.ts` | Interfaces (Line, ScheduledBlock, OperatorCommand) |
+| `src/services/WireService.ts` | Incoming calls, Chronos + native timers |
+| `src/services/SessionLogger.ts` | Session tracking and log writing |
+| `src/settings/SwitchboardSettingTab.ts` | Settings UI, Schedule Overview |
+| `src/settings/LineEditorModal.ts` | Line editing, schedule blocks |
+| `src/modals/IncomingCallModal.ts` | "Line is calling" prompt |
+| `src/modals/CallLogModal.ts` | Post-session summary prompt |
+| `src/modals/OperatorModal.ts` | Context command menu |
+| `styles.css` | All plugin styling |
 
 ---
 
-## Archived Sessions
-*No archived sessions yet.*
+## Known Issues
+
+| Issue | Impact | Notes |
+|-------|--------|-------|
+| tslib lint error | None | IDE spurious error, doesn't affect build |
+
+---
+
+## Future Enhancements (Backlog)
+
+| Feature | Description |
+|---------|-------------|
+| Custom Operator Commands | User-defined commands per Line |
+| Auto-disconnect | End session at block end time |
+| Statistics Dashboard | Track time spent per Line |
+| Multi-Line Overlap | Handle when two Lines conflict |

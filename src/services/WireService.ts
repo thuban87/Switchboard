@@ -1,6 +1,6 @@
 import { App, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine, generateId } from "../types";
+import { SwitchboardLine, ScheduledBlock, generateId } from "../types";
 import { IncomingCallModal, IncomingCallAction } from "../modals/IncomingCallModal";
 
 /**
@@ -52,8 +52,9 @@ export class WireService {
         if (this.isRunning) return;
         this.isRunning = true;
 
-        // Initial scheduling
+        // Initial scheduling (both Chronos and native)
         this.refreshTimers();
+        this.refreshNativeTimers();
 
         // Subscribe to Chronos sync-complete events
         const chronos = this.getChronosPlugin();
@@ -131,6 +132,9 @@ export class WireService {
                 this.scheduleCall(task, lineMatch, taskTime);
             }
         }
+
+        // Also refresh native scheduled blocks
+        this.refreshNativeTimers();
     }
 
     /**
@@ -324,6 +328,113 @@ export class WireService {
         const lineNumber = task.lineNumber || 0;
         const date = task.date || task.taskDate || "";
         return `${filePath}:${lineNumber}:${date}`;
+    }
+
+    /**
+     * Refresh timers for native scheduled blocks (not from Chronos)
+     */
+    private refreshNativeTimers(): void {
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 = Sunday
+
+        for (const line of this.plugin.settings.lines) {
+            if (!line.scheduledBlocks || line.scheduledBlocks.length === 0) continue;
+
+            for (const block of line.scheduledBlocks) {
+                const nextTrigger = this.getNextTriggerTime(block, now, currentDay);
+                if (!nextTrigger) continue;
+
+                // Generate unique ID for this block occurrence
+                const blockId = `native:${line.id}:${block.id}:${nextTrigger.toISOString()}`;
+
+                // Skip if already scheduled or declined
+                if (this.scheduledCalls.has(blockId)) continue;
+                if (this.declinedCalls.has(blockId)) continue;
+
+                // Check if snoozed
+                const snoozed = this.snoozedCalls.get(blockId);
+                const triggerTime = snoozed && snoozed.snoozeUntil.getTime() > now.getTime()
+                    ? snoozed.snoozeUntil
+                    : nextTrigger;
+
+                // Create a fake task object for the scheduled block
+                const fakeTask = {
+                    title: `Scheduled: ${line.name}`,
+                    taskTitle: `Scheduled: ${line.name}`,
+                    filePath: "",
+                    lineNumber: 0,
+                    date: triggerTime.toISOString().split("T")[0],
+                    time: block.startTime,
+                    _blockId: blockId,
+                };
+
+                this.scheduleNativeCall(fakeTask, line, triggerTime, blockId);
+            }
+        }
+    }
+
+    /**
+     * Get the next trigger time for a scheduled block
+     */
+    private getNextTriggerTime(block: ScheduledBlock, now: Date, currentDay: number): Date | null {
+        // Check if this is a recurring block
+        if (block.recurring && block.days && block.days.length > 0) {
+            // Find the next day that matches
+            for (let offset = 0; offset < 7; offset++) {
+                const checkDay = (currentDay + offset) % 7;
+                if (block.days.includes(checkDay)) {
+                    const trigger = new Date(now);
+                    trigger.setDate(trigger.getDate() + offset);
+                    const [hours, minutes] = block.startTime.split(":").map(Number);
+                    trigger.setHours(hours, minutes, 0, 0);
+
+                    // If it's today but the time has passed, try next occurrence
+                    if (offset === 0 && trigger.getTime() < now.getTime() - 60000) {
+                        continue;
+                    }
+                    return trigger;
+                }
+            }
+            return null;
+        }
+
+        // One-time block (not recurring, has a date)
+        if (!block.recurring && block.date) {
+            const [hours, minutes] = block.startTime.split(":").map(Number);
+            const trigger = new Date(block.date + "T00:00:00");
+            trigger.setHours(hours, minutes, 0, 0);
+
+            // Skip if in the past
+            if (trigger.getTime() < now.getTime() - 60000) return null;
+            return trigger;
+        }
+
+        return null;
+    }
+
+    /**
+     * Schedule a native call (from scheduled blocks, not Chronos)
+     */
+    private scheduleNativeCall(task: any, line: SwitchboardLine, triggerTime: Date, blockId: string): void {
+        const now = new Date();
+        const delay = Math.max(0, triggerTime.getTime() - now.getTime());
+
+        const timerId = setTimeout(() => {
+            this.triggerIncomingCall(task, line);
+            // Remove from scheduled after triggering
+            this.scheduledCalls.delete(blockId);
+        }, delay);
+
+        this.scheduledCalls.set(blockId, {
+            taskId: blockId,
+            lineId: line.id,
+            lineName: line.name,
+            taskTitle: task.taskTitle || task.title || "Scheduled Block",
+            taskTime: triggerTime,
+            filePath: "",
+            lineNumber: 0,
+            timerId,
+        });
     }
 
     /**

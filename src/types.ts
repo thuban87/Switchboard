@@ -95,6 +95,10 @@ export interface SwitchboardSettings {
     autoDisconnect: boolean;
     /** Session history for statistics */
     sessionHistory: SessionRecord[];
+    /** Mute all sounds */
+    muteSounds: boolean;
+    /** Sound type: synthesized or realistic */
+    soundType: "synthesized" | "realistic";
 }
 
 /**
@@ -107,6 +111,8 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     defaultSnoozeMinutes: 5,
     autoDisconnect: false,
     sessionHistory: [],
+    muteSounds: false,
+    soundType: "synthesized",
 };
 
 /**

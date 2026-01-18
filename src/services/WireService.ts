@@ -170,13 +170,19 @@ export class WireService {
         // Remove from scheduled
         this.scheduledCalls.delete(taskId);
 
-        // EDGE CASE: If already patched into this Line, suppress the modal
+        // EDGE CASE: If already patched into this exact Line, suppress completely
         if (this.plugin.settings.activeLine === line.id) {
-            // Already on this Line, no need to prompt
             return;
         }
 
-        // Show the incoming call modal
+        // BUSY SIGNAL: If already patched into a DIFFERENT Line, show toast instead of modal
+        const activeLine = this.plugin.getActiveLine();
+        if (activeLine) {
+            new Notice(`📞 ${line.name} is calling - Busy on ${activeLine.name}`);
+            return;
+        }
+
+        // Not on any line - show the incoming call modal
         new IncomingCallModal(
             this.app,
             {

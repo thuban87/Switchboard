@@ -82,6 +82,35 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     })
             );
 
+        // Sound Settings
+        containerEl.createEl("h3", { text: "Sound Effects" });
+
+        new Setting(containerEl)
+            .setName("Mute sounds")
+            .setDesc("Disable all audio feedback.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.muteSounds)
+                    .onChange(async (value) => {
+                        this.plugin.settings.muteSounds = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
+        new Setting(containerEl)
+            .setName("Sound type")
+            .setDesc("Choose between synthesized beeps or realistic cable sounds.")
+            .addDropdown((dropdown) =>
+                dropdown
+                    .addOption("synthesized", "Synthesized (Web Audio)")
+                    .addOption("realistic", "Realistic (Sample)")
+                    .setValue(this.plugin.settings.soundType)
+                    .onChange(async (value: "synthesized" | "realistic") => {
+                        this.plugin.settings.soundType = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         // Schedule Overview Section
         containerEl.createEl("h2", { text: "Schedule Overview" });
         this.renderScheduleOverview(containerEl);
@@ -167,6 +196,10 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         deleteBtn.innerHTML = "🗑️";
         deleteBtn.setAttribute("aria-label", "Delete");
         deleteBtn.addEventListener("click", () => {
+            // Confirm before deleting
+            const confirmed = confirm(`Delete "${line.name}"? This cannot be undone.`);
+            if (!confirmed) return;
+
             this.plugin.settings.lines = this.plugin.settings.lines.filter(
                 (l: SwitchboardLine) => l.id !== line.id
             );

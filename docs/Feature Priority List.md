@@ -76,6 +76,59 @@ tags:
 
 ---
 
+## Phase 6: Speed & Polish ⏳
+**Goal:** Low effort, high impact quick wins.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| 25 | **Speed Dial (Hotkeys)** | Register `patch-in-{line}` commands for each Line. | ⏳ |
+| 26 | **Busy Signal** | Toast notification when already on another Line. | ⏳ |
+| 27 | **The Click (Audio)** | Sound effects for patch-in/disconnect, mute toggle. | ⏳ |
+
+---
+
+## Phase 7: Smart Decline & Rescheduling ⏳
+**Goal:** Call Waiting with full reschedule capabilities.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| 28 | **Call Waiting Inbox** | Save declined tasks to `Call Waiting.md`. | ⏳ |
+| 29 | **Quick Reschedule** | "1 hour", "Tomorrow", "Pick time" options. | ⏳ |
+| 30 | **View Queue** | Command to view/manage queued tasks. | ⏳ |
+
+---
+
+## Phase 8: Session Goals & Break Reminders ⏳
+**Goal:** Wellbeing & focus features.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| 31 | **Session Goals** | Optional goal on patch-in, shown in status bar. | ⏳ |
+| 32 | **Goal Reflection** | "Did you accomplish?" in disconnect modal. | ⏳ |
+| 33 | **Break Reminder** | Gentle notification after configurable duration. | ⏳ |
+
+---
+
+## Phase 9: Quick Switch & Dashboard ⏳
+**Goal:** Navigation & visibility improvements.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| 34 | **Party Line (Quick Switch)** | Hotkey popup to instantly switch Lines. | ⏳ |
+| 35 | **Operator Dashboard** | Dedicated view with Lines, schedule, current session. | ⏳ |
+
+---
+
+## Phase 10: Daily Note Integration ⏳
+**Goal:** Operator's Log.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| 36 | **Daily Note Logging** | Append session summary to Daily Note. | ⏳ |
+| 37 | **Logging Settings** | Configurable heading, folder path. | ⏳ |
+
+---
+
 ## Technical Debt / Risks
 
 *   ~~**Theme Conflicts:** Custom themes might override "Signal Isolation" CSS.~~ Handled with specificity.
@@ -90,7 +143,12 @@ tags:
 *   **Phase 3:** ~6 hours ✅
 *   **Phase 4:** ~8 hours ✅
 *   **Phase 5:** ~6 hours ✅
-*   **Total:** ~29 hours
+*   **Phase 6:** ~3-4 hours (estimated)
+*   **Phase 7:** ~4-5 hours (estimated)
+*   **Phase 8:** ~3-4 hours (estimated)
+*   **Phase 9:** ~5-6 hours (estimated)
+*   **Phase 10:** ~2-3 hours (estimated)
+*   **Total:** ~29 hours completed, ~18-22 hours planned
 
 ---
 
@@ -98,7 +156,7 @@ tags:
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| Multi-Line Overlap | Handle when two Lines conflict | Low |
-| Command Picker | Autocomplete for Obsidian command IDs | Low |
+| Custom Sounds per Line | Different audio per Line (deferred: file size) | Low |
 | Weekly Charts | Visual bar charts in Statistics | Low |
 | Log Rotation | Yearly session log files to prevent large file sizes | Low |
+| Command Picker | Autocomplete for Obsidian command IDs | Low |

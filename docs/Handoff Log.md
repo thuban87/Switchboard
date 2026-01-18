@@ -8,8 +8,8 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** January 18, 2026
-**Status:** Phase 5 Complete ✅
-**Version:** 1.2.0
+**Status:** Phase 7 Complete ✅
+**Version:** 1.3.0
 
 ---
 
@@ -97,6 +97,30 @@ tags:
 | CSS Security | Use CSS.escape() for path selectors |
 | DOM Performance | Native collapse-all command instead of O(n) loop |
 | Chronos Robustness | Try-catch wrapper for plugin access |
+
+---
+
+## Phase 6: Speed & Polish
+**Date:** January 18, 2026
+
+| Feature | Description |
+|---------|-------------|
+| Speed Dial | `patch-in-{line}` commands, hotkey-assignable |
+| Busy Signal | Toast + tracks missed calls in status bar menu |
+| Audio Feedback | Synthesized clicks or custom `click.mp3` from plugin folder |
+| Delete Confirmation | Confirm dialog before deleting a Line |
+
+---
+
+## Phase 7: Smart Decline & Rescheduling
+**Date:** January 18, 2026
+
+| Feature | Description |
+|---------|-------------|
+| Quick Reschedule | "30 min", "1 hour", "Tomorrow" options when declining |
+| Missed Calls Blink | Status bar blinks when unacknowledged missed calls |
+| Acknowledge on Open | Blinking stops when status bar menu is opened |
+
 
 ---
 

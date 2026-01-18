@@ -175,9 +175,18 @@ export class WireService {
             return;
         }
 
-        // BUSY SIGNAL: If already patched into a DIFFERENT Line, show toast instead of modal
+        // BUSY SIGNAL: If already patched into a DIFFERENT Line, show toast and track as missed call
         const activeLine = this.plugin.getActiveLine();
         if (activeLine) {
+            const taskTitle = task.title || task.taskTitle || "Incoming Call";
+            // Add to missed calls list for display in status bar menu
+            this.plugin.missedCalls.push({
+                lineName: line.name,
+                taskTitle: taskTitle,
+                time: new Date()
+            });
+            // Mark as unacknowledged so status bar blinks
+            (this.plugin as any).missedCallsAcknowledged = false;
             new Notice(`📞 ${line.name} is calling - Busy on ${activeLine.name}`);
             return;
         }
@@ -250,6 +259,27 @@ export class WireService {
                 this.declinedCalls.add(taskId);
                 new Notice(`📞 Call declined: ${line.name}`);
                 break;
+
+            case "call-waiting":
+                // Save to Call Waiting file
+                this.saveToCallWaiting(task, line);
+                this.declinedCalls.add(taskId);
+                new Notice(`📼 Saved to Call Waiting: ${line.name}`);
+                break;
+
+            case "reschedule":
+                // Schedule callback after specified minutes
+                if (snoozeMinutes) {
+                    const callbackTime = new Date();
+                    callbackTime.setMinutes(callbackTime.getMinutes() + snoozeMinutes);
+                    this.scheduleCall(task, line, callbackTime);
+
+                    // Format the time for display
+                    const timeStr = callbackTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                    const dateStr = callbackTime.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+                    new Notice(`⏰ Will call back at ${timeStr} on ${dateStr}`);
+                }
+                break;
         }
     }
 
@@ -298,6 +328,42 @@ export class WireService {
             }
         }
         return null;
+    }
+
+    /**
+     * Save a declined task to the Call Waiting file
+     */
+    private async saveToCallWaiting(task: any, line: SwitchboardLine): Promise<void> {
+        const filePath = "Call Waiting.md";
+        const taskTitle = task.title || task.taskTitle || "Untitled Task";
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const dateStr = now.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
+
+        const entry = `- [ ] ${line.name} - ${taskTitle} (declined at ${timeStr} on ${dateStr})`;
+
+        try {
+            const file = this.app.vault.getAbstractFileByPath(filePath);
+
+            if (file) {
+                // Append to existing file
+                const content = await this.app.vault.read(file as any);
+                await this.app.vault.modify(file as any, content + "\n" + entry);
+            } else {
+                // Create new file with header
+                const content = `# Call Waiting
+
+Tasks that were declined but saved for later.
+
+${entry}`;
+                await this.app.vault.create(filePath, content);
+            }
+
+            console.log("WireService: Saved to Call Waiting:", entry);
+        } catch (error) {
+            console.error("WireService: Failed to save to Call Waiting:", error);
+            new Notice("Failed to save to Call Waiting file");
+        }
     }
 
     /**

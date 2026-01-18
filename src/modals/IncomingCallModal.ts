@@ -3,7 +3,7 @@ import { App, Modal } from "obsidian";
 /**
  * Actions available in the Incoming Call modal
  */
-export type IncomingCallAction = "connect" | "hold" | "decline";
+export type IncomingCallAction = "connect" | "hold" | "decline" | "call-waiting" | "reschedule";
 
 /**
  * Data for displaying an incoming call
@@ -25,6 +25,7 @@ export class IncomingCallModal extends Modal {
     private data: IncomingCallData;
     private defaultSnoozeMinutes: number;
     private onAction: (action: IncomingCallAction, snoozeMinutes?: number) => void;
+    private showingDeclineOptions: boolean = false;
 
     constructor(
         app: App,
@@ -70,7 +71,7 @@ export class IncomingCallModal extends Modal {
             taskEl.createEl("p", { text: `📄 ${fileName}`, cls: "incoming-call-task-file" });
         }
 
-        // Action buttons
+        // Action buttons container
         const actionsEl = contentEl.createDiv("incoming-call-actions");
 
         // Connect button (primary)
@@ -112,14 +113,72 @@ export class IncomingCallModal extends Modal {
             holdBtn.createEl("span", { text: `🕒 Hold (${minutes}m)` });
         });
 
-        // Decline button
+        // Decline button - now toggles options
         const declineBtn = actionsEl.createEl("button", {
             cls: "incoming-call-btn incoming-call-btn-decline",
         });
         declineBtn.createEl("span", { text: "❌ Decline" });
+
+        // Decline options container (hidden initially)
+        const declineOptionsEl = contentEl.createDiv("incoming-call-decline-options");
+        declineOptionsEl.style.display = "none";
+
         declineBtn.addEventListener("click", () => {
+            if (this.showingDeclineOptions) {
+                // If already showing, just dismiss
+                this.close();
+                this.onAction("decline");
+            } else {
+                // Show decline options
+                this.showingDeclineOptions = true;
+                declineOptionsEl.style.display = "flex";
+                declineBtn.empty();
+                declineBtn.createEl("span", { text: "❌ Just Dismiss" });
+            }
+        });
+
+        // Create decline option buttons
+        this.createDeclineOptions(declineOptionsEl, snoozeSelect);
+    }
+
+    /**
+     * Create the decline options UI
+     */
+    private createDeclineOptions(container: HTMLElement, snoozeSelect: HTMLSelectElement): void {
+        // Call back in 30 minutes
+        const thirtyMinBtn = container.createEl("button", {
+            cls: "incoming-call-btn incoming-call-btn-secondary",
+        });
+        thirtyMinBtn.createEl("span", { text: "⏰ Call back in 30 minutes" });
+        thirtyMinBtn.addEventListener("click", () => {
             this.close();
-            this.onAction("decline");
+            this.onAction("reschedule", 30);
+        });
+
+        // Call back in 1 hour
+        const oneHourBtn = container.createEl("button", {
+            cls: "incoming-call-btn incoming-call-btn-secondary",
+        });
+        oneHourBtn.createEl("span", { text: "⏰ Call back in 1 hour" });
+        oneHourBtn.addEventListener("click", () => {
+            this.close();
+            this.onAction("reschedule", 60);
+        });
+
+        // Call back tomorrow (9 AM)
+        const tomorrowBtn = container.createEl("button", {
+            cls: "incoming-call-btn incoming-call-btn-secondary",
+        });
+        tomorrowBtn.createEl("span", { text: "📅 Call back tomorrow" });
+        tomorrowBtn.addEventListener("click", () => {
+            // Calculate minutes until 9 AM tomorrow
+            const now = new Date();
+            const tomorrow9AM = new Date(now);
+            tomorrow9AM.setDate(tomorrow9AM.getDate() + 1);
+            tomorrow9AM.setHours(9, 0, 0, 0);
+            const minutesUntilTomorrow = Math.round((tomorrow9AM.getTime() - now.getTime()) / 60000);
+            this.close();
+            this.onAction("reschedule", minutesUntilTomorrow);
         });
     }
 

@@ -296,9 +296,17 @@ export class WireService {
 
     /**
      * Get the Chronos plugin if available
+     * Wrapped in try-catch for robustness if plugin structure changes
      */
     private getChronosPlugin(): any {
-        return (this.app as any).plugins?.plugins?.["chronos-google-calendar-sync"];
+        try {
+            const plugins = (this.app as any).plugins?.plugins;
+            if (!plugins) return null;
+            return plugins["chronos-google-calendar-sync"] || null;
+        } catch (error) {
+            console.warn("Switchboard: Error accessing Chronos plugin:", error);
+            return null;
+        }
     }
 
     /**

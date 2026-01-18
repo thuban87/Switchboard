@@ -1403,3 +1403,49 @@
 	gap: 12px;
 	margin-top: 20px;
 }
+
+/* ==========================================
+   Decline Options (Call Waiting / Reschedule)
+   ========================================== */
+
+.incoming-call-decline-options {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.incoming-call-btn-secondary {
+	background: var(--background-secondary) !important;
+	border: 1px solid var(--background-modifier-border) !important;
+	color: var(--text-normal) !important;
+	padding: 8px 16px !important;
+	font-size: 13px !important;
+	justify-content: flex-start !important;
+}
+
+.incoming-call-btn-secondary:hover {
+	background: var(--background-modifier-hover) !important;
+}
+
+/* ==========================================
+   Status Bar Blinking (Missed Calls)
+   ========================================== */
+
+@keyframes switchboard-blink {
+
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.4;
+	}
+}
+
+.switchboard-status-blink {
+	animation: switchboard-blink 1s ease-in-out infinite;
+}

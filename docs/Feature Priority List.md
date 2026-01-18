@@ -76,25 +76,26 @@ tags:
 
 ---
 
-## Phase 6: Speed & Polish ⏳
+## Phase 6: Speed & Polish ✅
 **Goal:** Low effort, high impact quick wins.
 
 | Order | Feature | Details | Status |
 |-------|---------|---------|--------|
-| 25 | **Speed Dial (Hotkeys)** | Register `patch-in-{line}` commands for each Line. | ⏳ |
-| 26 | **Busy Signal** | Toast notification when already on another Line. | ⏳ |
-| 27 | **The Click (Audio)** | Sound effects for patch-in/disconnect, mute toggle. | ⏳ |
+| 25 | **Speed Dial (Hotkeys)** | Register `patch-in-{line}` commands for each Line. | ✅ |
+| 26 | **Busy Signal** | Toast notification when already on another Line. | ✅ |
+| 27 | **The Click (Audio)** | Sound effects for patch-in/disconnect, mute toggle. | ✅ |
+| 28 | **Delete Confirmation** | Confirm dialog before deleting a Line. | ✅ |
 
 ---
 
-## Phase 7: Smart Decline & Rescheduling ⏳
-**Goal:** Call Waiting with full reschedule capabilities.
+## Phase 7: Smart Decline & Rescheduling ✅
+**Goal:** Reschedule options and missed call tracking.
 
 | Order | Feature | Details | Status |
-|-------|---------|---------|--------|
-| 28 | **Call Waiting Inbox** | Save declined tasks to `Call Waiting.md`. | ⏳ |
-| 29 | **Quick Reschedule** | "1 hour", "Tomorrow", "Pick time" options. | ⏳ |
-| 30 | **View Queue** | Command to view/manage queued tasks. | ⏳ |
+|-------|---------|--------|---------|
+| 29 | **Quick Reschedule** | "30 min", "1 hour", "Tomorrow" options in decline. | ✅ |
+| 30 | **Missed Calls in Menu** | Busy signal adds to status bar menu with blink. | ✅ |
+| 31 | **Delete Confirmation** | Confirm dialog before deleting a Line. | ✅ |
 
 ---
 

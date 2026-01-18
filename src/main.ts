@@ -22,6 +22,8 @@ export default class SwitchboardPlugin extends Plugin {
     wireService: WireService;
     sessionLogger: SessionLogger;
     audioService: AudioService;
+    missedCalls: Array<{ lineName: string; taskTitle: string; time: Date }> = [];
+    private missedCallsAcknowledged: boolean = true;
     private statusBarItem: HTMLElement | null = null;
     private timerInterval: ReturnType<typeof setInterval> | null = null;
     private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -93,6 +95,15 @@ export default class SwitchboardPlugin extends Plugin {
             name: "Edit Session History",
             callback: () => {
                 this.openSessionEditor();
+            },
+        });
+
+        // Register view call waiting command
+        this.addCommand({
+            id: "view-call-waiting",
+            name: "View Call Waiting",
+            callback: () => {
+                this.openCallWaiting();
             },
         });
 
@@ -194,6 +205,29 @@ export default class SwitchboardPlugin extends Plugin {
      */
     openSessionEditor() {
         new SessionEditorModal(this.app, this).open();
+    }
+
+    /**
+     * Opens the Call Waiting file
+     */
+    async openCallWaiting() {
+        const filePath = "Call Waiting.md";
+        let file = this.app.vault.getAbstractFileByPath(filePath);
+
+        if (!file) {
+            // Create the file if it doesn't exist
+            const content = `# Call Waiting
+
+Tasks that were declined but saved for later.
+`;
+            await this.app.vault.create(filePath, content);
+            file = this.app.vault.getAbstractFileByPath(filePath);
+        }
+
+        if (file) {
+            const leaf = this.app.workspace.getLeaf();
+            await leaf.openFile(file as any);
+        }
     }
 
     /**
@@ -353,6 +387,13 @@ export default class SwitchboardPlugin extends Plugin {
         const duration = this.sessionLogger.getCurrentDuration();
         const durationStr = this.formatDuration(duration);
         this.statusBarItem.createSpan({ text: `${activeLine.name} • ${durationStr}` });
+
+        // Add missed calls indicator if there are unacknowledged missed calls
+        if (this.missedCalls.length > 0 && !this.missedCallsAcknowledged) {
+            this.statusBarItem.addClass("switchboard-status-blink");
+        } else {
+            this.statusBarItem.removeClass("switchboard-status-blink");
+        }
     }
 
     /**
@@ -398,6 +439,12 @@ export default class SwitchboardPlugin extends Plugin {
 
         const menu = new Menu();
 
+        // When menu is opened, acknowledge missed calls (stop blinking)
+        if (this.missedCalls.length > 0) {
+            this.missedCallsAcknowledged = true;
+            this.updateStatusBar();
+        }
+
         menu.addItem((item) =>
             item
                 .setTitle(`🔌 Disconnect from ${activeLine.name}`)
@@ -433,6 +480,39 @@ export default class SwitchboardPlugin extends Plugin {
                     this.openSessionEditor();
                 })
         );
+
+        // Show missed calls if any
+        if (this.missedCalls.length > 0) {
+            menu.addSeparator();
+            menu.addItem((item) =>
+                item
+                    .setTitle(`📞 Missed Calls (${this.missedCalls.length})`)
+                    .setIcon("phone-missed")
+                    .setDisabled(true)
+            );
+
+            for (const call of this.missedCalls) {
+                const timeStr = call.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                menu.addItem((item) =>
+                    item
+                        .setTitle(`  ${call.lineName} - ${timeStr}`)
+                        .onClick(() => {
+                            // Clear this missed call
+                            this.missedCalls = this.missedCalls.filter(c => c !== call);
+                        })
+                );
+            }
+
+            menu.addItem((item) =>
+                item
+                    .setTitle("Clear all missed calls")
+                    .setIcon("x")
+                    .onClick(() => {
+                        this.missedCalls = [];
+                        new Notice("Cleared missed calls");
+                    })
+            );
+        }
 
         menu.showAtMouseEvent(event);
     }

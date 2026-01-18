@@ -1,9 +1,12 @@
-import { Plugin, Notice } from "obsidian";
+import { Plugin, Notice, Menu } from "obsidian";
 import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
 import { CallLogModal } from "./modals/CallLogModal";
 import { OperatorModal } from "./modals/OperatorModal";
+import { TimeUpModal } from "./modals/TimeUpModal";
+import { StatisticsModal } from "./modals/StatisticsModal";
+import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
@@ -17,6 +20,9 @@ export default class SwitchboardPlugin extends Plugin {
     circuitManager: CircuitManager;
     wireService: WireService;
     sessionLogger: SessionLogger;
+    private statusBarItem: HTMLElement | null = null;
+    private timerInterval: ReturnType<typeof setInterval> | null = null;
+    private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
@@ -67,6 +73,24 @@ export default class SwitchboardPlugin extends Plugin {
             },
         });
 
+        // Register statistics command
+        this.addCommand({
+            id: "statistics",
+            name: "Open Statistics",
+            callback: () => {
+                this.openStatistics();
+            },
+        });
+
+        // Register session editor command
+        this.addCommand({
+            id: "session-editor",
+            name: "Edit Session History",
+            callback: () => {
+                this.openSessionEditor();
+            },
+        });
+
         // Add operator menu ribbon icon
         this.addRibbonIcon("headphones", "Operator Menu", () => {
             this.openOperatorModal();
@@ -87,10 +111,21 @@ export default class SwitchboardPlugin extends Plugin {
             }, 2000);
         }
 
+        // Add status bar item for session timer
+        this.statusBarItem = this.addStatusBarItem();
+        this.statusBarItem.addClass("switchboard-status-bar");
+        this.statusBarItem.addEventListener("click", (event) => {
+            this.showStatusBarMenu(event);
+        });
+        this.updateStatusBar();
+
         console.log("Switchboard: Plugin loaded successfully.");
     }
 
     onunload() {
+        // Stop timer updates
+        this.stopTimerUpdates();
+
         // Stop wire service
         this.wireService.stop();
 
@@ -140,6 +175,20 @@ export default class SwitchboardPlugin extends Plugin {
     }
 
     /**
+     * Opens the Statistics modal
+     */
+    openStatistics() {
+        new StatisticsModal(this.app, this).open();
+    }
+
+    /**
+     * Opens the Session Editor modal
+     */
+    openSessionEditor() {
+        new SessionEditorModal(this.app, this).open();
+    }
+
+    /**
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
@@ -154,6 +203,9 @@ export default class SwitchboardPlugin extends Plugin {
 
         // Start session tracking
         this.sessionLogger.startSession(line);
+
+        // Start status bar timer updates
+        this.startTimerUpdates();
 
         // Show notice
         new Notice(`📞 Patched in: ${line.name}`);
@@ -194,6 +246,14 @@ export default class SwitchboardPlugin extends Plugin {
 
         // End session and check for call log
         const sessionInfo = this.sessionLogger.endSession();
+
+        // Stop status bar timer updates
+        this.stopTimerUpdates();
+        this.updateStatusBar();
+
+        // Cancel any pending auto-disconnect
+        this.cancelAutoDisconnect();
+
         if (sessionInfo) {
             // Session was 5+ minutes, show call log modal
             new CallLogModal(this.app, sessionInfo, async (summary) => {
@@ -232,5 +292,146 @@ export default class SwitchboardPlugin extends Plugin {
      */
     async saveSettings() {
         await this.saveData(this.settings);
+    }
+
+    /**
+     * Update the status bar with current session info
+     */
+    private updateStatusBar(): void {
+        if (!this.statusBarItem) return;
+
+        const activeLine = this.getActiveLine();
+        if (!activeLine) {
+            this.statusBarItem.empty();
+            this.statusBarItem.style.display = "none";
+            return;
+        }
+
+        this.statusBarItem.style.display = "flex";
+        this.statusBarItem.empty();
+
+        // Color dot
+        const dot = this.statusBarItem.createSpan("switchboard-status-dot");
+        dot.style.backgroundColor = activeLine.color;
+
+        // Line name and timer
+        const duration = this.sessionLogger.getCurrentDuration();
+        const durationStr = this.formatDuration(duration);
+        this.statusBarItem.createSpan({ text: `${activeLine.name} • ${durationStr}` });
+    }
+
+    /**
+     * Start the timer update interval
+     */
+    private startTimerUpdates(): void {
+        this.stopTimerUpdates();
+        this.updateStatusBar();
+        // Update every 30 seconds
+        this.timerInterval = setInterval(() => {
+            this.updateStatusBar();
+        }, 30000);
+    }
+
+    /**
+     * Stop the timer update interval
+     */
+    private stopTimerUpdates(): void {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+
+    /**
+     * Format duration as "Xh Ym" or "Xm"
+     */
+    private formatDuration(minutes: number): string {
+        if (minutes < 60) {
+            return `${minutes}m`;
+        }
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    }
+
+    /**
+     * Show status bar context menu
+     */
+    private showStatusBarMenu(event: MouseEvent): void {
+        const activeLine = this.getActiveLine();
+        if (!activeLine) return;
+
+        const menu = new Menu();
+
+        menu.addItem((item) =>
+            item
+                .setTitle(`🔌 Disconnect from ${activeLine.name}`)
+                .setIcon("unplug")
+                .onClick(() => {
+                    this.disconnect();
+                })
+        );
+
+        menu.addItem((item) =>
+            item
+                .setTitle("🏛️ Open Operator Menu")
+                .setIcon("headphones")
+                .onClick(() => {
+                    this.openOperatorModal();
+                })
+        );
+
+        menu.addItem((item) =>
+            item
+                .setTitle("📊 Statistics")
+                .setIcon("bar-chart-2")
+                .onClick(() => {
+                    this.openStatistics();
+                })
+        );
+
+        menu.addItem((item) =>
+            item
+                .setTitle("📝 Edit Sessions")
+                .setIcon("pencil")
+                .onClick(() => {
+                    this.openSessionEditor();
+                })
+        );
+
+        menu.showAtMouseEvent(event);
+    }
+
+    /**
+     * Schedule auto-disconnect at a specific time
+     */
+    scheduleAutoDisconnect(endTime: Date): void {
+        this.cancelAutoDisconnect();
+
+        if (!this.settings.autoDisconnect) return;
+
+        const now = new Date();
+        const delay = endTime.getTime() - now.getTime();
+
+        if (delay <= 0) return;
+
+        this.autoDisconnectTimer = setTimeout(() => {
+            const activeLine = this.getActiveLine();
+            if (activeLine) {
+                new TimeUpModal(this.app, this, activeLine).open();
+            } else {
+                this.disconnect();
+            }
+        }, delay);
+    }
+
+    /**
+     * Cancel any pending auto-disconnect
+     */
+    cancelAutoDisconnect(): void {
+        if (this.autoDisconnectTimer) {
+            clearTimeout(this.autoDisconnectTimer);
+            this.autoDisconnectTimer = null;
+        }
     }
 }

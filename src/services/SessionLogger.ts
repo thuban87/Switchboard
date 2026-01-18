@@ -65,6 +65,9 @@ export class SessionLogger {
      * Log a session summary to the configured file
      */
     async logSession(session: SessionInfo, summary: string): Promise<void> {
+        // Save to session history for statistics
+        await this.saveToHistory(session, summary);
+
         const logEntry = this.formatLogEntry(session, summary);
         const logFile = await this.getOrCreateLogFile(session.line);
 
@@ -81,26 +84,76 @@ export class SessionLogger {
         const headingIndex = content.indexOf(heading);
 
         if (headingIndex !== -1) {
-            // Insert after the heading line
-            const insertPoint = content.indexOf("\n", headingIndex) + 1;
+            // Find end of the heading line
+            let insertPoint = content.indexOf("\n", headingIndex);
+            if (insertPoint === -1) {
+                // No newline after heading, append at end
+                insertPoint = content.length;
+            } else {
+                insertPoint += 1; // Move past the newline
+            }
+
+            // Insert the new entry after the heading (newest first)
             content = content.slice(0, insertPoint) + "\n" + logEntry + "\n" + content.slice(insertPoint);
         } else {
-            // Heading not found, append at end
+            // Heading not found, append at end with heading
             content += "\n\n" + heading + "\n\n" + logEntry + "\n";
         }
 
         await this.app.vault.modify(logFile, content);
+        console.log("SessionLogger: Appended log entry to", logFile.path);
+    }
+
+    /**
+     * Save session to history for statistics
+     */
+    private async saveToHistory(session: SessionInfo, summary: string): Promise<void> {
+        const record = {
+            lineId: session.line.id,
+            lineName: session.line.name,
+            date: session.startTime.toISOString().split("T")[0],
+            startTime: this.formatTime24(session.startTime),
+            endTime: this.formatTime24(session.endTime),
+            durationMinutes: session.durationMinutes,
+            summary,
+        };
+
+        console.log("Switchboard: Saving session to history", record);
+        console.log("Switchboard: Current history length:", this.plugin.settings.sessionHistory?.length || 0);
+
+        // Ensure sessionHistory array exists
+        if (!this.plugin.settings.sessionHistory) {
+            this.plugin.settings.sessionHistory = [];
+        }
+
+        this.plugin.settings.sessionHistory.push(record);
+        console.log("Switchboard: New history length:", this.plugin.settings.sessionHistory.length);
+
+        await this.plugin.saveSettings();
+        console.log("Switchboard: Settings saved");
+    }
+
+    /**
+     * Format time as 24h "HH:MM"
+     */
+    private formatTime24(date: Date): string {
+        return date.toTimeString().slice(0, 5);
     }
 
     /**
      * Format a log entry
      */
     private formatLogEntry(session: SessionInfo, summary: string): string {
+        const dateStr = session.startTime.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+        });
         const startStr = this.formatTime(session.startTime);
         const endStr = this.formatTime(session.endTime);
         const durationStr = this.formatDuration(session.durationMinutes);
 
-        return `### 📞 ${session.line.name} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
+        return `### 📞 ${dateStr} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
     }
 
     /**

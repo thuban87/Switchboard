@@ -8,7 +8,7 @@ tags:
 # Switchboard - Feature Priority List
 
 **Goal:** Build a "Context Manager" for the ADHD brain.
-**Version:** 1.0.0 (All Phases Complete)
+**Version:** 1.2.0 (Phase 5 Complete)
 
 ---
 
@@ -62,6 +62,20 @@ tags:
 
 ---
 
+## Phase 5: Deferred Features & Statistics ✅
+**Goal:** Polish, statistics tracking, and session management.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| 19 | **Session Timer** | Status bar shows Line + elapsed time, clickable menu. | ✅ |
+| 20 | **Custom Operator Commands** | User-defined commands per Line (insert/command/file). | ✅ |
+| 21 | **Auto-disconnect** | TimeUpModal at block end with extend options. | ✅ |
+| 22 | **Statistics Dashboard** | Summary cards, per-line breakdown, AI export. | ✅ |
+| 23 | **Session Editor** | Browse, edit (Line/date/times), delete sessions. | ✅ |
+| 24 | **Log Format Fix** | Date/time instead of Line name in log entries. | ✅ |
+
+---
+
 ## Technical Debt / Risks
 
 *   ~~**Theme Conflicts:** Custom themes might override "Signal Isolation" CSS.~~ Handled with specificity.
@@ -74,8 +88,9 @@ tags:
 *   **Phase 1:** ~4.5 hours ✅
 *   **Phase 2:** ~4.5 hours ✅
 *   **Phase 3:** ~6 hours ✅
-*   **Phase 4:** ~8 hours ✅ (exceeded estimate due to scheduling features)
-*   **Total:** ~23 hours
+*   **Phase 4:** ~8 hours ✅
+*   **Phase 5:** ~6 hours ✅
+*   **Total:** ~29 hours
 
 ---
 
@@ -83,7 +98,6 @@ tags:
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| Custom Operator Commands | User-defined commands per Line | Low |
-| Auto-disconnect | End session at block end time | Low |
-| Statistics Dashboard | Track time spent per Line | Low |
 | Multi-Line Overlap | Handle when two Lines conflict | Low |
+| Command Picker | Autocomplete for Obsidian command IDs | Low |
+| Weekly Charts | Visual bar charts in Statistics | Low |

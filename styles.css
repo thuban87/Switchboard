@@ -818,3 +818,588 @@
 .schedule-overview-clickable:hover {
 	background: var(--background-modifier-hover);
 }
+
+/* ============================================
+   Status Bar Session Timer
+   ============================================ */
+
+.switchboard-status-bar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 8px;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.switchboard-status-bar:hover {
+	background: var(--background-modifier-hover);
+}
+
+.switchboard-status-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+/* ============================================
+   Operator Menu Modal
+   ============================================ */
+
+.switchboard-operator-modal {
+	--operator-color: #3498db;
+}
+
+.switchboard-operator-modal .modal-content {
+	padding: 20px;
+	min-width: 320px;
+}
+
+.operator-header {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.operator-header .operator-icon {
+	font-size: 28px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.operator-header h2 {
+	margin: 0 0 12px 0;
+	font-size: 1.4rem;
+	font-weight: 600;
+}
+
+.operator-line {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: var(--background-secondary);
+	padding: 6px 14px;
+	border-radius: 20px;
+	font-size: 0.9rem;
+}
+
+.operator-color-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.operator-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 16px;
+}
+
+.operator-cmd-btn {
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	gap: 14px;
+	width: 100%;
+	min-height: 52px;
+	padding: 12px 18px;
+	border: none;
+	border-radius: 10px;
+	background: var(--background-secondary);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	text-align: left;
+}
+
+.operator-cmd-btn:hover {
+	background: var(--background-modifier-hover);
+	transform: translateX(4px);
+}
+
+.operator-cmd-btn:active {
+	transform: translateX(2px);
+}
+
+.operator-cmd-icon {
+	font-size: 1.4rem;
+	line-height: 1;
+	flex-shrink: 0;
+	display: inline-block;
+}
+
+.operator-cmd-name {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--text-normal);
+	flex-grow: 1;
+}
+
+/* ============================================
+   Custom Commands Editor
+   ============================================ */
+
+.custom-commands-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.custom-command-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--background-secondary);
+	border-radius: 8px;
+}
+
+.custom-command-icon {
+	width: 40px;
+	text-align: center;
+	font-size: 1.2rem;
+	padding: 4px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-name {
+	flex: 1;
+	min-width: 100px;
+	padding: 6px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-action {
+	width: 110px;
+	padding: 6px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-value {
+	flex: 2;
+	min-width: 120px;
+	padding: 6px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-delete {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.custom-command-delete:hover {
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+}
+
+/* ============================================
+   Time Up Modal
+   ============================================ */
+
+.switchboard-timeup-modal .modal-content {
+	padding: 24px;
+	text-align: center;
+	min-width: 320px;
+}
+
+.timeup-header {
+	margin-bottom: 16px;
+}
+
+.timeup-header .timeup-icon {
+	font-size: 48px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.timeup-header h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 600;
+}
+
+.timeup-message {
+	margin-bottom: 24px;
+}
+
+.timeup-message p {
+	margin: 8px 0;
+	color: var(--text-normal);
+}
+
+.timeup-message .timeup-subtitle {
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.timeup-buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.timeup-extend-row {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+}
+
+.timeup-btn {
+	padding: 12px 20px;
+	border: none;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.timeup-extend {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	flex: 1;
+}
+
+.timeup-extend:hover {
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+}
+
+.timeup-disconnect {
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	width: 100%;
+}
+
+.timeup-disconnect:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* ============================================
+   Statistics Modal
+   ============================================ */
+
+.switchboard-statistics-modal .modal-content {
+	padding: 24px;
+	min-width: 400px;
+	max-width: 500px;
+}
+
+.stats-header h2 {
+	margin: 0 0 20px 0;
+	font-size: 1.4rem;
+	font-weight: 600;
+}
+
+.stats-empty {
+	text-align: center;
+	color: var(--text-muted);
+	padding: 40px 20px;
+}
+
+.stats-cards {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.stats-card {
+	background: var(--background-secondary);
+	padding: 16px;
+	border-radius: 12px;
+	text-align: center;
+}
+
+.stats-card h3 {
+	margin: 0 0 8px 0;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.stats-big-number {
+	font-size: 1.8rem;
+	font-weight: 700;
+	color: var(--interactive-accent);
+	margin-bottom: 4px;
+}
+
+.stats-subtitle {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+}
+
+.stats-section {
+	margin-bottom: 24px;
+}
+
+.stats-section h3 {
+	margin: 0 0 12px 0;
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+.stats-bars {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.stats-bar-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.stats-bar-label {
+	width: 100px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.9rem;
+	flex-shrink: 0;
+}
+
+.stats-bar-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.stats-bar-container {
+	flex: 1;
+	height: 20px;
+	background: var(--background-secondary);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.stats-bar {
+	height: 100%;
+	border-radius: 4px;
+	transition: width 0.3s ease;
+}
+
+.stats-bar-value {
+	width: 60px;
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	text-align: right;
+	flex-shrink: 0;
+}
+
+.stats-sessions-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.stats-session-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+	background: var(--background-secondary);
+	border-radius: 8px;
+}
+
+.stats-session-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.stats-session-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.stats-session-name {
+	font-weight: 500;
+}
+
+.stats-session-date {
+	color: var(--text-muted);
+	font-size: 0.85rem;
+}
+
+.stats-session-duration {
+	font-size: 0.9rem;
+	color: var(--text-muted);
+	flex-shrink: 0;
+}
+
+.stats-export {
+	margin-top: 20px;
+	text-align: center;
+}
+
+.stats-export-btn {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 8px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: 0.95rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.stats-export-btn:hover {
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+}
+
+/* ============================================
+   Session Editor Modal
+   ============================================ */
+
+.switchboard-session-editor-modal .modal-content {
+	padding: 24px;
+	min-width: 450px;
+	max-width: 550px;
+}
+
+.session-editor-empty {
+	text-align: center;
+	color: var(--text-muted);
+	padding: 40px 20px;
+}
+
+.session-editor-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.session-editor-line {
+	background: var(--background-secondary);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.session-editor-line-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.session-editor-line-header:hover {
+	background: var(--background-modifier-hover);
+}
+
+.session-editor-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.session-editor-expand {
+	margin-left: auto;
+	color: var(--text-muted);
+	font-size: 0.8rem;
+}
+
+.session-editor-sessions {
+	padding: 0 12px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.session-editor-session {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	background: var(--background-primary);
+	border-radius: 6px;
+}
+
+.session-editor-session-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.session-editor-session-date {
+	font-size: 0.9rem;
+}
+
+.session-editor-session-duration {
+	color: var(--text-muted);
+	font-size: 0.85rem;
+	margin-left: 8px;
+}
+
+.session-editor-session-summary {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	margin-top: 4px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.session-editor-session-actions {
+	display: flex;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.session-editor-session-actions button {
+	padding: 4px 8px;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.session-editor-session-actions button:hover {
+	background: var(--background-modifier-hover);
+}
+
+.session-btn-delete:hover {
+	background: var(--background-modifier-error) !important;
+}
+
+.session-editor-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 20px;
+}

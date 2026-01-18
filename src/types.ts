@@ -41,6 +41,8 @@ export interface SwitchboardLine {
     sessionLogHeading: string;
     /** Scheduled time blocks for this Line */
     scheduledBlocks: ScheduledBlock[];
+    /** Custom operator commands for this Line */
+    customCommands: OperatorCommand[];
 }
 
 /**
@@ -58,6 +60,26 @@ export interface OperatorCommand {
 }
 
 /**
+ * Represents a recorded session for statistics
+ */
+export interface SessionRecord {
+    /** Line ID */
+    lineId: string;
+    /** Line name at time of session */
+    lineName: string;
+    /** Date in YYYY-MM-DD format */
+    date: string;
+    /** Start time in HH:MM format */
+    startTime: string;
+    /** End time in HH:MM format */
+    endTime: string;
+    /** Duration in minutes */
+    durationMinutes: number;
+    /** Optional session summary */
+    summary?: string;
+}
+
+/**
  * Plugin settings stored in data.json
  */
 export interface SwitchboardSettings {
@@ -69,6 +91,10 @@ export interface SwitchboardSettings {
     chronosIntegrationEnabled: boolean;
     /** Default snooze time in minutes for "Hold" action */
     defaultSnoozeMinutes: number;
+    /** Auto-disconnect when scheduled block ends */
+    autoDisconnect: boolean;
+    /** Session history for statistics */
+    sessionHistory: SessionRecord[];
 }
 
 /**
@@ -79,6 +105,8 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     activeLine: null,
     chronosIntegrationEnabled: true,
     defaultSnoozeMinutes: 5,
+    autoDisconnect: false,
+    sessionHistory: [],
 };
 
 /**

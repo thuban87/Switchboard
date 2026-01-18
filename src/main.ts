@@ -1,4 +1,4 @@
-import { Plugin, Notice } from "obsidian";
+import { Plugin, Notice, Menu } from "obsidian";
 import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
@@ -17,6 +17,8 @@ export default class SwitchboardPlugin extends Plugin {
     circuitManager: CircuitManager;
     wireService: WireService;
     sessionLogger: SessionLogger;
+    private statusBarItem: HTMLElement | null = null;
+    private timerInterval: ReturnType<typeof setInterval> | null = null;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
@@ -87,10 +89,21 @@ export default class SwitchboardPlugin extends Plugin {
             }, 2000);
         }
 
+        // Add status bar item for session timer
+        this.statusBarItem = this.addStatusBarItem();
+        this.statusBarItem.addClass("switchboard-status-bar");
+        this.statusBarItem.addEventListener("click", (event) => {
+            this.showStatusBarMenu(event);
+        });
+        this.updateStatusBar();
+
         console.log("Switchboard: Plugin loaded successfully.");
     }
 
     onunload() {
+        // Stop timer updates
+        this.stopTimerUpdates();
+
         // Stop wire service
         this.wireService.stop();
 
@@ -155,6 +168,9 @@ export default class SwitchboardPlugin extends Plugin {
         // Start session tracking
         this.sessionLogger.startSession(line);
 
+        // Start status bar timer updates
+        this.startTimerUpdates();
+
         // Show notice
         new Notice(`📞 Patched in: ${line.name}`);
 
@@ -194,6 +210,11 @@ export default class SwitchboardPlugin extends Plugin {
 
         // End session and check for call log
         const sessionInfo = this.sessionLogger.endSession();
+
+        // Stop status bar timer updates
+        this.stopTimerUpdates();
+        this.updateStatusBar();
+
         if (sessionInfo) {
             // Session was 5+ minutes, show call log modal
             new CallLogModal(this.app, sessionInfo, async (summary) => {
@@ -232,5 +253,95 @@ export default class SwitchboardPlugin extends Plugin {
      */
     async saveSettings() {
         await this.saveData(this.settings);
+    }
+
+    /**
+     * Update the status bar with current session info
+     */
+    private updateStatusBar(): void {
+        if (!this.statusBarItem) return;
+
+        const activeLine = this.getActiveLine();
+        if (!activeLine) {
+            this.statusBarItem.empty();
+            this.statusBarItem.style.display = "none";
+            return;
+        }
+
+        this.statusBarItem.style.display = "flex";
+        this.statusBarItem.empty();
+
+        // Color dot
+        const dot = this.statusBarItem.createSpan("switchboard-status-dot");
+        dot.style.backgroundColor = activeLine.color;
+
+        // Line name and timer
+        const duration = this.sessionLogger.getCurrentDuration();
+        const durationStr = this.formatDuration(duration);
+        this.statusBarItem.createSpan({ text: `${activeLine.name} • ${durationStr}` });
+    }
+
+    /**
+     * Start the timer update interval
+     */
+    private startTimerUpdates(): void {
+        this.stopTimerUpdates();
+        this.updateStatusBar();
+        // Update every 30 seconds
+        this.timerInterval = setInterval(() => {
+            this.updateStatusBar();
+        }, 30000);
+    }
+
+    /**
+     * Stop the timer update interval
+     */
+    private stopTimerUpdates(): void {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+
+    /**
+     * Format duration as "Xh Ym" or "Xm"
+     */
+    private formatDuration(minutes: number): string {
+        if (minutes < 60) {
+            return `${minutes}m`;
+        }
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    }
+
+    /**
+     * Show status bar context menu
+     */
+    private showStatusBarMenu(event: MouseEvent): void {
+        const activeLine = this.getActiveLine();
+        if (!activeLine) return;
+
+        const menu = new Menu();
+
+        menu.addItem((item) =>
+            item
+                .setTitle(`🔌 Disconnect from ${activeLine.name}`)
+                .setIcon("unplug")
+                .onClick(() => {
+                    this.disconnect();
+                })
+        );
+
+        menu.addItem((item) =>
+            item
+                .setTitle("🏛️ Open Operator Menu")
+                .setIcon("headphones")
+                .onClick(() => {
+                    this.openOperatorModal();
+                })
+        );
+
+        menu.showAtMouseEvent(event);
     }
 }

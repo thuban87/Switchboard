@@ -818,3 +818,121 @@
 .schedule-overview-clickable:hover {
 	background: var(--background-modifier-hover);
 }
+
+/* ============================================
+   Status Bar Session Timer
+   ============================================ */
+
+.switchboard-status-bar {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 8px;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.switchboard-status-bar:hover {
+	background: var(--background-modifier-hover);
+}
+
+.switchboard-status-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+/* ============================================
+   Operator Menu Modal
+   ============================================ */
+
+.switchboard-operator-modal {
+	--operator-color: #3498db;
+}
+
+.switchboard-operator-modal .modal-content {
+	padding: 20px;
+	min-width: 320px;
+}
+
+.operator-header {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.operator-header .operator-icon {
+	font-size: 28px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.operator-header h2 {
+	margin: 0 0 12px 0;
+	font-size: 1.4rem;
+	font-weight: 600;
+}
+
+.operator-line {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: var(--background-secondary);
+	padding: 6px 14px;
+	border-radius: 20px;
+	font-size: 0.9rem;
+}
+
+.operator-color-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.operator-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 16px;
+}
+
+.operator-cmd-btn {
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	gap: 14px;
+	width: 100%;
+	min-height: 52px;
+	padding: 12px 18px;
+	border: none;
+	border-radius: 10px;
+	background: var(--background-secondary);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	text-align: left;
+}
+
+.operator-cmd-btn:hover {
+	background: var(--background-modifier-hover);
+	transform: translateX(4px);
+}
+
+.operator-cmd-btn:active {
+	transform: translateX(2px);
+}
+
+.operator-cmd-icon {
+	font-size: 1.4rem;
+	line-height: 1;
+	flex-shrink: 0;
+	display: inline-block;
+}
+
+.operator-cmd-name {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--text-normal);
+	flex-grow: 1;
+}

@@ -170,6 +170,12 @@ export class WireService {
         // Remove from scheduled
         this.scheduledCalls.delete(taskId);
 
+        // EDGE CASE: If already patched into this Line, suppress the modal
+        if (this.plugin.settings.activeLine === line.id) {
+            // Already on this Line, no need to prompt
+            return;
+        }
+
         // Show the incoming call modal
         new IncomingCallModal(
             this.app,

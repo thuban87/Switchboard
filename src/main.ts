@@ -10,6 +10,7 @@ import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
+import { AudioService } from "./services/AudioService";
 
 /**
  * Switchboard - Context Manager for Obsidian
@@ -20,6 +21,7 @@ export default class SwitchboardPlugin extends Plugin {
     circuitManager: CircuitManager;
     wireService: WireService;
     sessionLogger: SessionLogger;
+    audioService: AudioService;
     private statusBarItem: HTMLElement | null = null;
     private timerInterval: ReturnType<typeof setInterval> | null = null;
     private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -35,6 +37,9 @@ export default class SwitchboardPlugin extends Plugin {
 
         // Initialize session logger
         this.sessionLogger = new SessionLogger(this.app, this);
+
+        // Initialize audio service
+        this.audioService = new AudioService(this);
 
         await this.loadSettings();
 
@@ -118,6 +123,9 @@ export default class SwitchboardPlugin extends Plugin {
             this.showStatusBarMenu(event);
         });
         this.updateStatusBar();
+
+        // Register commands for each Line (Speed Dial)
+        this.registerLineCommands();
 
         console.log("Switchboard: Plugin loaded successfully.");
     }
@@ -204,6 +212,9 @@ export default class SwitchboardPlugin extends Plugin {
         // Start session tracking
         this.sessionLogger.startSession(line);
 
+        // Play patch-in sound
+        this.audioService.playPatchIn();
+
         // Start status bar timer updates
         this.startTimerUpdates();
 
@@ -267,6 +278,9 @@ export default class SwitchboardPlugin extends Plugin {
         // Show notice
         new Notice(`🔌 Disconnected from: ${activeLine.name}`);
 
+        // Play disconnect sound
+        this.audioService.playDisconnect();
+
         console.log("Switchboard: ✅ Disconnected");
     }
 
@@ -292,6 +306,27 @@ export default class SwitchboardPlugin extends Plugin {
      */
     async saveSettings() {
         await this.saveData(this.settings);
+        // Re-register Line commands when settings change
+        this.registerLineCommands();
+    }
+
+    /**
+     * Register commands for each Line (Speed Dial)
+     * Allows users to bind hotkeys to specific Lines
+     */
+    registerLineCommands(): void {
+        // Register patch-in command for each line
+        for (const line of this.settings.lines) {
+            const commandId = `patch-in-${line.id}`;
+            this.addCommand({
+                id: commandId,
+                name: `Patch In: ${line.name}`,
+                callback: () => {
+                    this.patchIn(line);
+                },
+            });
+        }
+        console.log(`Switchboard: Registered ${this.settings.lines.length} Speed Dial commands`);
     }
 
     /**

@@ -41,6 +41,8 @@ export interface SwitchboardLine {
     sessionLogHeading: string;
     /** Scheduled time blocks for this Line */
     scheduledBlocks: ScheduledBlock[];
+    /** Custom operator commands for this Line */
+    customCommands: OperatorCommand[];
 }
 
 /**
@@ -69,6 +71,8 @@ export interface SwitchboardSettings {
     chronosIntegrationEnabled: boolean;
     /** Default snooze time in minutes for "Hold" action */
     defaultSnoozeMinutes: number;
+    /** Auto-disconnect when scheduled block ends */
+    autoDisconnect: boolean;
 }
 
 /**
@@ -79,6 +83,7 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     activeLine: null,
     chronosIntegrationEnabled: true,
     defaultSnoozeMinutes: 5,
+    autoDisconnect: false,
 };
 
 /**

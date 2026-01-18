@@ -208,6 +208,24 @@ export class WireService {
             case "connect":
                 // Patch into the line
                 this.plugin.patchIn(line);
+
+                // Schedule auto-disconnect if this is a native block with endTime
+                if (task._endTime && task.date) {
+                    const [endHours, endMinutes] = task._endTime.split(":").map(Number);
+                    // Use the task's date, not today's date
+                    const endTime = new Date(task.date + "T00:00:00");
+                    endTime.setHours(endHours, endMinutes, 0, 0);
+
+                    const now = new Date();
+                    console.log("Switchboard: Auto-disconnect scheduled for", endTime.toLocaleString(), "now is", now.toLocaleString());
+
+                    // If end time is in the future, schedule auto-disconnect
+                    if (endTime.getTime() > now.getTime()) {
+                        this.plugin.scheduleAutoDisconnect(endTime);
+                    } else {
+                        console.log("Switchboard: End time already passed, not scheduling auto-disconnect");
+                    }
+                }
                 break;
 
             case "hold":
@@ -372,6 +390,7 @@ export class WireService {
                     date: triggerTime.toISOString().split("T")[0],
                     time: block.startTime,
                     _blockId: blockId,
+                    _endTime: block.endTime,
                 };
 
                 this.scheduleNativeCall(fakeTask, line, triggerTime, blockId);

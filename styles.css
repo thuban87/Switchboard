@@ -936,3 +936,161 @@
 	color: var(--text-normal);
 	flex-grow: 1;
 }
+
+/* ============================================
+   Custom Commands Editor
+   ============================================ */
+
+.custom-commands-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.custom-command-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--background-secondary);
+	border-radius: 8px;
+}
+
+.custom-command-icon {
+	width: 40px;
+	text-align: center;
+	font-size: 1.2rem;
+	padding: 4px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-name {
+	flex: 1;
+	min-width: 100px;
+	padding: 6px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-action {
+	width: 110px;
+	padding: 6px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-value {
+	flex: 2;
+	min-width: 120px;
+	padding: 6px 10px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.custom-command-delete {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.custom-command-delete:hover {
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+}
+
+/* ============================================
+   Time Up Modal
+   ============================================ */
+
+.switchboard-timeup-modal .modal-content {
+	padding: 24px;
+	text-align: center;
+	min-width: 320px;
+}
+
+.timeup-header {
+	margin-bottom: 16px;
+}
+
+.timeup-header .timeup-icon {
+	font-size: 48px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.timeup-header h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 600;
+}
+
+.timeup-message {
+	margin-bottom: 24px;
+}
+
+.timeup-message p {
+	margin: 8px 0;
+	color: var(--text-normal);
+}
+
+.timeup-message .timeup-subtitle {
+	color: var(--text-muted);
+	font-size: 0.9rem;
+}
+
+.timeup-buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.timeup-extend-row {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+}
+
+.timeup-btn {
+	padding: 12px 20px;
+	border: none;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.timeup-extend {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	flex: 1;
+}
+
+.timeup-extend:hover {
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+}
+
+.timeup-disconnect {
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	width: 100%;
+}
+
+.timeup-disconnect:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}

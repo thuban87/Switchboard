@@ -1,5 +1,5 @@
 import { Modal, App, Setting, TextComponent } from "obsidian";
-import { SwitchboardLine, ScheduledBlock, PRESET_COLORS, generateId } from "../types";
+import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId } from "../types";
 import { FolderSuggest, FileSuggest } from "./PathSuggest";
 
 /**
@@ -27,10 +27,14 @@ export class LineEditorModal extends Modal {
             sessionLogFile: "",
             sessionLogHeading: "## Session Log",
             scheduledBlocks: [],
+            customCommands: [],
         };
-        // Ensure scheduledBlocks exists for older saved lines
+        // Ensure arrays exist for older saved lines
         if (!this.line.scheduledBlocks) {
             this.line.scheduledBlocks = [];
+        }
+        if (!this.line.customCommands) {
+            this.line.customCommands = [];
         }
     }
 
@@ -110,6 +114,9 @@ export class LineEditorModal extends Modal {
 
         // Schedule section
         this.renderScheduleSection(contentEl);
+
+        // Custom commands section
+        this.renderCustomCommandsSection(contentEl);
 
         // Buttons
         const buttonContainer = contentEl.createDiv("switchboard-modal-buttons");
@@ -427,6 +434,127 @@ export class LineEditorModal extends Modal {
             this.line.safePaths.push("");
         }
         return true;
+    }
+
+    /**
+     * Render the custom commands section
+     */
+    private renderCustomCommandsSection(containerEl: HTMLElement) {
+        containerEl.createEl("h3", { text: "Operator Commands" });
+        containerEl.createEl("p", {
+            text: "Quick actions shown in the Operator Menu (click status bar timer or use command palette). Insert text snippets, run Obsidian commands, or open specific files.",
+            cls: "setting-item-description",
+        });
+
+        const commandsContainer = containerEl.createDiv("custom-commands-container");
+        this.renderCustomCommands(commandsContainer);
+
+        new Setting(containerEl)
+            .addButton((btn) =>
+                btn.setButtonText("+ Add Command").onClick(() => {
+                    const newCmd: OperatorCommand = {
+                        name: "New Command",
+                        icon: "📌",
+                        action: "insert",
+                        value: "",
+                    };
+                    this.line.customCommands.push(newCmd);
+                    this.renderCustomCommands(commandsContainer);
+                })
+            );
+    }
+
+    /**
+     * Render the list of custom commands
+     */
+    private renderCustomCommands(containerEl: HTMLElement) {
+        containerEl.empty();
+
+        for (let i = 0; i < this.line.customCommands.length; i++) {
+            const cmd = this.line.customCommands[i];
+            const cmdEl = containerEl.createDiv("custom-command-item");
+
+            // Icon input
+            const iconInput = cmdEl.createEl("input", {
+                type: "text",
+                cls: "custom-command-icon",
+                value: cmd.icon,
+            });
+            iconInput.maxLength = 4;
+            iconInput.addEventListener("change", () => {
+                cmd.icon = iconInput.value;
+            });
+
+            // Name input
+            const nameInput = cmdEl.createEl("input", {
+                type: "text",
+                cls: "custom-command-name",
+                placeholder: "Command name",
+                value: cmd.name,
+            });
+            nameInput.addEventListener("change", () => {
+                cmd.name = nameInput.value;
+            });
+
+            // Action type select
+            const actionSelect = cmdEl.createEl("select", {
+                cls: "custom-command-action",
+            });
+            const actions = [
+                { value: "insert", label: "Insert text" },
+                { value: "command", label: "Run command" },
+                { value: "open", label: "Open file" },
+            ];
+            for (const act of actions) {
+                const opt = actionSelect.createEl("option", {
+                    value: act.value,
+                    text: act.label,
+                });
+                if (act.value === cmd.action) {
+                    opt.selected = true;
+                }
+            }
+            actionSelect.addEventListener("change", () => {
+                cmd.action = actionSelect.value as "insert" | "command" | "open";
+                // Re-render to update placeholder
+                this.renderCustomCommands(containerEl);
+            });
+
+            // Value input with action-specific placeholder
+            const getPlaceholder = (action: string) => {
+                switch (action) {
+                    case "insert": return "Text to insert (use {{date}}, {{time}})...";
+                    case "command": return "e.g. editor:toggle-bold";
+                    case "open": return "e.g. Notes/Math/Formulas.md";
+                    default: return "";
+                }
+            };
+
+            const valueInput = cmdEl.createEl("input", {
+                type: "text",
+                cls: "custom-command-value",
+                placeholder: getPlaceholder(cmd.action),
+                value: cmd.value,
+            });
+            valueInput.addEventListener("change", () => {
+                cmd.value = valueInput.value;
+            });
+
+            // Add file autocomplete when action is "open"
+            if (cmd.action === "open") {
+                new FileSuggest(this.app, valueInput);
+            }
+
+            // Delete button
+            const deleteBtn = cmdEl.createEl("button", {
+                cls: "custom-command-delete",
+                text: "×",
+            });
+            deleteBtn.addEventListener("click", () => {
+                this.line.customCommands.splice(i, 1);
+                this.renderCustomCommands(containerEl);
+            });
+        }
     }
 
     onClose() {

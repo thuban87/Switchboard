@@ -68,6 +68,20 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     })
             );
 
+        new Setting(containerEl)
+            .setName("Auto-disconnect")
+            .setDesc(
+                "Automatically disconnect when a scheduled block ends."
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.autoDisconnect)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoDisconnect = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         // Schedule Overview Section
         containerEl.createEl("h2", { text: "Schedule Overview" });
         this.renderScheduleOverview(containerEl);

@@ -101,14 +101,18 @@ export class OperatorModal extends Modal {
      * Get commands for the current line
      */
     private getCommandsForLine(): OperatorCommand[] {
-        const lineId = this.line.id.toLowerCase();
+        // Use custom commands if defined
+        if (this.line.customCommands && this.line.customCommands.length > 0) {
+            return this.line.customCommands;
+        }
 
-        // Check for matching category
+        // Fallback to category-based defaults
+        const lineId = this.line.id.toLowerCase();
         if (lineId.includes("math")) return DEFAULT_COMMANDS.math;
         if (lineId.includes("bio")) return DEFAULT_COMMANDS.bio;
         if (lineId.includes("eng")) return DEFAULT_COMMANDS.eng;
 
-        // Fallback to default commands
+        // Fallback to generic defaults
         return DEFAULT_COMMANDS.default;
     }
 
@@ -119,7 +123,12 @@ export class OperatorModal extends Modal {
         switch (cmd.action) {
             case "command":
                 // Execute an Obsidian command
-                (this.app as any).commands.executeCommandById(cmd.value);
+                const commands = (this.app as any).commands;
+                if (commands.commands[cmd.value]) {
+                    commands.executeCommandById(cmd.value);
+                } else {
+                    new Notice(`Command not found: ${cmd.value}\n\nTip: Use Command Palette (Ctrl+P) and copy the command ID`);
+                }
                 break;
 
             case "insert":
@@ -127,7 +136,9 @@ export class OperatorModal extends Modal {
                 const editor = this.app.workspace.activeEditor?.editor;
                 if (editor) {
                     const cursor = editor.getCursor();
-                    const text = cmd.value.replace("{{date}}", new Date().toLocaleDateString());
+                    const text = cmd.value
+                        .replace("{{date}}", new Date().toLocaleDateString())
+                        .replace("{{time}}", new Date().toLocaleTimeString());
                     editor.replaceRange(text, cursor);
 
                     // Position cursor in the middle of inline elements
@@ -135,17 +146,21 @@ export class OperatorModal extends Modal {
                         editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
                     }
                 } else {
-                    new Notice("No active editor");
+                    new Notice("No active editor - open a note first");
                 }
                 break;
 
             case "open":
                 // Open a file
+                if (!cmd.value) {
+                    new Notice("No file path specified");
+                    break;
+                }
                 const file = this.app.vault.getAbstractFileByPath(cmd.value);
                 if (file) {
                     this.app.workspace.getLeaf().openFile(file as any);
                 } else {
-                    new Notice(`File not found: ${cmd.value}`);
+                    new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
                 }
                 break;
         }

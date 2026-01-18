@@ -4,6 +4,7 @@ import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
 import { CallLogModal } from "./modals/CallLogModal";
 import { OperatorModal } from "./modals/OperatorModal";
+import { TimeUpModal } from "./modals/TimeUpModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
@@ -19,6 +20,7 @@ export default class SwitchboardPlugin extends Plugin {
     sessionLogger: SessionLogger;
     private statusBarItem: HTMLElement | null = null;
     private timerInterval: ReturnType<typeof setInterval> | null = null;
+    private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
@@ -215,6 +217,9 @@ export default class SwitchboardPlugin extends Plugin {
         this.stopTimerUpdates();
         this.updateStatusBar();
 
+        // Cancel any pending auto-disconnect
+        this.cancelAutoDisconnect();
+
         if (sessionInfo) {
             // Session was 5+ minutes, show call log modal
             new CallLogModal(this.app, sessionInfo, async (summary) => {
@@ -343,5 +348,38 @@ export default class SwitchboardPlugin extends Plugin {
         );
 
         menu.showAtMouseEvent(event);
+    }
+
+    /**
+     * Schedule auto-disconnect at a specific time
+     */
+    scheduleAutoDisconnect(endTime: Date): void {
+        this.cancelAutoDisconnect();
+
+        if (!this.settings.autoDisconnect) return;
+
+        const now = new Date();
+        const delay = endTime.getTime() - now.getTime();
+
+        if (delay <= 0) return;
+
+        this.autoDisconnectTimer = setTimeout(() => {
+            const activeLine = this.getActiveLine();
+            if (activeLine) {
+                new TimeUpModal(this.app, this, activeLine).open();
+            } else {
+                this.disconnect();
+            }
+        }, delay);
+    }
+
+    /**
+     * Cancel any pending auto-disconnect
+     */
+    cancelAutoDisconnect(): void {
+        if (this.autoDisconnectTimer) {
+            clearTimeout(this.autoDisconnectTimer);
+            this.autoDisconnectTimer = null;
+        }
     }
 }

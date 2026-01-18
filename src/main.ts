@@ -5,6 +5,7 @@ import { PatchInModal } from "./modals/PatchInModal";
 import { CallLogModal } from "./modals/CallLogModal";
 import { OperatorModal } from "./modals/OperatorModal";
 import { TimeUpModal } from "./modals/TimeUpModal";
+import { StatisticsModal } from "./modals/StatisticsModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
@@ -68,6 +69,15 @@ export default class SwitchboardPlugin extends Plugin {
             name: "Open Operator Menu",
             callback: () => {
                 this.openOperatorModal();
+            },
+        });
+
+        // Register statistics command
+        this.addCommand({
+            id: "statistics",
+            name: "Open Statistics",
+            callback: () => {
+                this.openStatistics();
             },
         });
 
@@ -152,6 +162,13 @@ export default class SwitchboardPlugin extends Plugin {
             return;
         }
         new OperatorModal(this.app, this, activeLine).open();
+    }
+
+    /**
+     * Opens the Statistics modal
+     */
+    openStatistics() {
+        new StatisticsModal(this.app, this).open();
     }
 
     /**
@@ -344,6 +361,15 @@ export default class SwitchboardPlugin extends Plugin {
                 .setIcon("headphones")
                 .onClick(() => {
                     this.openOperatorModal();
+                })
+        );
+
+        menu.addItem((item) =>
+            item
+                .setTitle("📊 Statistics")
+                .setIcon("bar-chart-2")
+                .onClick(() => {
+                    this.openStatistics();
                 })
         );
 

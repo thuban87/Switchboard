@@ -60,6 +60,26 @@ export interface OperatorCommand {
 }
 
 /**
+ * Represents a recorded session for statistics
+ */
+export interface SessionRecord {
+    /** Line ID */
+    lineId: string;
+    /** Line name at time of session */
+    lineName: string;
+    /** Date in YYYY-MM-DD format */
+    date: string;
+    /** Start time in HH:MM format */
+    startTime: string;
+    /** End time in HH:MM format */
+    endTime: string;
+    /** Duration in minutes */
+    durationMinutes: number;
+    /** Optional session summary */
+    summary?: string;
+}
+
+/**
  * Plugin settings stored in data.json
  */
 export interface SwitchboardSettings {
@@ -73,6 +93,8 @@ export interface SwitchboardSettings {
     defaultSnoozeMinutes: number;
     /** Auto-disconnect when scheduled block ends */
     autoDisconnect: boolean;
+    /** Session history for statistics */
+    sessionHistory: SessionRecord[];
 }
 
 /**
@@ -84,6 +106,7 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     chronosIntegrationEnabled: true,
     defaultSnoozeMinutes: 5,
     autoDisconnect: false,
+    sessionHistory: [],
 };
 
 /**

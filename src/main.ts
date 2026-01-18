@@ -6,6 +6,7 @@ import { CallLogModal } from "./modals/CallLogModal";
 import { OperatorModal } from "./modals/OperatorModal";
 import { TimeUpModal } from "./modals/TimeUpModal";
 import { StatisticsModal } from "./modals/StatisticsModal";
+import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
@@ -78,6 +79,15 @@ export default class SwitchboardPlugin extends Plugin {
             name: "Open Statistics",
             callback: () => {
                 this.openStatistics();
+            },
+        });
+
+        // Register session editor command
+        this.addCommand({
+            id: "session-editor",
+            name: "Edit Session History",
+            callback: () => {
+                this.openSessionEditor();
             },
         });
 
@@ -169,6 +179,13 @@ export default class SwitchboardPlugin extends Plugin {
      */
     openStatistics() {
         new StatisticsModal(this.app, this).open();
+    }
+
+    /**
+     * Opens the Session Editor modal
+     */
+    openSessionEditor() {
+        new SessionEditorModal(this.app, this).open();
     }
 
     /**
@@ -370,6 +387,15 @@ export default class SwitchboardPlugin extends Plugin {
                 .setIcon("bar-chart-2")
                 .onClick(() => {
                     this.openStatistics();
+                })
+        );
+
+        menu.addItem((item) =>
+            item
+                .setTitle("📝 Edit Sessions")
+                .setIcon("pencil")
+                .onClick(() => {
+                    this.openSessionEditor();
                 })
         );
 

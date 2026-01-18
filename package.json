@@ -1,6 +1,6 @@
 {
     "name": "switchboard",
-    "version": "0.1.0",
+    "version": "1.2.0",
     "description": "Context manager for the ADHD brain. Patch into your focus.",
     "main": "main.js",
     "scripts": {

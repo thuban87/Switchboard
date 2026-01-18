@@ -144,11 +144,16 @@ export class SessionLogger {
      * Format a log entry
      */
     private formatLogEntry(session: SessionInfo, summary: string): string {
+        const dateStr = session.startTime.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+        });
         const startStr = this.formatTime(session.startTime);
         const endStr = this.formatTime(session.endTime);
         const durationStr = this.formatDuration(session.durationMinutes);
 
-        return `### 📞 ${session.line.name} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
+        return `### 📞 ${dateStr} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
     }
 
     /**

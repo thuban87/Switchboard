@@ -101,3 +101,4 @@ tags:
 | Multi-Line Overlap | Handle when two Lines conflict | Low |
 | Command Picker | Autocomplete for Obsidian command IDs | Low |
 | Weekly Charts | Visual bar charts in Statistics | Low |
+| Log Rotation | Yearly session log files to prevent large file sizes | Low |

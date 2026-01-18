@@ -80,6 +80,9 @@ export class CircuitManager {
      * Collapses all folders, then expands the safe paths
      */
     private focusFolders(safePaths: string[]): void {
+        // Use native collapse-all command for performance (optimized for large vaults)
+        (this.app as any).commands?.executeCommandById?.("file-explorer:collapse-all");
+
         const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0];
         if (!fileExplorer) {
             console.log("CircuitManager: File explorer not found");
@@ -92,14 +95,7 @@ export class CircuitManager {
             return;
         }
 
-        // First, collapse all folders
-        for (const [path, item] of Object.entries(explorerView.fileItems)) {
-            if (item && (item as any).collapsed === false) {
-                (item as any).setCollapsed?.(true);
-            }
-        }
-
-        // Then expand the safe paths (and their parent folders)
+        // Expand the safe paths (and their parent folders)
         for (const safePath of safePaths) {
             if (!safePath) continue;
 
@@ -175,15 +171,18 @@ body.switchboard-active-${line.id} .nav-folder-title.is-active {
         for (const path of safePaths) {
             if (!path) continue;
 
+            // Escape path for CSS attribute selector to prevent injection
+            const escapedPath = CSS.escape(path);
+
             // Match the folder itself and all children (using *= for contains)
             // Obsidian uses data-path attribute on nav-folder-title and nav-file-title
             selectors.push(`
 /* Safe path: ${path} */
-body.switchboard-active .nav-folder-title[data-path="${path}"],
-body.switchboard-active .nav-folder-title[data-path^="${path}/"],
-body.switchboard-active .nav-file-title[data-path^="${path}/"],
-body.switchboard-active .nav-folder-title[data-path="${path}"] ~ .nav-folder-children .nav-folder-title,
-body.switchboard-active .nav-folder-title[data-path="${path}"] ~ .nav-folder-children .nav-file-title {
+body.switchboard-active .nav-folder-title[data-path="${escapedPath}"],
+body.switchboard-active .nav-folder-title[data-path^="${escapedPath}/"],
+body.switchboard-active .nav-file-title[data-path^="${escapedPath}/"],
+body.switchboard-active .nav-folder-title[data-path="${escapedPath}"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active .nav-folder-title[data-path="${escapedPath}"] ~ .nav-folder-children .nav-file-title {
 	opacity: 1 !important;
 	filter: none !important;
 }`);

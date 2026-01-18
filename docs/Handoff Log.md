@@ -91,6 +91,13 @@ tags:
 | Session Editor | Browse, edit (Line/date/times), delete sessions |
 | Log Format | Date/time instead of Line name in log entries |
 
+### Structural Fixes ✅
+| Fix | Description |
+|-----|-------------|
+| CSS Security | Use CSS.escape() for path selectors |
+| DOM Performance | Native collapse-all command instead of O(n) loop |
+| Chronos Robustness | Try-catch wrapper for plugin access |
+
 ---
 
 ## Quick Reference

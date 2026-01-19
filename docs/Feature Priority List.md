@@ -8,7 +8,7 @@ tags:
 # Switchboard - Feature Priority List
 
 **Goal:** Build a "Context Manager" for the ADHD brain.
-**Version:** 1.2.0 (Phase 5 Complete)
+**Version:** 1.5.0 (Phase 9 Complete)
 
 ---
 
@@ -111,13 +111,13 @@ tags:
 
 ---
 
-## Phase 9: Quick Switch & Dashboard ⏳
+## Phase 9: Quick Switch & Dashboard ✅
 **Goal:** Navigation & visibility improvements.
 
 | Order | Feature | Details | Status |
 |-------|---------|---------|--------|
-| 34 | **Party Line (Quick Switch)** | Hotkey popup to instantly switch Lines. | ⏳ |
-| 35 | **Operator Dashboard** | Dedicated view with Lines, schedule, current session. | ⏳ |
+| 34 | **Party Line (Quick Switch)** | Hotkey popup to instantly switch Lines. | ✅ |
+| 35 | **Operator Dashboard** | Dedicated view with Lines, schedule, current session. | ✅ |
 
 ---
 

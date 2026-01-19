@@ -8,10 +8,12 @@ import { TimeUpModal } from "./modals/TimeUpModal";
 import { StatisticsModal } from "./modals/StatisticsModal";
 import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { GoalPromptModal } from "./modals/GoalPromptModal";
+import { QuickSwitchModal } from "./modals/QuickSwitchModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
 import { AudioService } from "./services/AudioService";
+import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/DashboardView";
 
 /**
  * Switchboard - Context Manager for Obsidian
@@ -107,6 +109,30 @@ export default class SwitchboardPlugin extends Plugin {
             name: "View Call Waiting",
             callback: () => {
                 this.openCallWaiting();
+            },
+        });
+
+        // Register quick switch command
+        this.addCommand({
+            id: "quick-switch",
+            name: "Quick Switch",
+            callback: () => {
+                this.openQuickSwitchModal();
+            },
+        });
+
+        // Register dashboard view
+        this.registerView(
+            DASHBOARD_VIEW_TYPE,
+            (leaf) => new DashboardView(leaf, this)
+        );
+
+        // Register open dashboard command
+        this.addCommand({
+            id: "open-dashboard",
+            name: "Open Dashboard",
+            callback: () => {
+                this.activateDashboard();
             },
         });
 
@@ -235,6 +261,62 @@ Tasks that were declined but saved for later.
     }
 
     /**
+     * Opens the Quick Switch modal (Party Line)
+     */
+    openQuickSwitchModal() {
+        new QuickSwitchModal(
+            this.app,
+            this.settings.lines,
+            this.settings.activeLine,
+            this.currentGoal,
+            (line) => {
+                if (line === null) {
+                    this.disconnect();
+                } else {
+                    this.patchInWithGoal(line);
+                }
+            }
+        ).open();
+    }
+
+    /**
+     * Activates/reveals the Dashboard sidebar view
+     */
+    async activateDashboard() {
+        const { workspace } = this.app;
+
+        // Check if dashboard is already open
+        const existing = workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
+        if (existing.length > 0) {
+            workspace.revealLeaf(existing[0]);
+            return;
+        }
+
+        // Open in right sidebar
+        const leaf = workspace.getRightLeaf(false);
+        if (leaf) {
+            await leaf.setViewState({
+                type: DASHBOARD_VIEW_TYPE,
+                active: true,
+            });
+            workspace.revealLeaf(leaf);
+        }
+    }
+
+    /**
+     * Refresh the dashboard view (if open)
+     */
+    private refreshDashboard() {
+        const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
+        for (const leaf of leaves) {
+            const view = leaf.view;
+            if (view instanceof DashboardView) {
+                view.refresh();
+            }
+        }
+    }
+
+    /**
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
@@ -274,6 +356,9 @@ Tasks that were declined but saved for later.
         }
 
         console.log(`Switchboard: ✅ Now connected to "${line.name}"`);
+
+        // Refresh dashboard if open
+        this.refreshDashboard();
     }
 
     /**
@@ -352,6 +437,9 @@ Tasks that were declined but saved for later.
         this.audioService.playDisconnect();
 
         console.log("Switchboard: ✅ Disconnected");
+
+        // Refresh dashboard if open
+        this.refreshDashboard();
     }
 
     /**

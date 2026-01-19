@@ -8,8 +8,8 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** January 18, 2026
-**Status:** Phase 8 Complete ✅
-**Version:** 1.4.0
+**Status:** Phase 9 Complete ✅
+**Version:** 1.5.0
 
 ---
 
@@ -139,13 +139,33 @@ tags:
 
 ---
 
+## Phase 9: Quick Switch & Dashboard
+**Date:** January 18, 2026
+
+| Feature | Description |
+|---------|-------------|
+| Quick Switch Modal | Hotkey popup for fast Line switching with keyboard nav (↑/↓/Enter) |
+| Operator Dashboard | Sidebar view with current session, Lines grid, schedule, recent sessions |
+
+**New Commands:**
+- `Quick Switch` - Open fast Line switching popup (hotkey-assignable)
+- `Open Dashboard` - Open/reveal the Switchboard sidebar
+
+**New Files:**
+- `src/modals/QuickSwitchModal.ts` - Quick switch modal with keyboard navigation
+- `src/views/DashboardView.ts` - Sidebar dashboard view
+
+---
+
 ## Quick Reference
 
 ### Key Commands
 | Command | Description |
 |---------|-------------|
 | Patch In | Open Line selection modal |
+| Quick Switch | Fast Line switching popup |
 | Disconnect | End current session |
+| Open Dashboard | Open Switchboard sidebar |
 | Open Operator Menu | Context commands for active Line |
 | Open Statistics | View session statistics |
 | Edit Session History | Edit/delete recorded sessions |
@@ -155,6 +175,8 @@ tags:
 |------|---------|
 | `src/main.ts` | Plugin entry, commands, status bar |
 | `src/types.ts` | Interfaces (Line, SessionRecord, etc.) |
+| `src/modals/QuickSwitchModal.ts` | Fast Line switching |
+| `src/views/DashboardView.ts` | Sidebar dashboard |
 | `src/modals/StatisticsModal.ts` | Statistics dashboard |
 | `src/modals/SessionEditorModal.ts` | Session history editor |
 | `src/modals/TimeUpModal.ts` | Auto-disconnect prompt |

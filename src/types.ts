@@ -99,6 +99,10 @@ export interface SwitchboardSettings {
     muteSounds: boolean;
     /** Sound type: synthesized or realistic */
     soundType: "synthesized" | "realistic";
+    /** Enable goal prompt on patch-in */
+    enableGoalPrompt: boolean;
+    /** Break reminder interval in minutes (0 = disabled) */
+    breakReminderMinutes: number;
 }
 
 /**
@@ -113,6 +117,8 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     sessionHistory: [],
     muteSounds: false,
     soundType: "synthesized",
+    enableGoalPrompt: true,
+    breakReminderMinutes: 60,
 };
 
 /**

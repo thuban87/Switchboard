@@ -99,14 +99,15 @@ tags:
 
 ---
 
-## Phase 8: Session Goals & Break Reminders ⏳
+## Phase 8: Session Goals & Break Reminders ✅
 **Goal:** Wellbeing & focus features.
 
 | Order | Feature | Details | Status |
 |-------|---------|---------|--------|
-| 31 | **Session Goals** | Optional goal on patch-in, shown in status bar. | ⏳ |
-| 32 | **Goal Reflection** | "Did you accomplish?" in disconnect modal. | ⏳ |
-| 33 | **Break Reminder** | Gentle notification after configurable duration. | ⏳ |
+| 32 | **Session Goals** | Optional goal on patch-in, shown in status bar. | ✅ |
+| 33 | **Goal Reflection** | "Did you accomplish?" in disconnect modal. | ✅ |
+| 34 | **Break Reminder** | Gentle notification after configurable duration. | ✅ |
+| 35 | **Case-Insensitive Logging** | Log file lookup is now case-insensitive. | ✅ |
 
 ---
 

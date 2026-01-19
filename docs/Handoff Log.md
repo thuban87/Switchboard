@@ -8,8 +8,8 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** January 18, 2026
-**Status:** Phase 7 Complete ✅
-**Version:** 1.3.0
+**Status:** Phase 8 Complete ✅
+**Version:** 1.4.0
 
 ---
 
@@ -121,6 +121,21 @@ tags:
 | Missed Calls Blink | Status bar blinks when unacknowledged missed calls |
 | Acknowledge on Open | Blinking stops when status bar menu is opened |
 
+---
+
+## Phase 8: Session Goals & Break Reminders
+**Date:** January 18, 2026
+
+| Feature | Description |
+|---------|-------------|
+| Session Goals | Optional goal prompt on patch-in, displayed in status bar |
+| Goal Reflection | "Did you accomplish?" shown in disconnect modal |
+| Break Reminder | Configurable interval (default 60min), recurring reminder |
+| Case-Insensitive Logging | Log file lookup now case-insensitive |
+
+**New Settings:**
+- `enableGoalPrompt` (toggle, default: true)
+- `breakReminderMinutes` (number, default: 60, 0 = disabled)
 
 ---
 

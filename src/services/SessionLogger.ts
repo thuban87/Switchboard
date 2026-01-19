@@ -179,50 +179,61 @@ export class SessionLogger {
      * Get or create the log file
      */
     private async getOrCreateLogFile(line: SwitchboardLine): Promise<TFile | null> {
+        let logPath: string;
+
         // Use line's configured file if specified
         if (line.sessionLogFile) {
-            const file = this.app.vault.getAbstractFileByPath(line.sessionLogFile);
-            if (file instanceof TFile) return file;
-
-            // Create it if it doesn't exist
-            try {
-                return await this.app.vault.create(
-                    line.sessionLogFile,
-                    this.getDefaultLogContent(line)
-                );
-            } catch {
-                return null;
+            logPath = line.sessionLogFile;
+            console.log("SessionLogger: Using configured log file path:", logPath);
+        } else {
+            // Default: create in same folder as landing page
+            let folderPath = "";
+            if (line.landingPage) {
+                const parts = line.landingPage.split("/");
+                parts.pop(); // Remove filename
+                folderPath = parts.join("/");
             }
+
+            logPath = folderPath
+                ? `${folderPath}/${line.name} - Session Log.md`
+                : `${line.name} - Session Log.md`;
+            console.log("SessionLogger: Using default log file path:", logPath);
         }
 
-        // Default: create in same folder as landing page
-        let folderPath = "";
-        if (line.landingPage) {
-            const parts = line.landingPage.split("/");
-            parts.pop(); // Remove filename
-            folderPath = parts.join("/");
+        // Try exact path match first
+        let file = this.app.vault.getAbstractFileByPath(logPath);
+        if (file instanceof TFile) {
+            console.log("SessionLogger: Found file at exact path");
+            return file;
         }
 
-        const logPath = folderPath
-            ? `${folderPath}/${line.name} - Session Log.md`
-            : `${line.name} - Session Log.md`;
-
-        // Check if file exists
-        const existingFile = this.app.vault.getAbstractFileByPath(logPath);
-        if (existingFile instanceof TFile) return existingFile;
-
-        // Create folder if needed
-        if (folderPath) {
-            const folder = this.app.vault.getAbstractFileByPath(folderPath);
-            if (!folder) {
-                await this.app.vault.createFolder(folderPath);
-            }
+        // Try case-insensitive lookup
+        const allFiles = this.app.vault.getFiles();
+        const lowerLogPath = logPath.toLowerCase();
+        const matchingFile = allFiles.find(f => f.path.toLowerCase() === lowerLogPath);
+        if (matchingFile) {
+            console.log("SessionLogger: Found file via case-insensitive match:", matchingFile.path);
+            return matchingFile;
         }
 
-        // Create the file
+        // File doesn't exist - try to create it
+        console.log("SessionLogger: File not found, attempting to create:", logPath);
         try {
+            // Ensure parent folders exist
+            const parts = logPath.split("/");
+            parts.pop(); // Remove filename
+            const folderPath = parts.join("/");
+            if (folderPath) {
+                const folder = this.app.vault.getAbstractFileByPath(folderPath);
+                if (!folder) {
+                    console.log("SessionLogger: Creating folder:", folderPath);
+                    await this.app.vault.createFolder(folderPath);
+                }
+            }
+
             return await this.app.vault.create(logPath, this.getDefaultLogContent(line));
-        } catch {
+        } catch (e) {
+            console.error("SessionLogger: Failed to create log file:", e);
             return null;
         }
     }

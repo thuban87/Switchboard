@@ -10,15 +10,18 @@ export class CallLogModal extends Modal {
     private session: SessionInfo;
     private onSubmit: (summary: string | null) => void;
     private textArea: HTMLTextAreaElement;
+    private goal: string | null;
 
     constructor(
         app: App,
         session: SessionInfo,
-        onSubmit: (summary: string | null) => void
+        onSubmit: (summary: string | null) => void,
+        goal: string | null = null
     ) {
         super(app);
         this.session = session;
         this.onSubmit = onSubmit;
+        this.goal = goal;
     }
 
     onOpen() {
@@ -44,6 +47,19 @@ export class CallLogModal extends Modal {
         const durationStr = this.formatDuration(this.session.durationMinutes);
         const timeRange = `${this.formatTime(this.session.startTime)} - ${this.formatTime(this.session.endTime)}`;
         infoEl.createEl("p", { text: `⏱️ ${durationStr} (${timeRange})`, cls: "call-log-duration" });
+
+        // Goal reflection if a goal was set
+        if (this.goal) {
+            const goalEl = contentEl.createDiv("call-log-goal-reflection");
+            goalEl.createEl("p", {
+                text: `🎯 Your goal: "${this.goal}"`,
+                cls: "call-log-goal-text"
+            });
+            goalEl.createEl("p", {
+                text: "Did you accomplish it?",
+                cls: "call-log-goal-question"
+            });
+        }
 
         // Summary prompt
         contentEl.createEl("p", {

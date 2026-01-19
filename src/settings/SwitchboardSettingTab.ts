@@ -111,6 +111,34 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     })
             );
 
+        // Session Goals Section
+        containerEl.createEl("h3", { text: "Session Goals" });
+
+        new Setting(containerEl)
+            .setName("Enable goal prompt")
+            .setDesc("Ask for a session goal when patching in.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.enableGoalPrompt)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableGoalPrompt = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
+        new Setting(containerEl)
+            .setName("Break reminder (minutes)")
+            .setDesc("Get a gentle reminder after this many minutes. Set to 0 to disable.")
+            .addText((text) =>
+                text
+                    .setValue(this.plugin.settings.breakReminderMinutes.toString())
+                    .onChange(async (value) => {
+                        const mins = parseInt(value) || 0;
+                        this.plugin.settings.breakReminderMinutes = Math.max(0, mins);
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         // Schedule Overview Section
         containerEl.createEl("h2", { text: "Schedule Overview" });
         this.renderScheduleOverview(containerEl);

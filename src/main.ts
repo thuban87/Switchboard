@@ -7,6 +7,7 @@ import { OperatorModal } from "./modals/OperatorModal";
 import { TimeUpModal } from "./modals/TimeUpModal";
 import { StatisticsModal } from "./modals/StatisticsModal";
 import { SessionEditorModal } from "./modals/SessionEditorModal";
+import { GoalPromptModal } from "./modals/GoalPromptModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
@@ -23,10 +24,12 @@ export default class SwitchboardPlugin extends Plugin {
     sessionLogger: SessionLogger;
     audioService: AudioService;
     missedCalls: Array<{ lineName: string; taskTitle: string; time: Date }> = [];
+    currentGoal: string | null = null;
     private missedCallsAcknowledged: boolean = true;
     private statusBarItem: HTMLElement | null = null;
     private timerInterval: ReturnType<typeof setInterval> | null = null;
     private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    private breakReminderTimer: ReturnType<typeof setTimeout> | null = null;
 
     async onload() {
         console.log("Switchboard: Loading plugin...");
@@ -175,7 +178,8 @@ export default class SwitchboardPlugin extends Plugin {
                 if (line === null) {
                     this.disconnect();
                 } else {
-                    this.patchIn(line);
+                    // Use patchInWithGoal for user-initiated patching (shows goal prompt)
+                    this.patchInWithGoal(line);
                 }
             }
         ).open();
@@ -252,6 +256,9 @@ Tasks that were declined but saved for later.
         // Start status bar timer updates
         this.startTimerUpdates();
 
+        // Start break reminder timer if enabled
+        this.startBreakReminderTimer();
+
         // Show notice
         new Notice(`📞 Patched in: ${line.name}`);
 
@@ -270,6 +277,26 @@ Tasks that were declined but saved for later.
     }
 
     /**
+     * Patch in with goal prompt (call this instead of patchIn directly for user-initiated)
+     */
+    async patchInWithGoal(line: SwitchboardLine) {
+        if (this.settings.enableGoalPrompt) {
+            new GoalPromptModal(
+                this.app,
+                line.name,
+                line.color,
+                (goal) => {
+                    this.currentGoal = goal;
+                    this.patchIn(line);
+                }
+            ).open();
+        } else {
+            this.currentGoal = null;
+            this.patchIn(line);
+        }
+    }
+
+    /**
      * Disconnects from the current line
      */
     async disconnect() {
@@ -282,8 +309,12 @@ Tasks that were declined but saved for later.
 
         console.log(`Switchboard: Disconnecting from "${activeLine.name}"...`);
 
-        // Clear active line
+        // Store goal for reflection before clearing
+        const sessionGoal = this.currentGoal;
+
+        // Clear active line and goal
         this.settings.activeLine = null;
+        this.currentGoal = null;
         await this.saveSettings();
 
         // Deactivate the circuit (remove CSS)
@@ -296,17 +327,22 @@ Tasks that were declined but saved for later.
         this.stopTimerUpdates();
         this.updateStatusBar();
 
-        // Cancel any pending auto-disconnect
+        // Cancel any pending auto-disconnect and break reminder
         this.cancelAutoDisconnect();
+        this.stopBreakReminderTimer();
 
         if (sessionInfo) {
-            // Session was 5+ minutes, show call log modal
+            // Session was 5+ minutes, show call log modal with goal reflection
             new CallLogModal(this.app, sessionInfo, async (summary) => {
                 if (summary) {
-                    await this.sessionLogger.logSession(sessionInfo, summary);
+                    // Include goal in summary if it was set
+                    const fullSummary = sessionGoal
+                        ? `Goal: ${sessionGoal}\n${summary}`
+                        : summary;
+                    await this.sessionLogger.logSession(sessionInfo, fullSummary);
                     new Notice("📝 Session logged");
                 }
-            }).open();
+            }, sessionGoal).open();
         }
 
         // Show notice
@@ -383,10 +419,19 @@ Tasks that were declined but saved for later.
         const dot = this.statusBarItem.createSpan("switchboard-status-dot");
         dot.style.backgroundColor = activeLine.color;
 
-        // Line name and timer
+        // Line name, timer, and optional goal
         const duration = this.sessionLogger.getCurrentDuration();
         const durationStr = this.formatDuration(duration);
-        this.statusBarItem.createSpan({ text: `${activeLine.name} • ${durationStr}` });
+
+        let statusText = `${activeLine.name} • ${durationStr}`;
+        if (this.currentGoal) {
+            // Abbreviate goal to 20 chars
+            const goalAbbrev = this.currentGoal.length > 20
+                ? this.currentGoal.substring(0, 20) + "..."
+                : this.currentGoal;
+            statusText += ` • 🎯 ${goalAbbrev}`;
+        }
+        this.statusBarItem.createSpan({ text: statusText });
 
         // Add missed calls indicator if there are unacknowledged missed calls
         if (this.missedCalls.length > 0 && !this.missedCallsAcknowledged) {
@@ -415,6 +460,36 @@ Tasks that were declined but saved for later.
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
+        }
+    }
+
+    /**
+     * Start break reminder timer
+     */
+    private startBreakReminderTimer(): void {
+        this.stopBreakReminderTimer();
+
+        const minutes = this.settings.breakReminderMinutes;
+        if (minutes <= 0) return;
+
+        const ms = minutes * 60 * 1000;
+        this.breakReminderTimer = setTimeout(() => {
+            const activeLine = this.getActiveLine();
+            if (activeLine) {
+                new Notice(`☕ You've been on ${activeLine.name} for ${minutes} minutes - consider a break!`, 10000);
+                // Restart timer for another interval
+                this.startBreakReminderTimer();
+            }
+        }, ms);
+    }
+
+    /**
+     * Stop break reminder timer
+     */
+    private stopBreakReminderTimer(): void {
+        if (this.breakReminderTimer) {
+            clearTimeout(this.breakReminderTimer);
+            this.breakReminderTimer = null;
         }
     }
 

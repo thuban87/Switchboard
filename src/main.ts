@@ -405,6 +405,9 @@ Tasks that were declined but saved for later.
         // Deactivate the circuit (remove CSS)
         this.circuitManager.deactivate();
 
+        // Get duration before ending session (endSession clears it)
+        const sessionDuration = this.sessionLogger.getCurrentDuration();
+
         // End session and check for call log
         const sessionInfo = this.sessionLogger.endSession();
 
@@ -427,7 +430,12 @@ Tasks that were declined but saved for later.
                     await this.sessionLogger.logSession(sessionInfo, fullSummary);
                     new Notice("📝 Session logged");
                 }
+                // Log to daily note with summary (after modal)
+                await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
             }, sessionGoal).open();
+        } else {
+            // Session was < 5 minutes, log to daily note without summary
+            await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
         }
 
         // Show notice

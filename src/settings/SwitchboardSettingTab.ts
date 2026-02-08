@@ -139,6 +139,97 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     })
             );
 
+        // Daily Note Logging Section
+        containerEl.createEl("h3", { text: "Daily Note Logging" });
+
+        new Setting(containerEl)
+            .setName("Log sessions to daily notes")
+            .setDesc("Append session summaries to your daily note when disconnecting.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.enableDailyNoteLogging)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableDailyNoteLogging = value;
+                        await this.plugin.saveSettings();
+                        this.display(); // Refresh to show/hide folder settings
+                    })
+            );
+
+        // Only show folder/heading settings if logging is enabled
+        if (this.plugin.settings.enableDailyNoteLogging) {
+            new Setting(containerEl)
+                .setName("Daily notes folder")
+                .setDesc("Path to your daily notes folder.")
+                .addSearch((search) => {
+                    search
+                        .setPlaceholder("e.g., Journal/Daily")
+                        .setValue(this.plugin.settings.dailyNotesFolder)
+                        .onChange(async (value) => {
+                            this.plugin.settings.dailyNotesFolder = value;
+                            await this.plugin.saveSettings();
+                        });
+
+                    // Add folder suggestions
+                    const inputEl = search.inputEl;
+                    inputEl.addEventListener("input", () => {
+                        const value = inputEl.value;
+                        const folders = this.app.vault.getAllLoadedFiles()
+                            .filter((f) => (f as any).children !== undefined)
+                            .map((f) => f.path)
+                            .filter((p) => p.toLowerCase().includes(value.toLowerCase()))
+                            .slice(0, 10);
+
+                        // Clear existing suggestions
+                        const existingPopover = containerEl.querySelector(".daily-note-folder-suggestions");
+                        if (existingPopover) existingPopover.remove();
+
+                        if (folders.length > 0 && value.length > 0) {
+                            const popover = containerEl.createDiv("daily-note-folder-suggestions suggestion-container");
+                            popover.style.position = "absolute";
+                            popover.style.zIndex = "1000";
+
+                            for (const folder of folders) {
+                                const item = popover.createDiv("suggestion-item");
+                                item.setText(folder);
+                                item.addEventListener("click", async () => {
+                                    inputEl.value = folder;
+                                    this.plugin.settings.dailyNotesFolder = folder;
+                                    await this.plugin.saveSettings();
+                                    popover.remove();
+                                });
+                            }
+
+                            // Position popover
+                            const rect = inputEl.getBoundingClientRect();
+                            popover.style.top = `${inputEl.offsetTop + inputEl.offsetHeight}px`;
+                            popover.style.left = `${inputEl.offsetLeft}px`;
+                            popover.style.width = `${inputEl.offsetWidth}px`;
+                        }
+                    });
+
+                    // Hide suggestions on blur (with delay to allow click)
+                    inputEl.addEventListener("blur", () => {
+                        setTimeout(() => {
+                            const popover = containerEl.querySelector(".daily-note-folder-suggestions");
+                            if (popover) popover.remove();
+                        }, 200);
+                    });
+                });
+
+            new Setting(containerEl)
+                .setName("Heading to log under")
+                .setDesc("The heading in your daily note to append sessions under.")
+                .addText((text) =>
+                    text
+                        .setPlaceholder("### Switchboard Logs")
+                        .setValue(this.plugin.settings.dailyNoteHeading)
+                        .onChange(async (value) => {
+                            this.plugin.settings.dailyNoteHeading = value || "### Switchboard Logs";
+                            await this.plugin.saveSettings();
+                        })
+                );
+        }
+
         // Schedule Overview Section
         containerEl.createEl("h2", { text: "Schedule Overview" });
         this.renderScheduleOverview(containerEl);

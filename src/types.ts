@@ -103,6 +103,12 @@ export interface SwitchboardSettings {
     enableGoalPrompt: boolean;
     /** Break reminder interval in minutes (0 = disabled) */
     breakReminderMinutes: number;
+    /** Enable logging to daily notes */
+    enableDailyNoteLogging: boolean;
+    /** Folder path for daily notes */
+    dailyNotesFolder: string;
+    /** Heading to append logs under in daily notes */
+    dailyNoteHeading: string;
 }
 
 /**
@@ -119,6 +125,9 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     soundType: "synthesized",
     enableGoalPrompt: true,
     breakReminderMinutes: 60,
+    enableDailyNoteLogging: false,
+    dailyNotesFolder: "",
+    dailyNoteHeading: "### Switchboard Logs",
 };
 
 /**

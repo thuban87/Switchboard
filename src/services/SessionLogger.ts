@@ -261,4 +261,98 @@ export class SessionLogger {
         const now = new Date();
         return Math.floor((now.getTime() - this.currentSession.startTime.getTime()) / 60000);
     }
+
+    /**
+     * Log session to daily note
+     */
+    async logToDailyNote(lineName: string, durationMinutes: number, summary?: string): Promise<void> {
+        const settings = this.plugin.settings;
+
+        if (!settings.enableDailyNoteLogging || !settings.dailyNotesFolder) {
+            return;
+        }
+
+        // Build filename: YYYY-MM-DD, DayName.md (using local time, not UTC)
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const dateStr = `${year}-${month}-${day}`;
+        const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
+        const filename = `${dateStr}, ${dayName}.md`;
+        const filePath = `${settings.dailyNotesFolder}/${filename}`;
+
+        // Format: LINE: DURATION - SUMMARY
+        const durationStr = this.formatDuration(durationMinutes);
+        const bulletEntry = summary
+            ? `- **${lineName}**: ${durationStr} - ${summary}`
+            : `- **${lineName}**: ${durationStr}`;
+
+        // Get or create the file
+        let file = this.app.vault.getAbstractFileByPath(filePath);
+
+        if (!file) {
+            // File doesn't exist, create it with the heading
+            try {
+                const heading = settings.dailyNoteHeading || "### Switchboard Logs";
+                const content = `# ${dateStr}, ${dayName}\n\n${heading}\n${bulletEntry}\n`;
+                await this.app.vault.create(filePath, content);
+                console.log("SessionLogger: Created daily note with session log:", filePath);
+                return;
+            } catch (e) {
+                console.error("SessionLogger: Failed to create daily note:", e);
+                return;
+            }
+        }
+
+        if (!(file instanceof TFile)) {
+            console.error("SessionLogger: Daily note path is not a file:", filePath);
+            return;
+        }
+
+        // Read existing content
+        let content = await this.app.vault.read(file);
+        const heading = settings.dailyNoteHeading || "### Switchboard Logs";
+
+        // Find the heading
+        const headingIndex = content.indexOf(heading);
+
+        if (headingIndex !== -1) {
+            // Find the end of the heading line
+            let insertPoint = content.indexOf("\n", headingIndex);
+            if (insertPoint === -1) {
+                insertPoint = content.length;
+            } else {
+                insertPoint += 1; // Move past the newline
+            }
+
+            // Find existing bullet list - we want to append to end of list
+            // Look for next heading or end of file
+            const restContent = content.slice(insertPoint);
+            const nextHeadingMatch = restContent.match(/^#+\s/m);
+            const listEndIndex = nextHeadingMatch
+                ? insertPoint + (nextHeadingMatch.index ?? restContent.length)
+                : content.length;
+
+            // Insert before the next heading or at end
+            // Find the last bullet in the section to append after it
+            const sectionContent = content.slice(insertPoint, listEndIndex);
+            const trimmedSection = sectionContent.trimEnd();
+
+            if (trimmedSection.length > 0) {
+                // There's content under the heading, append after it
+                const actualInsertPoint = insertPoint + trimmedSection.length;
+                content = content.slice(0, actualInsertPoint) + "\n" + bulletEntry + content.slice(actualInsertPoint);
+            } else {
+                // No content under heading, insert right after heading
+                content = content.slice(0, insertPoint) + bulletEntry + "\n" + content.slice(insertPoint);
+            }
+        } else {
+            // Heading not found, append at end of file
+            content = content.trimEnd() + "\n\n" + heading + "\n" + bulletEntry + "\n";
+        }
+
+        await this.app.vault.modify(file, content);
+        console.log("SessionLogger: Appended to daily note:", bulletEntry);
+    }
 }

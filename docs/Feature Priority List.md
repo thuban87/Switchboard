@@ -131,6 +131,24 @@ tags:
 
 ---
 
+## Pre-Launch Hardening ⏳
+**Goal:** Documentation, build pipeline, and codebase analysis for BRAT release.
+
+| Order | Feature | Details | Status |
+|-------|---------|---------|--------|
+| — | **CLAUDE.md Overhaul** | Expanded with file tree, layer responsibilities, architecture constraints | ✅ |
+| — | **Codebase Stats** | Full stat sheet (19 files, ~4,500 LoC TS + ~1,600 LoC CSS) | ✅ |
+| — | **Test Coverage Matrix** | Risk-ranked assessment of all services/modals | ✅ |
+| — | **System Dependency Matrix** | Import map + Mermaid diagram | ✅ |
+| — | **Pre-Launch Implementation Guide** | 4-session plan: Debug Logger, Error Handling, Decomposition, Tests | ✅ |
+| — | **Build Pipeline** | Local-only build, `deploy:test`, `deploy:production` with confirmation | ✅ |
+| — | **Debug Logger System** | Centralized logger with settings toggle | ⏳ |
+| — | **Error Handling Audit** | try-catch across all services | ⏳ |
+| — | **main.ts Decomposition** | Extract StatusBarManager + TimerManager | ⏳ |
+| — | **Targeted Unit Tests** | Vitest setup + tests for riskiest pure logic | ⏳ |
+
+---
+
 ## Technical Debt / Risks
 
 *   ~~**Theme Conflicts:** Custom themes might override "Signal Isolation" CSS.~~ Handled with specificity.

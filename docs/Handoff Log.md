@@ -7,8 +7,8 @@ tags:
 ---
 # Switchboard Handoff Log
 
-**Last Updated:** January 18, 2026
-**Status:** Phase 9 Complete ✅
+**Last Updated:** February 8, 2026
+**Status:** Pre-Launch Hardening In Progress
 **Version:** 1.5.0
 
 ---
@@ -130,7 +130,7 @@ tags:
 |---------|-------------|
 | Session Goals | Optional goal prompt on patch-in, displayed in status bar |
 | Goal Reflection | "Did you accomplish?" shown in disconnect modal |
-| Break Reminder | Configurable interval (default 60min), recurring reminder |
+| Break Reminder | Gentle notification after configurable duration |
 | Case-Insensitive Logging | Log file lookup now case-insensitive |
 
 **New Settings:**
@@ -157,6 +157,39 @@ tags:
 
 ---
 
+## Session: Pre-Launch Hardening
+**Date:** February 8, 2026
+
+### Documentation ✅
+| Item | Description |
+|------|-------------|
+| CLAUDE.md Overhaul | Expanded from 116 → 250 lines with file tree, layer responsibilities, architecture constraints, feature status, data storage, pitfalls |
+| Codebase Stats | Full stat sheet: 19 files, ~4,500 LoC TS + ~1,600 LoC CSS |
+| Test Coverage Matrix | Risk-ranked assessment of all services and modals (0% automated coverage) |
+| System Dependency Matrix | Import map + Mermaid diagram confirming zero service-to-service coupling |
+| Pre-Launch Implementation Guide | 4-session hardening plan: Debug Logger, Error Handling, main.ts Decomposition, Targeted Tests |
+
+### Build Pipeline ✅
+| Item | Description |
+|------|-------------|
+| Local-only build | `npm run build` / `npm run dev` no longer auto-copy to production |
+| Test deploy | `npm run deploy:test` → copies to test vault |
+| Production deploy | `npm run deploy:production` → requires "yes" confirmation |
+
+**New Files:**
+- `scripts/deploy.mjs` - Deploy script with test/production targets
+- `docs/launch-considerations/Codebase Stats.md`
+- `docs/launch-considerations/Test Coverage Matrix.md`
+- `docs/launch-considerations/System Dependency Matrix.md`
+- `docs/launch-considerations/Pre-Launch Implementation Guide.md`
+
+**Modified Files:**
+- `esbuild.config.mjs` - Removed auto-copy to production
+- `package.json` - Added `deploy:test` and `deploy:production` scripts
+- `CLAUDE.md` - Major overhaul with architectural guidelines
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -170,6 +203,14 @@ tags:
 | Open Statistics | View session statistics |
 | Edit Session History | Edit/delete recorded sessions |
 
+### Build & Deploy
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Watch mode, local output only |
+| `npm run build` | One-shot build, local output only |
+| `npm run deploy:test` | Build + copy to test vault |
+| `npm run deploy:production` | Build + confirmation + copy to prod |
+
 ### Key Files
 | File | Purpose |
 |------|---------|
@@ -181,6 +222,7 @@ tags:
 | `src/modals/SessionEditorModal.ts` | Session history editor |
 | `src/modals/TimeUpModal.ts` | Auto-disconnect prompt |
 | `src/services/SessionLogger.ts` | Session tracking + history |
+| `scripts/deploy.mjs` | Test/production deploy script |
 
 ---
 
@@ -189,3 +231,10 @@ tags:
 | Issue | Impact |
 |-------|--------|
 | tslib lint error | None - IDE spurious error |
+| Zero automated tests | See Pre-Launch Implementation Guide for plan |
+
+---
+
+## Next Session Prompt
+
+> "Let's start Session 1 of the Pre-Launch Implementation Guide: Debug Logger System. Create a centralized Logger utility with a settings toggle, replace all 35 console.log calls, and add the debug mode toggle to settings. See `docs/launch-considerations/Pre-Launch Implementation Guide.md` for full spec."

@@ -145,7 +145,7 @@ tags:
 | — | **Debug Logger System** | Centralized logger with settings toggle | ✅ |
 | — | **Error Handling Audit** | try-catch across all services | ✅ |
 | — | **main.ts Decomposition** | Extract StatusBarManager + TimerManager (743 → 457 lines) | ✅ |
-| — | **Targeted Unit Tests** | Vitest setup + tests for riskiest pure logic | ⏳ |
+| — | **Targeted Unit Tests** | Vitest setup + 40 tests for riskiest pure logic (34 pass, 6 skipped for S6/S8) | ✅ |
 
 ---
 

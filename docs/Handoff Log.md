@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4 Complete
 **Version:** 1.5.0
 
 ---
@@ -248,6 +248,36 @@ tags:
 
 ---
 
+## Session: Targeted Unit Tests (S4) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| Vitest Setup | `npm install -D vitest`, config with `obsidian` module alias, `test`/`test:watch` scripts |
+| Obsidian Mock | Minimal `test/__mocks__/obsidian.ts` (Notice, App, TFile, TFolder, Modal, Menu) |
+| types.test.ts | 8 tests — `generateId()` slug generation, edge cases |
+| logger.test.ts | 6 tests — Logger gating, output format, always-on methods |
+| timer-manager.test.ts | 6 tests — Auto-disconnect, break reminder, `destroy()` |
+| status-bar-manager.test.ts | 4 tests — `formatDuration()` pure function |
+| wire-utils.test.ts | 5 tests (1 skip) — `parseTaskTime()` format parsing |
+| heading-detection.test.ts | 6 tests (3 skip) — indexOf detection + S8 regex prep |
+| snooze-state.test.ts | 5 tests (2 skip) — Decline/snooze state transitions |
+
+**Totals:** 40 tests — 34 pass, 6 skipped (awaiting S6/S8 code fixes)
+
+**New Files:**
+- `vitest.config.ts`
+- `test/__mocks__/obsidian.ts`
+- `test/types.test.ts`, `test/logger.test.ts`, `test/timer-manager.test.ts`
+- `test/status-bar-manager.test.ts`, `test/wire-utils.test.ts`
+- `test/heading-detection.test.ts`, `test/snooze-state.test.ts`
+
+**Modified Files:**
+- `package.json` — Added `test` and `test:watch` scripts
+- `.gitignore` — Added `.vitest/` cache directory
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -266,6 +296,8 @@ tags:
 |---------|-------------|
 | `npm run dev` | Watch mode, local output only |
 | `npm run build` | One-shot build, local output only |
+| `npm run test` | Run all vitest tests once |
+| `npm run test:watch` | Run vitest in watch mode |
 | `npm run deploy:test` | Build + copy to test vault |
 | `npm run deploy:production` | Build + confirmation + copy to prod |
 
@@ -289,10 +321,10 @@ tags:
 | Issue | Impact |
 |-------|--------|
 | tslib lint error | None - IDE spurious error |
-| Zero automated tests | See Pre-Launch Implementation Guide for plan |
+| 6 skipped tests | Awaiting S6/S8 code fixes — will un-skip when those sessions are done |
 
 ---
 
 ## Next Session Prompt
 
-> "Let's start Session 4 of the Master Pre-Launch Plan: Targeted Unit Tests. Set up vitest, write tests for `generateId()`, `Logger`, `TimerManager`, `StatusBarManager.formatDuration()`, `parseTaskTime()`, heading detection, and snooze state. See `docs/launch-considerations/Master Pre-Launch Plan.md` lines 271-327 for full spec."
+> "Let's start Session 5 of the Master Pre-Launch Plan: Settings Validation. Add runtime validation to Line creation/editing (blank names, duplicate IDs, path traversal). See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

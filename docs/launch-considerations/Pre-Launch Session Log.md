@@ -139,6 +139,64 @@
 - Plan estimated reduction to ~500 lines — actual result was 457 lines (even better)
 - No changes needed to `WireService.ts` or `TimeUpModal.ts` — thin wrappers on plugin class preserve the external API
 
-## Session 4–13
+## Session 4: Targeted Unit Tests ✅
+
+**Date:** February 9, 2026
+**Effort:** ~45 min | **Planned:** ~1.5 hours
+**Audit Items:** (Infrastructure — no direct audit fixes; tests scaffold for S6, S8)
+
+### What Was Done
+
+1. **Installed Vitest** — `npm install -D vitest` (40 packages added)
+
+2. **Created `vitest.config.ts`:**
+   - Globals enabled (no imports needed for `describe`/`it`/`expect`)
+   - `resolve.alias` maps `obsidian` → `test/__mocks__/obsidian.ts` (real package has no Node entry point)
+
+3. **Added npm scripts:**
+   - `"test": "vitest run"` — single pass
+   - `"test:watch": "vitest"` — watch mode
+
+4. **Created `test/__mocks__/obsidian.ts`:**
+   - Minimal stubs: `Notice`, `App`, `TFile`, `TFolder`, `Modal`, `Menu`
+   - S13 will expand into full mock with Vault, Workspace, etc.
+
+5. **Created 7 test files (40 tests total, 34 active + 6 skipped):**
+
+   | File | Tests | Skip | What's Tested |
+   |------|------:|-----:|---------------|
+   | `types.test.ts` | 8 | 0 | `generateId()` slug generation, edge cases |
+   | `logger.test.ts` | 6 | 0 | Logger gating, output format, always-on methods |
+   | `timer-manager.test.ts` | 6 | 0 | Auto-disconnect, break reminder, `destroy()` |
+   | `status-bar-manager.test.ts` | 4 | 0 | `formatDuration()` pure function |
+   | `wire-utils.test.ts` | 5 | 1 | `parseTaskTime()` various formats |
+   | `heading-detection.test.ts` | 6 | 3 | `indexOf` heading detection + S8 regex prep |
+   | `snooze-state.test.ts` | 5 | 2 | Decline/snooze state transitions |
+
+6. **Updated `.gitignore`** — Added `.vitest/` cache directory
+
+### Skipped Tests (by design — awaiting S6/S8 code fixes)
+
+| Test | Depends On | Reason |
+|------|-----------|--------|
+| `wire-utils: invalid date → null` | S6 #10/A4 | `parseTaskTime` has no `isNaN` guard yet |
+| `heading: substring non-match` | S8 #24 | Still uses `indexOf`, not regex |
+| `heading: trailing whitespace match` | S8 #24 | Same |
+| `heading: multiple similar headings` | S8 #24 | Same |
+| `snooze: decline clears snoozed` | S6 #7 | `snoozedCalls.delete` not in decline handler yet |
+| `snooze: stop() clears all state` | S6 A1 | `stop()` doesn't clear snoozed/declined yet |
+
+### Testing Results
+- ✅ `npx vitest run` — 34 pass, 6 skipped, 0 fail
+- ✅ `npm run build` — clean (vitest is devDependency only)
+
+### Notes
+- Master Pre-Launch Plan listed S4 dependencies as S3+S6+S8. Proceeded with Option 1: write all tests now, `test.skip()` the 6 that need S6/S8, un-skip when those sessions are done.
+- The `obsidian` module alias in vitest config was the key insight — the `obsidian` npm package has no Node-compatible entry point, so tests can't resolve it without aliasing.
+
+---
+
+## Session 5–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
+

@@ -26,3 +26,6 @@ Chronos Archive/
 
 docs/sync.ffs_db
 switchboard.code-workspace
+
+# Vitest
+.vitest/

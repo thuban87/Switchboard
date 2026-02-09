@@ -1,5 +1,6 @@
 import { App, TFolder } from "obsidian";
 import { SwitchboardLine } from "../types";
+import { Logger } from "./Logger";
 
 /**
  * CircuitManager - Handles CSS injection for Signal Isolation
@@ -44,7 +45,7 @@ export class CircuitManager {
             this.focusFolders(line.safePaths);
         }
 
-        console.log(`CircuitManager: Activated circuit for "${line.name}"`);
+        Logger.debug("Circuit", `Activated circuit for "${line.name}"`);
     }
 
     /**
@@ -73,7 +74,7 @@ export class CircuitManager {
             existingStyle.remove();
         }
 
-        console.log("CircuitManager: Deactivated circuit");
+        Logger.debug("Circuit", "Deactivated circuit");
     }
 
     /**
@@ -85,13 +86,13 @@ export class CircuitManager {
 
         const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0];
         if (!fileExplorer) {
-            console.log("CircuitManager: File explorer not found");
+            Logger.debug("Circuit", "File explorer not found");
             return;
         }
 
         const explorerView = fileExplorer.view as any;
         if (!explorerView?.fileItems) {
-            console.log("CircuitManager: File items not accessible");
+            Logger.debug("Circuit", "File items not accessible");
             return;
         }
 
@@ -112,7 +113,7 @@ export class CircuitManager {
             }
         }
 
-        console.log("CircuitManager: Focused folders on safe paths");
+        Logger.debug("Circuit", "Focused folders on safe paths");
     }
 
     /**

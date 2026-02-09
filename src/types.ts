@@ -109,6 +109,8 @@ export interface SwitchboardSettings {
     dailyNotesFolder: string;
     /** Heading to append logs under in daily notes */
     dailyNoteHeading: string;
+    /** Enable debug logging to console */
+    debugMode: boolean;
 }
 
 /**
@@ -128,6 +130,7 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     enableDailyNoteLogging: false,
     dailyNotesFolder: "",
     dailyNoteHeading: "### Switchboard Logs",
+    debugMode: false,
 };
 
 /**

@@ -13,6 +13,7 @@ import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
 import { AudioService } from "./services/AudioService";
+import { Logger } from "./services/Logger";
 import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/DashboardView";
 
 /**
@@ -34,7 +35,7 @@ export default class SwitchboardPlugin extends Plugin {
     private breakReminderTimer: ReturnType<typeof setTimeout> | null = null;
 
     async onload() {
-        console.log("Switchboard: Loading plugin...");
+        Logger.info("Plugin", "Loading plugin...");
 
         // Initialize circuit manager
         this.circuitManager = new CircuitManager(this.app);
@@ -49,6 +50,9 @@ export default class SwitchboardPlugin extends Plugin {
         this.audioService = new AudioService(this);
 
         await this.loadSettings();
+
+        // Initialize logger with debug mode setting
+        Logger.setDebugMode(this.settings.debugMode);
 
         // Add ribbon icon
         this.addRibbonIcon("plug", "Switchboard", () => {
@@ -145,7 +149,7 @@ export default class SwitchboardPlugin extends Plugin {
         const activeLine = this.getActiveLine();
         if (activeLine) {
             this.circuitManager.activate(activeLine, false);
-            console.log(`Switchboard: Restored connection to "${activeLine.name}"`);
+            Logger.debug("Plugin", `Restored connection to "${activeLine.name}"`);
         }
 
         // Start wire service if Chronos integration is enabled
@@ -167,7 +171,7 @@ export default class SwitchboardPlugin extends Plugin {
         // Register commands for each Line (Speed Dial)
         this.registerLineCommands();
 
-        console.log("Switchboard: Plugin loaded successfully.");
+        Logger.info("Plugin", "Plugin loaded successfully.");
     }
 
     onunload() {
@@ -179,7 +183,7 @@ export default class SwitchboardPlugin extends Plugin {
 
         // Clean up circuit when plugin is disabled
         this.circuitManager.deactivate();
-        console.log("Switchboard: Unloading plugin...");
+        Logger.info("Plugin", "Unloading plugin...");
     }
 
     /**
@@ -320,7 +324,7 @@ Tasks that were declined but saved for later.
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
-        console.log(`Switchboard: Patching in to "${line.name}"...`);
+        Logger.debug("Plugin", `Patching in to "${line.name}"...`);
 
         // Set active line
         this.settings.activeLine = line.id;
@@ -355,7 +359,7 @@ Tasks that were declined but saved for later.
             }
         }
 
-        console.log(`Switchboard: ✅ Now connected to "${line.name}"`);
+        Logger.debug("Plugin", `Now connected to "${line.name}"`);
 
         // Refresh dashboard if open
         this.refreshDashboard();
@@ -392,7 +396,7 @@ Tasks that were declined but saved for later.
             return;
         }
 
-        console.log(`Switchboard: Disconnecting from "${activeLine.name}"...`);
+        Logger.debug("Plugin", `Disconnecting from "${activeLine.name}"...`);
 
         // Store goal for reflection before clearing
         const sessionGoal = this.currentGoal;
@@ -444,7 +448,7 @@ Tasks that were declined but saved for later.
         // Play disconnect sound
         this.audioService.playDisconnect();
 
-        console.log("Switchboard: ✅ Disconnected");
+        Logger.debug("Plugin", "Disconnected");
 
         // Refresh dashboard if open
         this.refreshDashboard();
@@ -492,7 +496,7 @@ Tasks that were declined but saved for later.
                 },
             });
         }
-        console.log(`Switchboard: Registered ${this.settings.lines.length} Speed Dial commands`);
+        Logger.debug("Plugin", `Registered ${this.settings.lines.length} Speed Dial commands`);
     }
 
     /**

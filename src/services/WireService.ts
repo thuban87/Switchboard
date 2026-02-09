@@ -2,6 +2,7 @@ import { App, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, ScheduledBlock, generateId } from "../types";
 import { IncomingCallModal, IncomingCallAction } from "../modals/IncomingCallModal";
+import { Logger } from "./Logger";
 
 /**
  * Represents a scheduled incoming call
@@ -232,13 +233,13 @@ export class WireService {
                     endTime.setHours(endHours, endMinutes, 0, 0);
 
                     const now = new Date();
-                    console.log("Switchboard: Auto-disconnect scheduled for", endTime.toLocaleString(), "now is", now.toLocaleString());
+                    Logger.debug("Wire", "Auto-disconnect scheduled for", endTime.toLocaleString(), "now is", now.toLocaleString());
 
                     // If end time is in the future, schedule auto-disconnect
                     if (endTime.getTime() > now.getTime()) {
                         this.plugin.scheduleAutoDisconnect(endTime);
                     } else {
-                        console.log("Switchboard: End time already passed, not scheduling auto-disconnect");
+                        Logger.debug("Wire", "End time already passed, not scheduling auto-disconnect");
                     }
                 }
                 break;
@@ -359,9 +360,9 @@ ${entry}`;
                 await this.app.vault.create(filePath, content);
             }
 
-            console.log("WireService: Saved to Call Waiting:", entry);
+            Logger.debug("Wire", "Saved to Call Waiting:", entry);
         } catch (error) {
-            console.error("WireService: Failed to save to Call Waiting:", error);
+            Logger.error("Wire", "Failed to save to Call Waiting:", error);
             new Notice("Failed to save to Call Waiting file");
         }
     }
@@ -376,7 +377,7 @@ ${entry}`;
             if (!plugins) return null;
             return plugins["chronos-google-calendar-sync"] || null;
         } catch (error) {
-            console.warn("Switchboard: Error accessing Chronos plugin:", error);
+            Logger.warn("Wire", "Error accessing Chronos plugin:", error);
             return null;
         }
     }
@@ -393,7 +394,7 @@ ${entry}`;
             }
             return [];
         } catch (error) {
-            console.error("WireService: Error getting synced tasks:", error);
+            Logger.error("Wire", "Error getting synced tasks:", error);
             return [];
         }
     }

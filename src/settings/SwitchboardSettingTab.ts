@@ -2,6 +2,7 @@ import { PluginSettingTab, App, Setting } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
 import { SwitchboardLine } from "../types";
+import { Logger } from "../services/Logger";
 
 /**
  * Settings tab for configuring Switchboard Lines
@@ -268,6 +269,22 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         for (const line of this.plugin.settings.lines) {
             this.renderLineItem(linesContainer, line);
         }
+
+        // Advanced Section
+        containerEl.createEl("h2", { text: "Advanced" });
+
+        new Setting(containerEl)
+            .setName("Debug mode")
+            .setDesc("Log detailed debug information to the developer console. Useful for troubleshooting.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.debugMode)
+                    .onChange(async (value) => {
+                        this.plugin.settings.debugMode = value;
+                        Logger.setDebugMode(value);
+                        await this.plugin.saveSettings();
+                    })
+            );
     }
 
     private renderLineItem(containerEl: HTMLElement, line: SwitchboardLine) {
@@ -461,7 +478,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                 });
             });
 
-            console.log("Switchboard: Filtered to", switchboardTasks.length, "tasks with switchboard tags");
+            Logger.debug("Settings", "Filtered to", switchboardTasks.length, "tasks with switchboard tags");
 
             for (const task of switchboardTasks) {
                 const tags = task.tags || [];
@@ -481,13 +498,13 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     if (tag.toLowerCase().startsWith("switchboard/")) {
                         // Format: #switchboard/line-name
                         targetLine = tag.split("/")[1] || "";
-                        console.log("Switchboard: Found switchboard/ tag, targetLine:", targetLine);
+                        Logger.debug("Settings", "Found switchboard/ tag, targetLine:", targetLine);
                         break;
                     } else if (tag.toLowerCase() === "switchboard") {
                         // Format: #switchboard with /line-name in title
                         const match = title.match(/\/([a-z0-9-]+)/i);
                         if (match) targetLine = match[1];
-                        console.log("Switchboard: Found switchboard tag, checking title for /line-name, targetLine:", targetLine);
+                        Logger.debug("Settings", "Found switchboard tag, checking title for /line-name, targetLine:", targetLine);
                         break;
                     }
                 }
@@ -506,7 +523,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
             return result;
         } catch (e) {
-            console.error("Switchboard: Error getting Chronos tasks:", e);
+            Logger.error("Settings", "Error getting Chronos tasks:", e);
             return [];
         }
     }

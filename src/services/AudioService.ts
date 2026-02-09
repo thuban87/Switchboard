@@ -1,4 +1,5 @@
 import type SwitchboardPlugin from "../main";
+import { Logger } from "./Logger";
 
 /**
  * AudioService - Handles sound effects for Switchboard
@@ -30,7 +31,7 @@ export class AudioService {
             // Check if file exists
             const exists = await adapter.exists(filePath);
             if (!exists) {
-                console.log("AudioService: click.mp3 not found in plugin folder");
+                Logger.debug("Audio", "click.mp3 not found in plugin folder");
                 return;
             }
 
@@ -41,9 +42,9 @@ export class AudioService {
             const blob = new Blob([data], { type: "audio/mpeg" });
             this.clickAudioUrl = URL.createObjectURL(blob);
             this.audioLoaded = true;
-            console.log("AudioService: Loaded click.mp3 successfully");
+            Logger.debug("Audio", "Loaded click.mp3 successfully");
         } catch (e) {
-            console.warn("AudioService: Could not load click.mp3", e);
+            Logger.warn("Audio", "Could not load click.mp3", e);
         }
     }
 
@@ -106,7 +107,7 @@ export class AudioService {
             osc2.start(ctx.currentTime);
             osc2.stop(ctx.currentTime + 0.05);
         } catch (e) {
-            console.warn("AudioService: Failed to play synthesized click", e);
+            Logger.warn("Audio", "Failed to play synthesized click", e);
         }
     }
 
@@ -134,7 +135,7 @@ export class AudioService {
             osc.start(ctx.currentTime);
             osc.stop(ctx.currentTime + 0.12);
         } catch (e) {
-            console.warn("AudioService: Failed to play synthesized disconnect", e);
+            Logger.warn("Audio", "Failed to play synthesized disconnect", e);
         }
     }
 
@@ -143,7 +144,7 @@ export class AudioService {
      */
     private playRealisticClick(): void {
         if (!this.audioLoaded || !this.clickAudioUrl) {
-            console.warn("AudioService: click.mp3 not loaded, using synthesized");
+            Logger.warn("Audio", "click.mp3 not loaded, using synthesized");
             this.playSynthesizedClick();
             return;
         }
@@ -152,11 +153,11 @@ export class AudioService {
             const audio = new Audio(this.clickAudioUrl);
             audio.volume = 0.5;
             audio.play().catch(() => {
-                console.warn("AudioService: Failed to play, using synthesized");
+                Logger.warn("Audio", "Failed to play, using synthesized");
                 this.playSynthesizedClick();
             });
         } catch (e) {
-            console.warn("AudioService: Error playing realistic click", e);
+            Logger.warn("Audio", "Error playing realistic click", e);
             this.playSynthesizedClick();
         }
     }
@@ -169,7 +170,7 @@ export class AudioService {
             try {
                 this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             } catch (e) {
-                console.warn("AudioService: AudioContext not supported", e);
+                Logger.warn("Audio", "AudioContext not supported", e);
                 return null;
             }
         }

@@ -172,6 +172,16 @@ tags:
 
 ---
 
+## Post-Launch / Pre-Publish Checklist ⏳
+**Goal:** Items from peer review — do before making the repo public, not blockers for BRAT launch.
+
+| Item | Description | Effort | Status |
+|------|-------------|--------|--------|
+| **README.md** | One-paragraph description, screenshot, setup steps, Chronos integration note | ~30 min | ⏳ |
+| **CSS Class Namespacing** | Standardize all CSS classes to `switchboard-` prefix (currently mixed: `incoming-call-`, `operator-`, `timeup-`, `call-log-`, etc.). ~1,627 lines of CSS to audit. | ~2-3 hrs | ⏳ |
+
+---
+
 ## Future Enhancements (Backlog)
 
 | Feature | Description | Priority |

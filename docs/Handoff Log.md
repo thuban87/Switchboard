@@ -7,8 +7,8 @@ tags:
 ---
 # Switchboard Handoff Log
 
-**Last Updated:** February 8, 2026
-**Status:** Pre-Launch Hardening In Progress
+**Last Updated:** February 9, 2026
+**Status:** Pre-Launch Hardening — S1+S2 Complete
 **Version:** 1.5.0
 
 ---
@@ -190,6 +190,41 @@ tags:
 
 ---
 
+## Session: Debug Logger System (S1) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| Logger.ts | New centralized `Logger` class with `debug()` (gated), `warn()`, `error()`, `info()` (always visible) |
+| debugMode setting | Added `debugMode: boolean` to `SwitchboardSettings` (default: `false`) |
+| Console replacement | Replaced 49 `console.log/warn/error` calls across 6 files with `Logger.*` calls |
+| Settings UI | New "Advanced" section with debug mode toggle in `SwitchboardSettingTab.ts` |
+
+**New Files:**
+- `src/services/Logger.ts`
+
+**Modified Files:**
+- `src/types.ts`, `src/main.ts`, `src/settings/SwitchboardSettingTab.ts`
+- `src/services/CircuitManager.ts`, `src/services/WireService.ts`, `src/services/AudioService.ts`, `src/services/SessionLogger.ts`
+
+---
+
+## Session: Error Handling Hardening (S2) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| main.ts | Wrapped `patchIn()`, `disconnect()`, `openCallWaiting()` in try-catch |
+| CircuitManager.ts | Wrapped `activate()` and `focusFolders()` — internals fail silently |
+| AudioService.ts | Wrapped `playPatchIn()` and `playDisconnect()` — audio never crashes |
+| WireService.ts | Per-task try-catch in `refreshTimers()` loop; Fix #9: `await saveToCallWaiting()` |
+| OperatorModal.ts | Fix #4: Per-case try-catch in `executeCommand()` |
+| StatisticsModal.ts | Fix #12: `await navigator.clipboard.writeText()` with error Notice |
+
+**Audit Items Resolved:** #4 (OperatorModal), #9 (saveToCallWaiting), #11 (already fixed), #12 (clipboard)
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -237,4 +272,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 1 of the Pre-Launch Implementation Guide: Debug Logger System. Create a centralized Logger utility with a settings toggle, replace all 35 console.log calls, and add the debug mode toggle to settings. See `docs/launch-considerations/Pre-Launch Implementation Guide.md` for full spec."
+> "Let's start Session 3 of the Master Pre-Launch Plan: main.ts Decomposition. Extract StatusBarManager and TimerManager from main.ts to reduce it from ~740 lines. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

@@ -15,15 +15,15 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 1 | `audioService.destroy()` not called in `onunload()` | **S3** | CRITICAL |
 | 2 | `breakReminderTimer` / `autoDisconnectTimer` not cleared in `onunload()` | **S3** | CRITICAL |
 | 3 | `sessionLogFile` path traversal — no validation | **S5** | CRITICAL |
-| 4 | `OperatorModal.executeCommand()` — no try-catch, `as any`, null access | **S2** | CRITICAL |
+| 4 | ✅ `OperatorModal.executeCommand()` — no try-catch, `as any`, null access | **S2** | CRITICAL |
 | 5 | `obsidian` dependency set to `"latest"` | **S9** | CRITICAL |
 | 6 | Array index closure bug in delete buttons | **S5** | CRITICAL |
 | 7 | Snooze/Decline race condition | **S6** | HIGH |
 | 8 | Session history unbounded growth | **S8** | HIGH |
-| 9 | `saveToCallWaiting()` not awaited | **S2** | HIGH |
+| 9 | ✅ `saveToCallWaiting()` not awaited | **S2** | HIGH |
 | 10 | `parseTaskTime()` no validation — invalid dates cause immediate setTimeout | **S6** | HIGH |
-| 11 | Daily note heading insertion null access | **S2** | HIGH |
-| 12 | `navigator.clipboard.writeText()` not awaited | **S2** | HIGH |
+| 11 | ✅ Daily note heading insertion null access | **S2** | HIGH |
+| 12 | ✅ `navigator.clipboard.writeText()` not awaited | **S2** | HIGH |
 | 13 | No time/date validation on scheduled block inputs | **S5** | HIGH |
 | 14 | No duplicate Line ID detection on creation | **S5** | HIGH |
 | 15 | `validate()` shows no error feedback | **S5** | HIGH |
@@ -111,7 +111,7 @@ graph LR
 
 ---
 
-## Session 1: Debug Logger System
+## Session 1: Debug Logger System ✅
 
 **Effort:** ~45 min | **Risk:** Low | **Audit items:** Partial #41 (via touching all files)
 
@@ -156,7 +156,7 @@ Replace all `console.log` / `console.error` / `console.warn` with `Logger.debug(
 
 ---
 
-## Session 2: Error Handling Hardening
+## Session 2: Error Handling Hardening ✅
 
 **Effort:** ~1 hour | **Risk:** Low | **Audit items:** #4, #9, #11, #12
 

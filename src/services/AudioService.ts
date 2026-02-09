@@ -54,10 +54,14 @@ export class AudioService {
     playPatchIn(): void {
         if (this.plugin.settings.muteSounds) return;
 
-        if (this.plugin.settings.soundType === "realistic") {
-            this.playRealisticClick();
-        } else {
-            this.playSynthesizedClick();
+        try {
+            if (this.plugin.settings.soundType === "realistic") {
+                this.playRealisticClick();
+            } else {
+                this.playSynthesizedClick();
+            }
+        } catch (e) {
+            Logger.warn("Audio", "Error playing patch-in sound:", e);
         }
     }
 
@@ -67,10 +71,14 @@ export class AudioService {
     playDisconnect(): void {
         if (this.plugin.settings.muteSounds) return;
 
-        if (this.plugin.settings.soundType === "realistic") {
-            this.playRealisticClick();
-        } else {
-            this.playSynthesizedDisconnect();
+        try {
+            if (this.plugin.settings.soundType === "realistic") {
+                this.playRealisticClick();
+            } else {
+                this.playSynthesizedDisconnect();
+            }
+        } catch (e) {
+            Logger.warn("Audio", "Error playing disconnect sound:", e);
         }
     }
 

@@ -1,6 +1,7 @@
 import { App, Modal, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SessionRecord } from "../types";
+import { Logger } from "../services/Logger";
 
 /**
  * StatisticsModal - Dashboard showing session statistics
@@ -147,10 +148,15 @@ export class StatisticsModal extends Modal {
     private renderExportButton(containerEl: HTMLElement, history: SessionRecord[]) {
         const buttonEl = containerEl.createDiv("stats-export");
         const btn = buttonEl.createEl("button", { text: "📤 Export for AI Analysis", cls: "stats-export-btn" });
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
             const markdown = this.generateExport(history);
-            navigator.clipboard.writeText(markdown);
-            new Notice("📋 Statistics copied to clipboard!");
+            try {
+                await navigator.clipboard.writeText(markdown);
+                new Notice("📋 Statistics copied to clipboard!");
+            } catch (e) {
+                Logger.error("Statistics", "Failed to copy to clipboard:", e);
+                new Notice("⚠️ Failed to copy to clipboard");
+            }
         });
     }
 

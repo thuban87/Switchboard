@@ -142,8 +142,8 @@ tags:
 | — | **System Dependency Matrix** | Import map + Mermaid diagram | ✅ |
 | — | **Pre-Launch Implementation Guide** | 4-session plan: Debug Logger, Error Handling, Decomposition, Tests | ✅ |
 | — | **Build Pipeline** | Local-only build, `deploy:test`, `deploy:production` with confirmation | ✅ |
-| — | **Debug Logger System** | Centralized logger with settings toggle | ⏳ |
-| — | **Error Handling Audit** | try-catch across all services | ⏳ |
+| — | **Debug Logger System** | Centralized logger with settings toggle | ✅ |
+| — | **Error Handling Audit** | try-catch across all services | ✅ |
 | — | **main.ts Decomposition** | Extract StatusBarManager + TimerManager | ⏳ |
 | — | **Targeted Unit Tests** | Vitest setup + tests for riskiest pure logic | ⏳ |
 

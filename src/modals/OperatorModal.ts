@@ -1,6 +1,7 @@
 import { App, Modal, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, OperatorCommand } from "../types";
+import { Logger } from "../services/Logger";
 
 /**
  * Default commands for academic Lines
@@ -122,45 +123,60 @@ export class OperatorModal extends Modal {
     private executeCommand(cmd: OperatorCommand): void {
         switch (cmd.action) {
             case "command":
-                // Execute an Obsidian command
-                const commands = (this.app as any).commands;
-                if (commands.commands[cmd.value]) {
-                    commands.executeCommandById(cmd.value);
-                } else {
-                    new Notice(`Command not found: ${cmd.value}\n\nTip: Use Command Palette (Ctrl+P) and copy the command ID`);
+                try {
+                    // Execute an Obsidian command
+                    const commands = (this.app as any).commands;
+                    if (commands.commands[cmd.value]) {
+                        commands.executeCommandById(cmd.value);
+                    } else {
+                        new Notice(`Command not found: ${cmd.value}\n\nTip: Use Command Palette (Ctrl+P) and copy the command ID`);
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error executing command:", cmd.value, e);
+                    new Notice(`⚠️ Error executing command: ${cmd.name}`);
                 }
                 break;
 
             case "insert":
-                // Insert text at cursor
-                const editor = this.app.workspace.activeEditor?.editor;
-                if (editor) {
-                    const cursor = editor.getCursor();
-                    const text = cmd.value
-                        .replace("{{date}}", new Date().toLocaleDateString())
-                        .replace("{{time}}", new Date().toLocaleTimeString());
-                    editor.replaceRange(text, cursor);
+                try {
+                    // Insert text at cursor
+                    const editor = this.app.workspace.activeEditor?.editor;
+                    if (editor) {
+                        const cursor = editor.getCursor();
+                        const text = cmd.value
+                            .replace("{{date}}", new Date().toLocaleDateString())
+                            .replace("{{time}}", new Date().toLocaleTimeString());
+                        editor.replaceRange(text, cursor);
 
-                    // Position cursor in the middle of inline elements
-                    if (text.includes("$  $")) {
-                        editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+                        // Position cursor in the middle of inline elements
+                        if (text.includes("$  $")) {
+                            editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+                        }
+                    } else {
+                        new Notice("No active editor - open a note first");
                     }
-                } else {
-                    new Notice("No active editor - open a note first");
+                } catch (e) {
+                    Logger.error("Operator", "Error inserting text:", cmd.name, e);
+                    new Notice(`⚠️ Error inserting text: ${cmd.name}`);
                 }
                 break;
 
             case "open":
-                // Open a file
-                if (!cmd.value) {
-                    new Notice("No file path specified");
-                    break;
-                }
-                const file = this.app.vault.getAbstractFileByPath(cmd.value);
-                if (file) {
-                    this.app.workspace.getLeaf().openFile(file as any);
-                } else {
-                    new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
+                try {
+                    // Open a file
+                    if (!cmd.value) {
+                        new Notice("No file path specified");
+                        break;
+                    }
+                    const file = this.app.vault.getAbstractFileByPath(cmd.value);
+                    if (file) {
+                        this.app.workspace.getLeaf().openFile(file as any);
+                    } else {
+                        new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error opening file:", cmd.value, e);
+                    new Notice(`⚠️ Error opening file: ${cmd.name}`);
                 }
                 break;
         }

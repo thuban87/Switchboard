@@ -245,22 +245,27 @@ export default class SwitchboardPlugin extends Plugin {
      * Opens the Call Waiting file
      */
     async openCallWaiting() {
-        const filePath = "Call Waiting.md";
-        let file = this.app.vault.getAbstractFileByPath(filePath);
+        try {
+            const filePath = "Call Waiting.md";
+            let file = this.app.vault.getAbstractFileByPath(filePath);
 
-        if (!file) {
-            // Create the file if it doesn't exist
-            const content = `# Call Waiting
+            if (!file) {
+                // Create the file if it doesn't exist
+                const content = `# Call Waiting
 
 Tasks that were declined but saved for later.
 `;
-            await this.app.vault.create(filePath, content);
-            file = this.app.vault.getAbstractFileByPath(filePath);
-        }
+                await this.app.vault.create(filePath, content);
+                file = this.app.vault.getAbstractFileByPath(filePath);
+            }
 
-        if (file) {
-            const leaf = this.app.workspace.getLeaf();
-            await leaf.openFile(file as any);
+            if (file) {
+                const leaf = this.app.workspace.getLeaf();
+                await leaf.openFile(file as any);
+            }
+        } catch (e) {
+            Logger.error("Plugin", "Error opening Call Waiting:", e);
+            new Notice("⚠️ Error opening Call Waiting — see console");
         }
     }
 
@@ -324,45 +329,50 @@ Tasks that were declined but saved for later.
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
-        Logger.debug("Plugin", `Patching in to "${line.name}"...`);
+        try {
+            Logger.debug("Plugin", `Patching in to "${line.name}"...`);
 
-        // Set active line
-        this.settings.activeLine = line.id;
-        await this.saveSettings();
+            // Set active line
+            this.settings.activeLine = line.id;
+            await this.saveSettings();
 
-        // Activate the circuit (CSS injection)
-        this.circuitManager.activate(line);
+            // Activate the circuit (CSS injection)
+            this.circuitManager.activate(line);
 
-        // Start session tracking
-        this.sessionLogger.startSession(line);
+            // Start session tracking
+            this.sessionLogger.startSession(line);
 
-        // Play patch-in sound
-        this.audioService.playPatchIn();
+            // Play patch-in sound
+            this.audioService.playPatchIn();
 
-        // Start status bar timer updates
-        this.startTimerUpdates();
+            // Start status bar timer updates
+            this.startTimerUpdates();
 
-        // Start break reminder timer if enabled
-        this.startBreakReminderTimer();
+            // Start break reminder timer if enabled
+            this.startBreakReminderTimer();
 
-        // Show notice
-        new Notice(`📞 Patched in: ${line.name}`);
+            // Show notice
+            new Notice(`📞 Patched in: ${line.name}`);
 
-        // Open landing page if specified
-        if (line.landingPage) {
-            const file = this.app.vault.getAbstractFileByPath(line.landingPage);
-            if (file) {
-                const leaf = this.app.workspace.getLeaf();
-                await leaf.openFile(file as any);
-            } else {
-                new Notice(`Landing page not found: ${line.landingPage}`);
+            // Open landing page if specified
+            if (line.landingPage) {
+                const file = this.app.vault.getAbstractFileByPath(line.landingPage);
+                if (file) {
+                    const leaf = this.app.workspace.getLeaf();
+                    await leaf.openFile(file as any);
+                } else {
+                    new Notice(`Landing page not found: ${line.landingPage}`);
+                }
             }
+
+            Logger.debug("Plugin", `Now connected to "${line.name}"`);
+
+            // Refresh dashboard if open
+            this.refreshDashboard();
+        } catch (e) {
+            Logger.error("Plugin", "Error during patch-in:", e);
+            new Notice("⚠️ Error patching in — see console");
         }
-
-        Logger.debug("Plugin", `Now connected to "${line.name}"`);
-
-        // Refresh dashboard if open
-        this.refreshDashboard();
     }
 
     /**
@@ -396,62 +406,67 @@ Tasks that were declined but saved for later.
             return;
         }
 
-        Logger.debug("Plugin", `Disconnecting from "${activeLine.name}"...`);
+        try {
+            Logger.debug("Plugin", `Disconnecting from "${activeLine.name}"...`);
 
-        // Store goal for reflection before clearing
-        const sessionGoal = this.currentGoal;
+            // Store goal for reflection before clearing
+            const sessionGoal = this.currentGoal;
 
-        // Clear active line and goal
-        this.settings.activeLine = null;
-        this.currentGoal = null;
-        await this.saveSettings();
+            // Clear active line and goal
+            this.settings.activeLine = null;
+            this.currentGoal = null;
+            await this.saveSettings();
 
-        // Deactivate the circuit (remove CSS)
-        this.circuitManager.deactivate();
+            // Deactivate the circuit (remove CSS)
+            this.circuitManager.deactivate();
 
-        // Get duration before ending session (endSession clears it)
-        const sessionDuration = this.sessionLogger.getCurrentDuration();
+            // Get duration before ending session (endSession clears it)
+            const sessionDuration = this.sessionLogger.getCurrentDuration();
 
-        // End session and check for call log
-        const sessionInfo = this.sessionLogger.endSession();
+            // End session and check for call log
+            const sessionInfo = this.sessionLogger.endSession();
 
-        // Stop status bar timer updates
-        this.stopTimerUpdates();
-        this.updateStatusBar();
+            // Stop status bar timer updates
+            this.stopTimerUpdates();
+            this.updateStatusBar();
 
-        // Cancel any pending auto-disconnect and break reminder
-        this.cancelAutoDisconnect();
-        this.stopBreakReminderTimer();
+            // Cancel any pending auto-disconnect and break reminder
+            this.cancelAutoDisconnect();
+            this.stopBreakReminderTimer();
 
-        if (sessionInfo) {
-            // Session was 5+ minutes, show call log modal with goal reflection
-            new CallLogModal(this.app, sessionInfo, async (summary) => {
-                if (summary) {
-                    // Include goal in summary if it was set
-                    const fullSummary = sessionGoal
-                        ? `Goal: ${sessionGoal}\n${summary}`
-                        : summary;
-                    await this.sessionLogger.logSession(sessionInfo, fullSummary);
-                    new Notice("📝 Session logged");
-                }
-                // Log to daily note with summary (after modal)
-                await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
-            }, sessionGoal).open();
-        } else {
-            // Session was < 5 minutes, log to daily note without summary
-            await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
+            if (sessionInfo) {
+                // Session was 5+ minutes, show call log modal with goal reflection
+                new CallLogModal(this.app, sessionInfo, async (summary) => {
+                    if (summary) {
+                        // Include goal in summary if it was set
+                        const fullSummary = sessionGoal
+                            ? `Goal: ${sessionGoal}\n${summary}`
+                            : summary;
+                        await this.sessionLogger.logSession(sessionInfo, fullSummary);
+                        new Notice("📝 Session logged");
+                    }
+                    // Log to daily note with summary (after modal)
+                    await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
+                }, sessionGoal).open();
+            } else {
+                // Session was < 5 minutes, log to daily note without summary
+                await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
+            }
+
+            // Show notice
+            new Notice(`🔌 Disconnected from: ${activeLine.name}`);
+
+            // Play disconnect sound
+            this.audioService.playDisconnect();
+
+            Logger.debug("Plugin", "Disconnected");
+
+            // Refresh dashboard if open
+            this.refreshDashboard();
+        } catch (e) {
+            Logger.error("Plugin", "Error during disconnect:", e);
+            new Notice("⚠️ Error disconnecting — see console");
         }
-
-        // Show notice
-        new Notice(`🔌 Disconnected from: ${activeLine.name}`);
-
-        // Play disconnect sound
-        this.audioService.playDisconnect();
-
-        Logger.debug("Plugin", "Disconnected");
-
-        // Refresh dashboard if open
-        this.refreshDashboard();
     }
 
     /**

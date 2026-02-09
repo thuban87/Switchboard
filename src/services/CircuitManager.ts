@@ -27,25 +27,29 @@ export class CircuitManager {
      * - Collapses all folders, expands safe paths
      */
     activate(line: SwitchboardLine, focusFolders: boolean = true): void {
-        // Remove any existing circuit first
-        this.deactivate();
+        try {
+            // Remove any existing circuit first
+            this.deactivate();
 
-        // Add body class
-        document.body.addClass(`switchboard-active`);
-        document.body.addClass(`switchboard-active-${line.id}`);
+            // Add body class
+            document.body.addClass(`switchboard-active`);
+            document.body.addClass(`switchboard-active-${line.id}`);
 
-        // Create and inject style element
-        this.styleEl = document.createElement("style");
-        this.styleEl.id = this.STYLE_ID;
-        this.styleEl.textContent = this.generateCSS(line);
-        document.head.appendChild(this.styleEl);
+            // Create and inject style element
+            this.styleEl = document.createElement("style");
+            this.styleEl.id = this.STYLE_ID;
+            this.styleEl.textContent = this.generateCSS(line);
+            document.head.appendChild(this.styleEl);
 
-        // Collapse all folders, then expand safe paths
-        if (focusFolders) {
-            this.focusFolders(line.safePaths);
+            // Collapse all folders, then expand safe paths
+            if (focusFolders) {
+                this.focusFolders(line.safePaths);
+            }
+
+            Logger.debug("Circuit", `Activated circuit for "${line.name}"`);
+        } catch (e) {
+            Logger.error("Circuit", "Error activating circuit:", e);
         }
-
-        Logger.debug("Circuit", `Activated circuit for "${line.name}"`);
     }
 
     /**
@@ -81,39 +85,44 @@ export class CircuitManager {
      * Collapses all folders, then expands the safe paths
      */
     private focusFolders(safePaths: string[]): void {
-        // Use native collapse-all command for performance (optimized for large vaults)
-        (this.app as any).commands?.executeCommandById?.("file-explorer:collapse-all");
+        try {
+            // Use native collapse-all command for performance (optimized for large vaults)
+            (this.app as any).commands?.executeCommandById?.("file-explorer:collapse-all");
 
-        const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0];
-        if (!fileExplorer) {
-            Logger.debug("Circuit", "File explorer not found");
-            return;
-        }
+            const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0];
+            if (!fileExplorer) {
+                Logger.debug("Circuit", "File explorer not found");
+                return;
+            }
 
-        const explorerView = fileExplorer.view as any;
-        if (!explorerView?.fileItems) {
-            Logger.debug("Circuit", "File items not accessible");
-            return;
-        }
+            const explorerView = fileExplorer.view as any;
+            if (!explorerView?.fileItems) {
+                Logger.debug("Circuit", "File items not accessible");
+                return;
+            }
 
-        // Expand the safe paths (and their parent folders)
-        for (const safePath of safePaths) {
-            if (!safePath) continue;
+            // Expand the safe paths (and their parent folders)
+            for (const safePath of safePaths) {
+                if (!safePath) continue;
 
-            // Expand each segment of the path
-            const segments = safePath.split("/");
-            let currentPath = "";
+                // Expand each segment of the path
+                const segments = safePath.split("/");
+                let currentPath = "";
 
-            for (const segment of segments) {
-                currentPath = currentPath ? `${currentPath}/${segment}` : segment;
-                const item = explorerView.fileItems[currentPath];
-                if (item && (item as any).setCollapsed) {
-                    (item as any).setCollapsed(false);
+                for (const segment of segments) {
+                    currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+                    const item = explorerView.fileItems[currentPath];
+                    if (item && (item as any).setCollapsed) {
+                        (item as any).setCollapsed(false);
+                    }
                 }
             }
-        }
 
-        Logger.debug("Circuit", "Focused folders on safe paths");
+            Logger.debug("Circuit", "Focused folders on safe paths");
+        } catch (e) {
+            // focusFolders uses undocumented internals — must fail silently
+            Logger.warn("Circuit", "Error focusing folders (non-critical):", e);
+        }
     }
 
     /**

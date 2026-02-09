@@ -107,30 +107,34 @@ export class WireService {
         const now = new Date();
 
         for (const task of syncedTasks) {
-            // Check for #switchboard/* tags (also checks title for /line-name pattern)
-            const taskTitle = task.taskTitle || task.title || "";
-            const lineMatch = this.findMatchingLine(task.tags || [], taskTitle);
-            if (!lineMatch) continue;
+            try {
+                // Check for #switchboard/* tags (also checks title for /line-name pattern)
+                const taskTitle = task.taskTitle || task.title || "";
+                const lineMatch = this.findMatchingLine(task.tags || [], taskTitle);
+                if (!lineMatch) continue;
 
-            // Parse task datetime
-            const taskTime = this.parseTaskTime(task);
-            if (!taskTime) continue;
+                // Parse task datetime
+                const taskTime = this.parseTaskTime(task);
+                if (!taskTime) continue;
 
-            // Skip past tasks (allow 1 min grace)
-            if (taskTime.getTime() < now.getTime() - 60000) continue;
+                // Skip past tasks (allow 1 min grace)
+                if (taskTime.getTime() < now.getTime() - 60000) continue;
 
-            // Skip declined tasks
-            const taskId = this.generateTaskId(task);
-            if (this.declinedCalls.has(taskId)) continue;
+                // Skip declined tasks
+                const taskId = this.generateTaskId(task);
+                if (this.declinedCalls.has(taskId)) continue;
 
-            // Check if snoozed
-            const snoozed = this.snoozedCalls.get(taskId);
-            if (snoozed && snoozed.snoozeUntil.getTime() > now.getTime()) {
-                // Schedule for after snooze
-                this.scheduleCall(task, lineMatch, snoozed.snoozeUntil);
-            } else {
-                // Schedule for task time
-                this.scheduleCall(task, lineMatch, taskTime);
+                // Check if snoozed
+                const snoozed = this.snoozedCalls.get(taskId);
+                if (snoozed && snoozed.snoozeUntil.getTime() > now.getTime()) {
+                    // Schedule for after snooze
+                    this.scheduleCall(task, lineMatch, snoozed.snoozeUntil);
+                } else {
+                    // Schedule for task time
+                    this.scheduleCall(task, lineMatch, taskTime);
+                }
+            } catch (e) {
+                Logger.error("Wire", "Error processing task during timer refresh:", e);
             }
         }
 
@@ -212,12 +216,12 @@ export class WireService {
     /**
      * Handle the user's action on the incoming call
      */
-    private handleCallAction(
+    private async handleCallAction(
         task: any,
         line: SwitchboardLine,
         action: IncomingCallAction,
         snoozeMinutes?: number
-    ): void {
+    ): Promise<void> {
         const taskId = this.generateTaskId(task);
 
         switch (action) {
@@ -262,8 +266,8 @@ export class WireService {
                 break;
 
             case "call-waiting":
-                // Save to Call Waiting file
-                this.saveToCallWaiting(task, line);
+                // Save to Call Waiting file (Fix #9: properly await async operation)
+                await this.saveToCallWaiting(task, line);
                 this.declinedCalls.add(taskId);
                 new Notice(`📼 Saved to Call Waiting: ${line.name}`);
                 break;

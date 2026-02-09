@@ -12,8 +12,8 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 
 | Audit # | Summary | Session | Priority |
 |---|---|---|---|
-| 1 | `audioService.destroy()` not called in `onunload()` | **S3** | CRITICAL |
-| 2 | `breakReminderTimer` / `autoDisconnectTimer` not cleared in `onunload()` | **S3** | CRITICAL |
+| 1 | ✅ `audioService.destroy()` not called in `onunload()` | **S3** | CRITICAL |
+| 2 | ✅ `breakReminderTimer` / `autoDisconnectTimer` not cleared in `onunload()` | **S3** | CRITICAL |
 | 3 | `sessionLogFile` path traversal — no validation | **S5** | CRITICAL |
 | 4 | ✅ `OperatorModal.executeCommand()` — no try-catch, `as any`, null access | **S2** | CRITICAL |
 | 5 | `obsidian` dependency set to `"latest"` | **S9** | CRITICAL |
@@ -46,7 +46,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 32 | `QuickSwitchModal.lineElements` not cleared in `onClose()` | **S7** | MEDIUM |
 | 33 | Dashboard `containerEl.children[1]` hard-indexed | **S12** | MEDIUM |
 | 34 | File path splitting assumes Unix separator | **S6** | MEDIUM |
-| 35 | Services initialized before settings loaded | **S3** | MEDIUM |
+| 35 | ✅ Services initialized before settings loaded | **S3** | MEDIUM |
 | 36 | No schema version in settings | **S8** | MEDIUM |
 | 37 | Business logic in `OperatorModal.executeCommand()` | **S10** | MEDIUM |
 | 38 | `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
@@ -64,13 +64,13 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 50 | tsconfig `inlineSourceMap`/`inlineSources` redundant with esbuild | **S9** | LOW |
 | 51 | `allowJs: true` with no .js files | **S9** | LOW |
 | 52 | 16 `as any` casts across 7 files — add justification comments | **S12** | LOW |
-| 53 | 5 files exceed 300-line guideline | **S3** | LOW |
+| 53 | ✅ 5 files exceed 300-line guideline | **S3** | LOW |
 | 54 | Hover state inconsistency in CSS | **S11** | LOW |
 | 55 | Empty input in PathSuggest returns all folders | **S12** | LOW |
 | 56 | Hardcoded esbuild deploy path | **S9** | LOW |
 | A1 | `snoozedCalls` timers not cleared in `WireService.stop()` | **S6** | HIGH |
 | A2 | `registerLineCommands()` accumulates commands without deregistration | **S10** | MEDIUM |
-| A3 | `AudioService` constructor calls `loadAudioFile()` before settings load | **S3** | MEDIUM |
+| A3 | ✅ `AudioService` constructor calls `loadAudioFile()` before settings load | **S3** | MEDIUM |
 | A4 | `parseTaskTime` returns dates without `isNaN` check | **S6** | HIGH |
 | A5 | No `versions.json` for BRAT version tracking | **S9** | HIGH |
 | A6 | `DashboardView.ts:169` uses UTC date for schedule display (same bug as #26) | **S8** | MEDIUM |
@@ -204,7 +204,7 @@ Wrap `playPatchIn()` and `playDisconnect()` in top-level try-catch (audio failur
 
 ---
 
-## Session 3: main.ts Decomposition + Cleanup
+## Session 3: main.ts Decomposition + Cleanup ✅
 
 **Effort:** ~1 hour | **Risk:** Medium (highest-touch refactor — moves timer fields, status bar element, and rewires 6+ method calls) | **Audit items:** #1, #2, #35, #53, A3
 

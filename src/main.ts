@@ -4,7 +4,6 @@ import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
 import { CallLogModal } from "./modals/CallLogModal";
 import { OperatorModal } from "./modals/OperatorModal";
-import { TimeUpModal } from "./modals/TimeUpModal";
 import { StatisticsModal } from "./modals/StatisticsModal";
 import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { GoalPromptModal } from "./modals/GoalPromptModal";
@@ -13,6 +12,8 @@ import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
 import { AudioService } from "./services/AudioService";
+import { StatusBarManager } from "./services/StatusBarManager";
+import { TimerManager } from "./services/TimerManager";
 import { Logger } from "./services/Logger";
 import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/DashboardView";
 
@@ -26,33 +27,28 @@ export default class SwitchboardPlugin extends Plugin {
     wireService: WireService;
     sessionLogger: SessionLogger;
     audioService: AudioService;
+    statusBarManager: StatusBarManager;
+    timerManager: TimerManager;
     missedCalls: Array<{ lineName: string; taskTitle: string; time: Date }> = [];
     currentGoal: string | null = null;
     private missedCallsAcknowledged: boolean = true;
-    private statusBarItem: HTMLElement | null = null;
-    private timerInterval: ReturnType<typeof setInterval> | null = null;
-    private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
-    private breakReminderTimer: ReturnType<typeof setTimeout> | null = null;
+    private chronosStartupTimer: ReturnType<typeof setTimeout> | null = null;
 
     async onload() {
         Logger.info("Plugin", "Loading plugin...");
 
-        // Initialize circuit manager
-        this.circuitManager = new CircuitManager(this.app);
-
-        // Initialize wire service for Chronos integration
-        this.wireService = new WireService(this.app, this);
-
-        // Initialize session logger
-        this.sessionLogger = new SessionLogger(this.app, this);
-
-        // Initialize audio service
-        this.audioService = new AudioService(this);
-
+        // Fix #35 / A3: Load settings BEFORE initializing services
+        // so AudioService.loadAudioFile() has access to settings
         await this.loadSettings();
-
-        // Initialize logger with debug mode setting
         Logger.setDebugMode(this.settings.debugMode);
+
+        // Initialize services (settings are now available)
+        this.circuitManager = new CircuitManager(this.app);
+        this.wireService = new WireService(this.app, this);
+        this.sessionLogger = new SessionLogger(this.app, this);
+        this.audioService = new AudioService(this);
+        this.statusBarManager = new StatusBarManager(this);
+        this.timerManager = new TimerManager(this);
 
         // Add ribbon icon
         this.addRibbonIcon("plug", "Switchboard", () => {
@@ -155,18 +151,14 @@ export default class SwitchboardPlugin extends Plugin {
         // Start wire service if Chronos integration is enabled
         if (this.settings.chronosIntegrationEnabled) {
             // Delay to allow Chronos to load first
-            setTimeout(() => {
+            // Partial fix #20: store handle so it can be cleared in onunload
+            this.chronosStartupTimer = setTimeout(() => {
                 this.wireService.start();
             }, 2000);
         }
 
-        // Add status bar item for session timer
-        this.statusBarItem = this.addStatusBarItem();
-        this.statusBarItem.addClass("switchboard-status-bar");
-        this.statusBarItem.addEventListener("click", (event) => {
-            this.showStatusBarMenu(event);
-        });
-        this.updateStatusBar();
+        // Initialize status bar
+        this.statusBarManager.init();
 
         // Register commands for each Line (Speed Dial)
         this.registerLineCommands();
@@ -175,14 +167,19 @@ export default class SwitchboardPlugin extends Plugin {
     }
 
     onunload() {
-        // Stop timer updates
-        this.stopTimerUpdates();
-
-        // Stop wire service
+        // Fix #1, #2: Properly clean up all resources
+        this.statusBarManager.destroy();
+        this.timerManager.destroy();        // breakReminder + autoDisconnect timers
         this.wireService.stop();
-
-        // Clean up circuit when plugin is disabled
         this.circuitManager.deactivate();
+        this.audioService.destroy();        // CRITICAL: was missing (audit #1)
+
+        // Partial fix #20: clear Chronos startup timer
+        if (this.chronosStartupTimer) {
+            clearTimeout(this.chronosStartupTimer);
+            this.chronosStartupTimer = null;
+        }
+
         Logger.info("Plugin", "Unloading plugin...");
     }
 
@@ -251,10 +248,7 @@ export default class SwitchboardPlugin extends Plugin {
 
             if (!file) {
                 // Create the file if it doesn't exist
-                const content = `# Call Waiting
-
-Tasks that were declined but saved for later.
-`;
+                const content = `# Call Waiting\n\nTasks that were declined but saved for later.\n`;
                 await this.app.vault.create(filePath, content);
                 file = this.app.vault.getAbstractFileByPath(filePath);
             }
@@ -346,10 +340,10 @@ Tasks that were declined but saved for later.
             this.audioService.playPatchIn();
 
             // Start status bar timer updates
-            this.startTimerUpdates();
+            this.statusBarManager.startTimerUpdates();
 
             // Start break reminder timer if enabled
-            this.startBreakReminderTimer();
+            this.timerManager.startBreakReminder();
 
             // Show notice
             new Notice(`📞 Patched in: ${line.name}`);
@@ -427,12 +421,12 @@ Tasks that were declined but saved for later.
             const sessionInfo = this.sessionLogger.endSession();
 
             // Stop status bar timer updates
-            this.stopTimerUpdates();
-            this.updateStatusBar();
+            this.statusBarManager.stopTimerUpdates();
+            this.statusBarManager.update();
 
             // Cancel any pending auto-disconnect and break reminder
-            this.cancelAutoDisconnect();
-            this.stopBreakReminderTimer();
+            this.timerManager.cancelAutoDisconnect();
+            this.timerManager.stopBreakReminder();
 
             if (sessionInfo) {
                 // Session was 5+ minutes, show call log modal with goal reflection
@@ -515,228 +509,19 @@ Tasks that were declined but saved for later.
     }
 
     /**
-     * Update the status bar with current session info
-     */
-    private updateStatusBar(): void {
-        if (!this.statusBarItem) return;
-
-        const activeLine = this.getActiveLine();
-        if (!activeLine) {
-            this.statusBarItem.empty();
-            this.statusBarItem.style.display = "none";
-            return;
-        }
-
-        this.statusBarItem.style.display = "flex";
-        this.statusBarItem.empty();
-
-        // Color dot
-        const dot = this.statusBarItem.createSpan("switchboard-status-dot");
-        dot.style.backgroundColor = activeLine.color;
-
-        // Line name, timer, and optional goal
-        const duration = this.sessionLogger.getCurrentDuration();
-        const durationStr = this.formatDuration(duration);
-
-        let statusText = `${activeLine.name} • ${durationStr}`;
-        if (this.currentGoal) {
-            // Abbreviate goal to 20 chars
-            const goalAbbrev = this.currentGoal.length > 20
-                ? this.currentGoal.substring(0, 20) + "..."
-                : this.currentGoal;
-            statusText += ` • 🎯 ${goalAbbrev}`;
-        }
-        this.statusBarItem.createSpan({ text: statusText });
-
-        // Add missed calls indicator if there are unacknowledged missed calls
-        if (this.missedCalls.length > 0 && !this.missedCallsAcknowledged) {
-            this.statusBarItem.addClass("switchboard-status-blink");
-        } else {
-            this.statusBarItem.removeClass("switchboard-status-blink");
-        }
-    }
-
-    /**
-     * Start the timer update interval
-     */
-    private startTimerUpdates(): void {
-        this.stopTimerUpdates();
-        this.updateStatusBar();
-        // Update every 30 seconds
-        this.timerInterval = setInterval(() => {
-            this.updateStatusBar();
-        }, 30000);
-    }
-
-    /**
-     * Stop the timer update interval
-     */
-    private stopTimerUpdates(): void {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-    }
-
-    /**
-     * Start break reminder timer
-     */
-    private startBreakReminderTimer(): void {
-        this.stopBreakReminderTimer();
-
-        const minutes = this.settings.breakReminderMinutes;
-        if (minutes <= 0) return;
-
-        const ms = minutes * 60 * 1000;
-        this.breakReminderTimer = setTimeout(() => {
-            const activeLine = this.getActiveLine();
-            if (activeLine) {
-                new Notice(`☕ You've been on ${activeLine.name} for ${minutes} minutes - consider a break!`, 10000);
-                // Restart timer for another interval
-                this.startBreakReminderTimer();
-            }
-        }, ms);
-    }
-
-    /**
-     * Stop break reminder timer
-     */
-    private stopBreakReminderTimer(): void {
-        if (this.breakReminderTimer) {
-            clearTimeout(this.breakReminderTimer);
-            this.breakReminderTimer = null;
-        }
-    }
-
-    /**
-     * Format duration as "Xh Ym" or "Xm"
-     */
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-
-    /**
-     * Show status bar context menu
-     */
-    private showStatusBarMenu(event: MouseEvent): void {
-        const activeLine = this.getActiveLine();
-        if (!activeLine) return;
-
-        const menu = new Menu();
-
-        // When menu is opened, acknowledge missed calls (stop blinking)
-        if (this.missedCalls.length > 0) {
-            this.missedCallsAcknowledged = true;
-            this.updateStatusBar();
-        }
-
-        menu.addItem((item) =>
-            item
-                .setTitle(`🔌 Disconnect from ${activeLine.name}`)
-                .setIcon("unplug")
-                .onClick(() => {
-                    this.disconnect();
-                })
-        );
-
-        menu.addItem((item) =>
-            item
-                .setTitle("🏛️ Open Operator Menu")
-                .setIcon("headphones")
-                .onClick(() => {
-                    this.openOperatorModal();
-                })
-        );
-
-        menu.addItem((item) =>
-            item
-                .setTitle("📊 Statistics")
-                .setIcon("bar-chart-2")
-                .onClick(() => {
-                    this.openStatistics();
-                })
-        );
-
-        menu.addItem((item) =>
-            item
-                .setTitle("📝 Edit Sessions")
-                .setIcon("pencil")
-                .onClick(() => {
-                    this.openSessionEditor();
-                })
-        );
-
-        // Show missed calls if any
-        if (this.missedCalls.length > 0) {
-            menu.addSeparator();
-            menu.addItem((item) =>
-                item
-                    .setTitle(`📞 Missed Calls (${this.missedCalls.length})`)
-                    .setIcon("phone-missed")
-                    .setDisabled(true)
-            );
-
-            for (const call of this.missedCalls) {
-                const timeStr = call.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-                menu.addItem((item) =>
-                    item
-                        .setTitle(`  ${call.lineName} - ${timeStr}`)
-                        .onClick(() => {
-                            // Clear this missed call
-                            this.missedCalls = this.missedCalls.filter(c => c !== call);
-                        })
-                );
-            }
-
-            menu.addItem((item) =>
-                item
-                    .setTitle("Clear all missed calls")
-                    .setIcon("x")
-                    .onClick(() => {
-                        this.missedCalls = [];
-                        new Notice("Cleared missed calls");
-                    })
-            );
-        }
-
-        menu.showAtMouseEvent(event);
-    }
-
-    /**
-     * Schedule auto-disconnect at a specific time
+     * Schedule auto-disconnect at a specific time.
+     * Thin wrapper — delegates to TimerManager.
+     * External callers (WireService, TimeUpModal) use this via plugin reference.
      */
     scheduleAutoDisconnect(endTime: Date): void {
-        this.cancelAutoDisconnect();
-
-        if (!this.settings.autoDisconnect) return;
-
-        const now = new Date();
-        const delay = endTime.getTime() - now.getTime();
-
-        if (delay <= 0) return;
-
-        this.autoDisconnectTimer = setTimeout(() => {
-            const activeLine = this.getActiveLine();
-            if (activeLine) {
-                new TimeUpModal(this.app, this, activeLine).open();
-            } else {
-                this.disconnect();
-            }
-        }, delay);
+        this.timerManager.scheduleAutoDisconnect(endTime);
     }
 
     /**
-     * Cancel any pending auto-disconnect
+     * Cancel any pending auto-disconnect.
+     * Thin wrapper — delegates to TimerManager.
      */
     cancelAutoDisconnect(): void {
-        if (this.autoDisconnectTimer) {
-            clearTimeout(this.autoDisconnectTimer);
-            this.autoDisconnectTimer = null;
-        }
+        this.timerManager.cancelAutoDisconnect();
     }
 }

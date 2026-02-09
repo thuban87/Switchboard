@@ -144,7 +144,7 @@ tags:
 | — | **Build Pipeline** | Local-only build, `deploy:test`, `deploy:production` with confirmation | ✅ |
 | — | **Debug Logger System** | Centralized logger with settings toggle | ✅ |
 | — | **Error Handling Audit** | try-catch across all services | ✅ |
-| — | **main.ts Decomposition** | Extract StatusBarManager + TimerManager | ⏳ |
+| — | **main.ts Decomposition** | Extract StatusBarManager + TimerManager (743 → 457 lines) | ✅ |
 | — | **Targeted Unit Tests** | Vitest setup + tests for riskiest pure logic | ⏳ |
 
 ---

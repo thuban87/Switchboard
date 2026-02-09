@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3 Complete
 **Version:** 1.5.0
 
 ---
@@ -225,6 +225,29 @@ tags:
 
 ---
 
+## Session: main.ts Decomposition (S3) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| StatusBarManager.ts | New service (178 lines): `update()`, `startTimerUpdates()`, `stopTimerUpdates()`, `showMenu()`, `formatDuration()`, `destroy()` |
+| TimerManager.ts | New service (82 lines): `scheduleAutoDisconnect()`, `cancelAutoDisconnect()`, `startBreakReminder()`, `stopBreakReminder()`, `destroy()` |
+| main.ts reduction | 743 → 457 lines (-286 lines). Thin wrapper methods preserved for external callers |
+| Fix #35 / A3 | `loadSettings()` now runs BEFORE service construction |
+| Fix #1, #2 | `onunload()` now calls `audioService.destroy()`, `timerManager.destroy()`, clears Chronos timer |
+| Partial #20 | Chronos startup `setTimeout` handle stored and cleared in `onunload()` |
+
+**New Files:**
+- `src/services/StatusBarManager.ts`
+- `src/services/TimerManager.ts`
+
+**Modified Files:**
+- `src/main.ts`
+
+**Audit Items Resolved:** #1, #2, #35, #53, A3 (partial #20)
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -272,4 +295,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 3 of the Master Pre-Launch Plan: main.ts Decomposition. Extract StatusBarManager and TimerManager from main.ts to reduce it from ~740 lines. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 4 of the Master Pre-Launch Plan: Targeted Unit Tests. Set up vitest, write tests for `generateId()`, `Logger`, `TimerManager`, `StatusBarManager.formatDuration()`, `parseTaskTime()`, heading detection, and snooze state. See `docs/launch-considerations/Master Pre-Launch Plan.md` lines 271-327 for full spec."

@@ -98,12 +98,46 @@
 
 ---
 
-## Session 3: main.ts Decomposition
+## Session 3: main.ts Decomposition + Cleanup ✅
 
-**Status:** Not started
-**Audit Items:** #1, #2, #35, #53, A3
+**Date:** February 9, 2026
+**Effort:** ~30 min | **Planned:** ~1 hour
+**Audit Items:** #1, #2, #35, #53, A3 (partial #20)
 
----
+### What Was Done
+
+1. **Created `src/services/StatusBarManager.ts` (178 lines):**
+   - `update()` — Renders status bar with color dot, line name, timer, goal abbreviation, missed calls blink
+   - `startTimerUpdates()` / `stopTimerUpdates()` — 30-second interval for timer display
+   - `showMenu(event)` — Full context menu (Disconnect, Operator, Stats, Edit Sessions, Missed Calls)
+   - `formatDuration(minutes)` — Public utility for `"Xh Ym"` / `"Xm"` formatting
+   - `init()` — Creates status bar element and binds click handler
+   - `destroy()` — Clears interval, nulls references
+
+2. **Created `src/services/TimerManager.ts` (82 lines):**
+   - `scheduleAutoDisconnect(endTime)` — Opens `TimeUpModal` at scheduled block end
+   - `cancelAutoDisconnect()` — Cancels pending auto-disconnect
+   - `startBreakReminder()` / `stopBreakReminder()` — Recurring break notifications
+   - `destroy()` — **Fixes #1 + #2:** Cancels both timers on plugin unload
+
+3. **Rewrote `src/main.ts` (743 → 457 lines, -286 lines):**
+   - Removed all extracted methods and fields
+   - Replaced internal calls with delegation to new services
+   - Thin public wrapper methods (`scheduleAutoDisconnect`, `cancelAutoDisconnect`) preserved for external callers (`WireService`, `TimeUpModal`)
+   - **Fix #35 / A3:** `loadSettings()` now runs BEFORE service construction, so `AudioService.loadAudioFile()` has settings available
+   - **Fix #1, #2:** `onunload()` expanded to call `audioService.destroy()`, `timerManager.destroy()`, `statusBarManager.destroy()`
+   - **Partial #20:** Chronos startup `setTimeout` handle stored in `chronosStartupTimer` field and cleared in `onunload()`
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npm run deploy:test` — deployed
+- ✅ Full patch-in/disconnect cycle — CSS, landing page, status bar, call log all work
+- ✅ Status bar context menu — all menu items functional
+- ✅ Plugin disable/re-enable — no console errors (onunload cleanup confirmed)
+
+### Notes
+- Plan estimated reduction to ~500 lines — actual result was 457 lines (even better)
+- No changes needed to `WireService.ts` or `TimeUpModal.ts` — thin wrappers on plugin class preserve the external API
 
 ## Session 4–13
 

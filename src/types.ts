@@ -83,6 +83,8 @@ export interface SessionRecord {
  * Plugin settings stored in data.json
  */
 export interface SwitchboardSettings {
+    /** Schema version for future migrations */
+    schemaVersion: number;
     /** All configured lines */
     lines: SwitchboardLine[];
     /** Currently active line ID, or null if disconnected */
@@ -117,6 +119,7 @@ export interface SwitchboardSettings {
  * Default settings for new installations
  */
 export const DEFAULT_SETTINGS: SwitchboardSettings = {
+    schemaVersion: 1,
     lines: [],
     activeLine: null,
     chronosIntegrationEnabled: true,

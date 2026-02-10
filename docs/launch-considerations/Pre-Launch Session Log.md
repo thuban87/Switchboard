@@ -327,6 +327,62 @@
 
 ---
 
-## Session 8–13
+## Session 8: Data Integrity & Session History ✅
+
+**Date:** February 9, 2026
+**Effort:** ~45 min | **Planned:** ~1 hour
+**Audit Items:** #8, #24, #25, #26, #36, #39, A6, A8
+
+### What Was Done
+
+1. **`src/types.ts` — Fix #36:**
+   - Added `schemaVersion: number` to `SwitchboardSettings` interface and `DEFAULT_SETTINGS` (value: `1`)
+
+2. **`src/main.ts` — Fix A8:**
+   - Wrapped `loadSettings()` in try-catch: corrupted `data.json` falls back to `DEFAULT_SETTINGS` with a Notice
+   - Added migration stub comment for future schema versioning
+
+3. **`src/services/SessionLogger.ts` — 4 fixes:**
+   - **Fix #25:** Implemented promise-based write queue (`writeQueue`) to serialize concurrent session logging
+   - **Fix #24:** Replaced `indexOf` with line-aware regex for heading detection in both `logSession()` and `logToDailyNote()` — prevents substring matches
+   - **Fix #8:** Added pruning to `saveToHistory()` — caps session history at 1,000 entries
+   - **Fix #26:** Changed `toISOString()` to local date (`getFullYear`/`getMonth`/`getDate`) in `saveToHistory()`
+
+4. **`src/views/DashboardView.ts` — Fix A6:**
+   - Changed `renderSchedule()` date calculation from UTC (`toISOString`) to local time
+
+5. **`src/modals/SessionEditorModal.ts` — Fix #39:**
+   - `recalculateDuration()` now adds 24 hours when duration is negative (midnight crossing)
+
+6. **Un-skipped 3 tests from S4:**
+   - `heading-detection.test.ts`: substring non-match, trailing whitespace match, multiple similar headings
+   - All 3 now pass with the new regex-based heading detection
+
+7. **Bonus: Comprehensive UTC→Local Date Cleanup:**
+   - Fixed 6 additional `toISOString().split("T")[0]` sites across 3 files:
+     - `StatisticsModal.ts` — "This Week" filter (2 sites), "Today"/"Yesterday" labels
+     - `SwitchboardSettingTab.ts` — Chronos task date filtering
+     - `LineEditorModal.ts` — Default date for new one-time schedule blocks
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 64 pass, 0 skipped, 0 fail (all S8 heading tests un-skipped)
+- ✅ `npm run deploy:test` — deployed
+- ✅ Manual: Dashboard headings visually larger (CSS 0.8rem → 1.1rem)
+- ✅ Manual: Session date displays correctly in local time
+- ✅ Manual: Heading detection works correctly with regex
+
+### Dashboard Heading CSS
+- Increased `.dashboard-section-title` font-size from `0.8rem` to `1.1rem` and added `margin-bottom: 4px` — requested by Brad during testing
+
+### Notes
+- The UTC date bug Brad initially observed was caused by stale code in Obsidian's memory — plugin reload was required after deploy
+- All `toISOString().split("T")[0]` date sites in `src/` are now eliminated except 2 internal-only uses in `WireService.ts` (cache key + fake task object, not user-facing)
+- The `tslib` lint errors are pre-existing IDE spurious errors — they don't affect build
+
+---
+
+## Session 9–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
+

@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8 Complete
 **Version:** 1.5.0
 
 ---
@@ -353,6 +353,36 @@ tags:
 
 ---
 
+## Session: Data Integrity & Session History (S8) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| types.ts Fix #36 | Added `schemaVersion: number` to settings interface and defaults |
+| main.ts Fix A8 | Corrupted `data.json` recovery with try-catch → fallback to defaults + Notice |
+| SessionLogger Fix #25 | Promise-based write queue to serialize concurrent session logging |
+| SessionLogger Fix #24 | Line-aware regex replaces `indexOf` for heading detection in `logSession()` and `logToDailyNote()` |
+| SessionLogger Fix #8 | Session history pruned to 1,000 entries max |
+| SessionLogger Fix #26 | `saveToHistory()` uses local date instead of UTC |
+| DashboardView Fix A6 | `renderSchedule()` uses local date instead of UTC |
+| SessionEditorModal Fix #39 | `recalculateDuration()` handles midnight crossing |
+| UTC cleanup (bonus) | Fixed 6 additional `toISOString` date sites in StatisticsModal, SwitchboardSettingTab, LineEditorModal |
+| Dashboard CSS | Section headings increased from 0.8rem → 1.1rem |
+| Tests un-skipped | 3 S8-dependent heading detection tests now pass (64 total, 0 skipped) |
+
+**Modified Files:**
+- `src/types.ts`, `src/main.ts`
+- `src/services/SessionLogger.ts`
+- `src/views/DashboardView.ts`
+- `src/modals/SessionEditorModal.ts`, `src/modals/StatisticsModal.ts`
+- `src/settings/SwitchboardSettingTab.ts`, `src/settings/LineEditorModal.ts`
+- `styles.css`
+- `test/heading-detection.test.ts`
+
+**Audit Items Resolved:** #8, #24, #25, #26, #36, #39, A6, A8
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -396,10 +426,9 @@ tags:
 | Issue | Impact |
 |-------|--------|
 | tslib lint error | None - IDE spurious error |
-| 3 skipped tests | Awaiting S8 code fixes — heading detection tests will un-skip when S8 is done |
 
 ---
 
 ## Next Session Prompt
 
-> "Let's start Session 8 of the Master Pre-Launch Plan: Data Integrity & Robustness. Implement session history cap, heading detection regex fix, concurrent logging mutex, timezone consistency, schema versioning, midnight-crossing duration fix, and corrupted data.json recovery. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 9 of the Master Pre-Launch Plan: Build & Manifest Cleanup. Fix the `obsidian` dependency version, set `isDesktopOnly: true`, update `minAppVersion`, fill in `authorUrl`, align tsconfig/esbuild targets, create `versions.json`, and clean up the esbuild deploy path. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

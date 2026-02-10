@@ -50,7 +50,7 @@ export class StatisticsModal extends Modal {
         // This week stats
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        const weekStr = weekAgo.toISOString().split("T")[0];
+        const weekStr = `${weekAgo.getFullYear()}-${String(weekAgo.getMonth() + 1).padStart(2, "0")}-${String(weekAgo.getDate()).padStart(2, "0")}`;
         const weekSessions = history.filter(s => s.date >= weekStr);
         const weekMinutes = weekSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
 
@@ -163,7 +163,7 @@ export class StatisticsModal extends Modal {
     private generateExport(history: SessionRecord[]): string {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        const weekStr = weekAgo.toISOString().split("T")[0];
+        const weekStr = `${weekAgo.getFullYear()}-${String(weekAgo.getMonth() + 1).padStart(2, "0")}-${String(weekAgo.getDate()).padStart(2, "0")}`;
         const weekSessions = history.filter(s => s.date >= weekStr);
         const weekMinutes = weekSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
         const totalMinutes = history.reduce((sum, s) => sum + s.durationMinutes, 0);
@@ -228,8 +228,11 @@ ${dayStats || "No sessions this week"}
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
 
-        if (dateStr === today.toISOString().split("T")[0]) return "Today";
-        if (dateStr === yesterday.toISOString().split("T")[0]) return "Yesterday";
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+        if (dateStr === todayStr) return "Today";
+        if (dateStr === yesterdayStr) return "Yesterday";
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 

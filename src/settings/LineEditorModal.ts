@@ -351,7 +351,10 @@ export class LineEditorModal extends Modal {
                                 if (!block.days) block.days = [1, 3, 5];
                             } else {
                                 block.days = undefined;
-                                if (!block.date) block.date = new Date().toISOString().split("T")[0];
+                                if (!block.date) {
+                                    const now = new Date();
+                                    block.date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+                                }
                             }
                             this.renderScheduleBlocks(containerEl);
                         })

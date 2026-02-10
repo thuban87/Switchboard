@@ -20,6 +20,8 @@ export class SessionLogger {
     private app: App;
     private plugin: SwitchboardPlugin;
     private currentSession: { line: SwitchboardLine; startTime: Date } | null = null;
+    /** Fix #25: Promise queue to prevent concurrent write interleaving */
+    private writeQueue: Promise<void> = Promise.resolve();
 
     constructor(app: App, plugin: SwitchboardPlugin) {
         this.app = app;
@@ -63,9 +65,20 @@ export class SessionLogger {
     }
 
     /**
-     * Log a session summary to the configured file
+     * Log a session summary to the configured file.
+     * Fix #25: Chains through writeQueue to prevent concurrent write interleaving.
      */
     async logSession(session: SessionInfo, summary: string): Promise<void> {
+        this.writeQueue = this.writeQueue
+            .then(() => this._doLogSession(session, summary))
+            .catch(e => Logger.error("Session", "Failed to log session", e));
+        return this.writeQueue;
+    }
+
+    /**
+     * Internal: performs the actual session logging (called via writeQueue).
+     */
+    private async _doLogSession(session: SessionInfo, summary: string): Promise<void> {
         // Save to session history for statistics
         await this.saveToHistory(session, summary);
 
@@ -81,8 +94,11 @@ export class SessionLogger {
         let content = await this.app.vault.read(logFile);
 
         // Find the heading and append after it
+        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
         const heading = session.line.sessionLogHeading || "## Session Log";
-        const headingIndex = content.indexOf(heading);
+        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+        const headingMatch = content.match(headingRegex);
+        const headingIndex = headingMatch ? headingMatch.index! : -1;
 
         if (headingIndex !== -1) {
             // Find end of the heading line
@@ -109,10 +125,15 @@ export class SessionLogger {
      * Save session to history for statistics
      */
     private async saveToHistory(session: SessionInfo, summary: string): Promise<void> {
+        // Fix #26: Use local date instead of UTC to match daily note behavior
+        const year = session.startTime.getFullYear();
+        const month = String(session.startTime.getMonth() + 1).padStart(2, "0");
+        const day = String(session.startTime.getDate()).padStart(2, "0");
+
         const record = {
             lineId: session.line.id,
             lineName: session.line.name,
-            date: session.startTime.toISOString().split("T")[0],
+            date: `${year}-${month}-${day}`,
             startTime: this.formatTime24(session.startTime),
             endTime: this.formatTime24(session.endTime),
             durationMinutes: session.durationMinutes,
@@ -128,6 +149,12 @@ export class SessionLogger {
         }
 
         this.plugin.settings.sessionHistory.push(record);
+
+        // Fix #8: Prune to keep last 1000 sessions
+        if (this.plugin.settings.sessionHistory.length > 1000) {
+            this.plugin.settings.sessionHistory = this.plugin.settings.sessionHistory.slice(-1000);
+        }
+
         Logger.debug("Session", "New history length:", this.plugin.settings.sessionHistory.length);
 
         await this.plugin.saveSettings();
@@ -318,8 +345,10 @@ export class SessionLogger {
         let content = await this.app.vault.read(file);
         const heading = settings.dailyNoteHeading || "### Switchboard Logs";
 
-        // Find the heading
-        const headingIndex = content.indexOf(heading);
+        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+        const headingMatch = content.match(headingRegex);
+        const headingIndex = headingMatch ? headingMatch.index! : -1;
 
         if (headingIndex !== -1) {
             // Find the end of the heading line

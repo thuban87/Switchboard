@@ -166,7 +166,7 @@ export class DashboardView extends ItemView {
         const scheduleContainer = section.createDiv("dashboard-schedule");
         const today = new Date();
         const dayOfWeek = today.getDay();
-        const todayStr = today.toISOString().split("T")[0];
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
         const todayBlocks: Array<{ line: SwitchboardLine; block: ScheduledBlock }> = [];
 

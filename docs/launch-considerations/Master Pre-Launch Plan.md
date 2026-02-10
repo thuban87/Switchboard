@@ -19,7 +19,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 5 | `obsidian` dependency set to `"latest"` | **S9** | CRITICAL |
 | 6 | ✅ Array index closure bug in delete buttons | **S5** | CRITICAL |
 | 7 | ✅ Snooze/Decline race condition | **S6** | HIGH |
-| 8 | Session history unbounded growth | **S8** | HIGH |
+| 8 | ✅ Session history unbounded growth | **S8** | HIGH |
 | 9 | ✅ `saveToCallWaiting()` not awaited | **S2** | HIGH |
 | 10 | ✅ `parseTaskTime()` no validation — invalid dates cause immediate setTimeout | **S6** | HIGH |
 | 11 | ✅ Daily note heading insertion null access | **S2** | HIGH |
@@ -35,9 +35,9 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 21 | `formatDuration()` duplicated in 6 files | **S10** | MEDIUM |
 | 22 | `formatTime12h()` duplicated in 2 files | **S10** | MEDIUM |
 | 23 | ✅ No color validation utility | **S5** | MEDIUM |
-| 24 | Heading detection uses `indexOf()` — substring not line-aware | **S8** | MEDIUM |
-| 25 | Concurrent session logging race condition | **S8** | MEDIUM |
-| 26 | Timezone inconsistency — UTC in history, local in daily notes | **S8** | MEDIUM |
+| 24 | ✅ Heading detection uses `indexOf()` — substring not line-aware | **S8** | MEDIUM |
+| 25 | ✅ Concurrent session logging race condition | **S8** | MEDIUM |
+| 26 | ✅ Timezone inconsistency — UTC in history, local in daily notes | **S8** | MEDIUM |
 | 27 | ✅ IncomingCallModal double-click race on action buttons | **S6** | MEDIUM |
 | 28 | PathSuggest full vault scan per keystroke — no debounce | **S12** | MEDIUM |
 | 29 | tsconfig target ES6 mismatches esbuild ES2018 | **S9** | MEDIUM |
@@ -47,10 +47,10 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 33 | Dashboard `containerEl.children[1]` hard-indexed | **S12** | MEDIUM |
 | 34 | ✅ File path splitting assumes Unix separator | **S6** | MEDIUM |
 | 35 | ✅ Services initialized before settings loaded | **S3** | MEDIUM |
-| 36 | No schema version in settings | **S8** | MEDIUM |
+| 36 | ✅ No schema version in settings | **S8** | MEDIUM |
 | 37 | Business logic in `OperatorModal.executeCommand()` | **S10** | MEDIUM |
 | 38 | ✅ `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
-| 39 | `recalculateDuration()` doesn't handle midnight crossing | **S8** | MEDIUM |
+| 39 | ✅ `recalculateDuration()` doesn't handle midnight crossing | **S8** | MEDIUM |
 | 40 | ✅ DashboardView refresh interval not cleared on plugin unload | **S7** | MEDIUM |
 | 41 | Missing JSDoc on modal and settings methods | **S12** | LOW |
 | 42 | Hardcoded "Call Waiting.md" path | **S12** | LOW |
@@ -73,9 +73,9 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | A3 | ✅ `AudioService` constructor calls `loadAudioFile()` before settings load | **S3** | MEDIUM |
 | A4 | ✅ `parseTaskTime` returns dates without `isNaN` check | **S6** | HIGH |
 | A5 | No `versions.json` for BRAT version tracking | **S9** | HIGH |
-| A6 | `DashboardView.ts:169` uses UTC date for schedule display (same bug as #26) | **S8** | MEDIUM |
+| A6 | ✅ `DashboardView.ts:169` uses UTC date for schedule display (same bug as #26) | **S8** | MEDIUM |
 | A7 | `SwitchboardSettingTab.ts:295,315` uses `innerHTML` for emoji strings | — | WON'T FIX (hardcoded emoji literals, no user input, no XSS vector) |
-| A8 | No corrupted `data.json` recovery — bad data permanently breaks plugin | **S8** | HIGH |
+| A8 | ✅ No corrupted `data.json` recovery — bad data permanently breaks plugin | **S8** | HIGH |
 
 ---
 
@@ -571,7 +571,7 @@ if (this.audioElement) {
 
 ---
 
-## Session 8: Data Integrity & Session History
+## Session 8: Data Integrity & Session History ✅
 
 **Effort:** ~1 hour | **Risk:** Medium | **Audit items:** #8, #24, #25, #26, #36, #39, A6, A8
 

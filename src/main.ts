@@ -475,9 +475,19 @@ export default class SwitchboardPlugin extends Plugin {
 
     /**
      * Loads settings from data.json
+     * Fix #36: Schema version for future migrations
+     * Fix A8: Corrupted data.json recovery
      */
     async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        try {
+            const data = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+            // Future: if (data.schemaVersion < 2) migrateV1toV2(data);
+            this.settings = data;
+        } catch (e) {
+            Logger.error("Plugin", "Failed to load settings, using defaults", e);
+            new Notice("Switchboard: Settings corrupted, using defaults. Your Lines may need to be reconfigured.");
+            this.settings = { ...DEFAULT_SETTINGS };
+        }
     }
 
     /**

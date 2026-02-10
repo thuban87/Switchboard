@@ -45,18 +45,18 @@ describe("Heading Detection (S8 regex fix)", () => {
     // These tests verify the FIXED behavior that S8 will implement.
     // They are skipped because the codebase still uses indexOf.
 
-    it.skip("substring heading does NOT match (requires S8 regex fix)", () => {
+    it("substring heading does NOT match (requires S8 regex fix)", () => {
         // "## Session Log" should NOT match "## Session Logging Details"
         const content = "## Session Logging Details\n\nSome content";
         expect(findHeadingIndexRegex(content, "## Session Log")).toBe(-1);
     });
 
-    it.skip("heading with trailing whitespace still matches (requires S8 regex fix)", () => {
+    it("heading with trailing whitespace still matches (requires S8 regex fix)", () => {
         const content = "## Session Log   \n\nContent after heading";
         expect(findHeadingIndexRegex(content, "## Session Log")).toBeGreaterThanOrEqual(0);
     });
 
-    it.skip("multiple similar headings — matches only the exact one (requires S8 regex fix)", () => {
+    it("multiple similar headings — matches only the exact one (requires S8 regex fix)", () => {
         const content = "## Session Logger\n\nDetails\n\n## Session Log\n\nActual logs";
         const index = findHeadingIndexRegex(content, "## Session Log");
         // Should find the exact "## Session Log", not "## Session Logger"

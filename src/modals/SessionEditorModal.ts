@@ -202,7 +202,9 @@ export class SessionEditorModal extends Modal {
         const [endH, endM] = record.endTime.split(":").map(Number);
         const startMins = startH * 60 + startM;
         const endMins = endH * 60 + endM;
-        record.durationMinutes = Math.max(0, endMins - startMins);
+        let duration = endMins - startMins;
+        if (duration < 0) duration += 24 * 60; // midnight crossing
+        record.durationMinutes = Math.max(0, Math.round(duration));
     }
 
     private async deleteSession(index: number) {

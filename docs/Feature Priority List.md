@@ -149,6 +149,7 @@ tags:
 | — | **Input Validation & Path Safety** | 4 validation utilities, path traversal fix, closure bug fix, time/date/color/ID validation + 18 tests | ✅ |
 | — | **Timer & Race Condition Fixes** | Snooze/decline race fix, parseTaskTime validation, double-click guard, cross-platform path split | ✅ |
 | — | **Memory Leak Fixes** | Audio element reuse + base64 embedding, QuickSwitchModal cleanup, DashboardView registerInterval, settings setTimeout guard | ✅ |
+| — | **Data Integrity & Session History** | Schema versioning, session history cap, heading regex fix, write queue concurrency, UTC→local timezone fix, midnight-crossing duration, corrupted data.json recovery, dashboard heading CSS | ✅ |
 
 ---
 

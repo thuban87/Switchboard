@@ -1,6 +1,6 @@
 import { App, TFile, TFolder } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine, validatePath } from "../types";
+import { SwitchboardLine, validatePath, formatDuration } from "../types";
 import { Logger } from "./Logger";
 
 /**
@@ -179,7 +179,7 @@ export class SessionLogger {
         });
         const startStr = this.formatTime(session.startTime);
         const endStr = this.formatTime(session.endTime);
-        const durationStr = this.formatDuration(session.durationMinutes);
+        const durationStr = formatDuration(session.durationMinutes);
 
         return `### 📞 ${dateStr} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
     }
@@ -191,17 +191,7 @@ export class SessionLogger {
         return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     }
 
-    /**
-     * Format duration as "1h 45m" or "45m"
-     */
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 
     /**
      * Get or create the log file
@@ -314,7 +304,7 @@ export class SessionLogger {
         const filePath = `${settings.dailyNotesFolder}/${filename}`;
 
         // Format: LINE: DURATION - SUMMARY
-        const durationStr = this.formatDuration(durationMinutes);
+        const durationStr = formatDuration(durationMinutes);
         const bulletEntry = summary
             ? `- **${lineName}**: ${durationStr} - ${summary}`
             : `- **${lineName}**: ${durationStr}`;

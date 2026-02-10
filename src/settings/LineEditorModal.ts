@@ -1,5 +1,5 @@
 import { Modal, App, Setting, TextComponent, Notice } from "obsidian";
-import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId, isValidHexColor, isValidTime, isValidDate } from "../types";
+import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId, isValidHexColor, isValidTime, isValidDate, formatTime12h, parseTime12h, isValidTime12h } from "../types";
 import { FolderSuggest, FileSuggest } from "./PathSuggest";
 
 /**
@@ -321,7 +321,7 @@ export class LineEditorModal extends Modal {
                 const date = new Date(block.date + "T00:00:00");
                 summary = date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
             }
-            summary += ` ${this.formatTime12h(block.startTime)} - ${this.formatTime12h(block.endTime)}`;
+            summary += ` ${formatTime12h(block.startTime)} - ${formatTime12h(block.endTime)}`;
             headerEl.createSpan({ text: summary, cls: "schedule-block-summary" });
 
             // Delete button
@@ -401,21 +401,22 @@ export class LineEditorModal extends Modal {
                     );
             }
 
-            // Time inputs
+            // Time inputs (12h format)
             const timeEl = fieldsEl.createDiv("schedule-times");
 
             new Setting(timeEl)
                 .setName("Start")
                 .addText((text) => {
                     text
-                        .setValue(block.startTime)
-                        .setPlaceholder("09:00")
+                        .setValue(formatTime12h(block.startTime))
+                        .setPlaceholder("9:00 AM")
                         .onChange((value) => {
-                            block.startTime = value;
-                            if (!isValidTime(value)) {
-                                text.inputEl.style.borderColor = "var(--text-error)";
-                            } else {
+                            const parsed = parseTime12h(value);
+                            if (parsed) {
+                                block.startTime = parsed;
                                 text.inputEl.style.borderColor = "";
+                            } else {
+                                text.inputEl.style.borderColor = "var(--text-error)";
                             }
                         });
                     text.inputEl.setAttribute("data-block-id", block.id);
@@ -426,14 +427,15 @@ export class LineEditorModal extends Modal {
                 .setName("End")
                 .addText((text) => {
                     text
-                        .setValue(block.endTime)
-                        .setPlaceholder("10:00")
+                        .setValue(formatTime12h(block.endTime))
+                        .setPlaceholder("10:00 AM")
                         .onChange((value) => {
-                            block.endTime = value;
-                            if (!isValidTime(value)) {
-                                text.inputEl.style.borderColor = "var(--text-error)";
-                            } else {
+                            const parsed = parseTime12h(value);
+                            if (parsed) {
+                                block.endTime = parsed;
                                 text.inputEl.style.borderColor = "";
+                            } else {
+                                text.inputEl.style.borderColor = "var(--text-error)";
                             }
                         });
                     text.inputEl.setAttribute("data-block-id", block.id);
@@ -449,15 +451,7 @@ export class LineEditorModal extends Modal {
         }
     }
 
-    /**
-     * Format 24h time to 12h format
-     */
-    private formatTime12h(time24: string): string {
-        const [hours, minutes] = time24.split(":").map(Number);
-        const period = hours >= 12 ? "PM" : "AM";
-        const hours12 = hours % 12 || 12;
-        return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
-    }
+
 
     private validate(): boolean {
         // Sync schedule block values from DOM inputs before validating
@@ -469,7 +463,13 @@ export class LineEditorModal extends Modal {
                 const field = input.getAttribute("data-field");
                 const block = this.line.scheduledBlocks.find(b => b.id === blockId);
                 if (block && field && (field === "startTime" || field === "endTime")) {
-                    (block as any)[field] = input.value;
+                    // Convert 12h display value back to 24h for storage
+                    const parsed = parseTime12h(input.value);
+                    if (parsed) {
+                        (block as any)[field] = parsed;
+                    } else {
+                        (block as any)[field] = input.value; // Keep raw for validation error message
+                    }
                 }
             }
         }
@@ -502,11 +502,11 @@ export class LineEditorModal extends Modal {
         // Fix #13: Validate schedule block times/dates
         for (const block of this.line.scheduledBlocks) {
             if (!isValidTime(block.startTime)) {
-                new Notice(`Switchboard: Invalid start time \"${block.startTime}\" — use HH:MM format`);
+                new Notice(`Switchboard: Invalid start time \"${block.startTime}\" — use format like 9:00 AM`);
                 return false;
             }
             if (!isValidTime(block.endTime)) {
-                new Notice(`Switchboard: Invalid end time \"${block.endTime}\" — use HH:MM format`);
+                new Notice(`Switchboard: Invalid end time \"${block.endTime}\" — use format like 10:00 AM`);
                 return false;
             }
             if (!block.recurring && block.date && !isValidDate(block.date)) {

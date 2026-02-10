@@ -1,5 +1,6 @@
 import { App, Modal } from "obsidian";
 import { SessionInfo } from "../services/SessionLogger";
+import { formatDuration } from "../types";
 
 /**
  * CallLogModal - Shows when disconnecting from a session (5+ min)
@@ -44,7 +45,7 @@ export class CallLogModal extends Modal {
         colorDot.style.backgroundColor = this.session.line.color;
         lineEl.createEl("span", { text: this.session.line.name });
 
-        const durationStr = this.formatDuration(this.session.durationMinutes);
+        const durationStr = formatDuration(this.session.durationMinutes);
         const timeRange = `${this.formatTime(this.session.startTime)} - ${this.formatTime(this.session.endTime)}`;
         infoEl.createEl("p", { text: `⏱️ ${durationStr} (${timeRange})`, cls: "call-log-duration" });
 
@@ -121,12 +122,5 @@ export class CallLogModal extends Modal {
         return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 }

@@ -32,8 +32,8 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 18 | ✅ `minAppVersion: "1.0.0"` — too old | **S9** | HIGH |
 | 19 | ✅ Empty `authorUrl` in manifest | **S9** | HIGH |
 | 20 | ✅ Chronos startup `setTimeout(2000)` untracked | **S6** | HIGH |
-| 21 | `formatDuration()` duplicated in 6 files | **S10** | MEDIUM |
-| 22 | `formatTime12h()` duplicated in 2 files | **S10** | MEDIUM |
+| 21 | ✅ `formatDuration()` duplicated in 6 files | **S10** | MEDIUM |
+| 22 | ✅ `formatTime12h()` duplicated in 2 files | **S10** | MEDIUM |
 | 23 | ✅ No color validation utility | **S5** | MEDIUM |
 | 24 | ✅ Heading detection uses `indexOf()` — substring not line-aware | **S8** | MEDIUM |
 | 25 | ✅ Concurrent session logging race condition | **S8** | MEDIUM |
@@ -48,7 +48,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 34 | ✅ File path splitting assumes Unix separator | **S6** | MEDIUM |
 | 35 | ✅ Services initialized before settings loaded | **S3** | MEDIUM |
 | 36 | ✅ No schema version in settings | **S8** | MEDIUM |
-| 37 | Business logic in `OperatorModal.executeCommand()` | **S10** | MEDIUM |
+| 37 | ✅ Business logic in `OperatorModal.executeCommand()` | **S10** | MEDIUM |
 | 38 | ✅ `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
 | 39 | ✅ `recalculateDuration()` doesn't handle midnight crossing | **S8** | MEDIUM |
 | 40 | ✅ DashboardView refresh interval not cleared on plugin unload | **S7** | MEDIUM |
@@ -69,7 +69,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 55 | Empty input in PathSuggest returns all folders | **S12** | LOW |
 | 56 | ✅ Hardcoded esbuild deploy path | **S9** | LOW |
 | A1 | ✅ `snoozedCalls` timers not cleared in `WireService.stop()` | **S6** | HIGH |
-| A2 | `registerLineCommands()` accumulates commands without deregistration | **S10** | MEDIUM |
+| A2 | ✅ `registerLineCommands()` accumulates commands without deregistration | **S10** | MEDIUM |
 | A3 | ✅ `AudioService` constructor calls `loadAudioFile()` before settings load | **S3** | MEDIUM |
 | A4 | ✅ `parseTaskTime` returns dates without `isNaN` check | **S6** | HIGH |
 | A5 | ✅ No `versions.json` for BRAT version tracking | **S9** | HIGH |
@@ -793,7 +793,7 @@ This prevents the plugin from becoming permanently broken if `data.json` is corr
 
 ---
 
-## Session 10: Code Deduplication & Refactoring
+## Session 10: Code Deduplication & Refactoring ✅
 
 **Effort:** ~45 min | **Risk:** Low | **Audit items:** #21, #22, #37, A2
 

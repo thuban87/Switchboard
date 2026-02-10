@@ -1,5 +1,5 @@
 import { Plugin, Notice, Menu } from "obsidian";
-import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types";
+import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine, OperatorCommand } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
 import { CallLogModal } from "./modals/CallLogModal";
@@ -33,6 +33,7 @@ export default class SwitchboardPlugin extends Plugin {
     currentGoal: string | null = null;
     private missedCallsAcknowledged: boolean = true;
     private chronosStartupTimer: ReturnType<typeof setTimeout> | null = null;
+    private registeredCommandIds: Set<string> = new Set();
 
     async onload() {
         Logger.info("Plugin", "Loading plugin...");
@@ -504,9 +505,10 @@ export default class SwitchboardPlugin extends Plugin {
      * Allows users to bind hotkeys to specific Lines
      */
     registerLineCommands(): void {
-        // Register patch-in command for each line
+        // Fix A2: Prevent duplicate command registration
         for (const line of this.settings.lines) {
             const commandId = `patch-in-${line.id}`;
+            if (this.registeredCommandIds.has(commandId)) continue;
             this.addCommand({
                 id: commandId,
                 name: `Patch In: ${line.name}`,
@@ -514,8 +516,71 @@ export default class SwitchboardPlugin extends Plugin {
                     this.patchIn(line);
                 },
             });
+            this.registeredCommandIds.add(commandId);
         }
         Logger.debug("Plugin", `Registered ${this.settings.lines.length} Speed Dial commands`);
+    }
+
+    /**
+     * Execute an operator command (Fix #37)
+     * Business logic extracted from OperatorModal to keep modals as pure UI.
+     */
+    executeOperatorCommand(cmd: OperatorCommand): void {
+        switch (cmd.action) {
+            case "command":
+                try {
+                    const commands = (this.app as any).commands;
+                    if (commands.commands[cmd.value]) {
+                        commands.executeCommandById(cmd.value);
+                    } else {
+                        new Notice(`Command not found: ${cmd.value}\n\nTip: Use Command Palette (Ctrl+P) and copy the command ID`);
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error executing command:", cmd.value, e);
+                    new Notice(`⚠️ Error executing command: ${cmd.name}`);
+                }
+                break;
+
+            case "insert":
+                try {
+                    const editor = this.app.workspace.activeEditor?.editor;
+                    if (editor) {
+                        const cursor = editor.getCursor();
+                        const text = cmd.value
+                            .replace("{{date}}", new Date().toLocaleDateString())
+                            .replace("{{time}}", new Date().toLocaleTimeString());
+                        editor.replaceRange(text, cursor);
+
+                        if (text.includes("$  $")) {
+                            editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+                        }
+                    } else {
+                        new Notice("No active editor - open a note first");
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error inserting text:", cmd.name, e);
+                    new Notice(`⚠️ Error inserting text: ${cmd.name}`);
+                }
+                break;
+
+            case "open":
+                try {
+                    if (!cmd.value) {
+                        new Notice("No file path specified");
+                        break;
+                    }
+                    const file = this.app.vault.getAbstractFileByPath(cmd.value);
+                    if (file) {
+                        this.app.workspace.getLeaf().openFile(file as any);
+                    } else {
+                        new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error opening file:", cmd.value, e);
+                    new Notice(`⚠️ Error opening file: ${cmd.name}`);
+                }
+                break;
+        }
     }
 
     /**

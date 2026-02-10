@@ -1,5 +1,6 @@
 import { Menu, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
+import { formatDuration } from "../types";
 import { Logger } from "./Logger";
 
 /**
@@ -52,7 +53,7 @@ export class StatusBarManager {
 
         // Line name, timer, and optional goal
         const duration = this.plugin.sessionLogger.getCurrentDuration();
-        const durationStr = this.formatDuration(duration);
+        const durationStr = formatDuration(duration);
 
         let statusText = `${activeLine.name} • ${durationStr}`;
         if (this.plugin.currentGoal) {
@@ -94,17 +95,7 @@ export class StatusBarManager {
         }
     }
 
-    /**
-     * Format duration as "Xh Ym" or "Xm"
-     */
-    formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 
     /**
      * Show status bar context menu

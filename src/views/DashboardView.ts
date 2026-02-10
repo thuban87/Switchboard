@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine, ScheduledBlock } from "../types";
+import { SwitchboardLine, ScheduledBlock, formatDuration } from "../types";
 
 export const DASHBOARD_VIEW_TYPE = "switchboard-dashboard";
 
@@ -93,7 +93,7 @@ export class DashboardView extends ItemView {
 
             // Timer
             const duration = this.plugin.sessionLogger.getCurrentDuration();
-            const durationStr = this.formatDuration(duration);
+            const durationStr = formatDuration(duration);
             content.createDiv({ text: `⏱️ ${durationStr}`, cls: "session-card-timer" });
 
             // Goal if set
@@ -232,18 +232,11 @@ export class DashboardView extends ItemView {
 
             sessionEl.createSpan({ text: session.lineName, cls: "dashboard-recent-name" });
             sessionEl.createSpan({
-                text: `${session.date} • ${this.formatDuration(session.durationMinutes)}`,
+                text: `${session.date} • ${formatDuration(session.durationMinutes)}`,
                 cls: "dashboard-recent-info"
             });
         }
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 }

@@ -1,7 +1,7 @@
 import { PluginSettingTab, App, Setting } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
-import { SwitchboardLine } from "../types";
+import { SwitchboardLine, formatTime12h } from "../types";
 import { Logger } from "../services/Logger";
 
 /**
@@ -396,8 +396,8 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                         desc = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
                     }
 
-                    const timeStart = this.formatTime12h(block.startTime);
-                    const timeEnd = this.formatTime12h(block.endTime);
+                    const timeStart = formatTime12h(block.startTime);
+                    const timeEnd = formatTime12h(block.endTime);
                     desc += ` ${timeStart} - ${timeEnd}`;
 
                     blockEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
@@ -417,7 +417,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
                 // Format task info
                 const dateStr = task.date ? new Date(task.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
-                const timeStr = task.time ? this.formatTime12h(task.time) : "All day";
+                const timeStr = task.time ? formatTime12h(task.time) : "All day";
                 const desc = `${dateStr} ${timeStr} - ${task.title}`;
 
                 taskEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
@@ -529,13 +529,5 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         }
     }
 
-    /**
-     * Format 24h time to 12h format
-     */
-    private formatTime12h(time24: string): string {
-        const [hours, minutes] = time24.split(":").map(Number);
-        const period = hours >= 12 ? "PM" : "AM";
-        const hours12 = hours % 12 || 12;
-        return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
-    }
+
 }

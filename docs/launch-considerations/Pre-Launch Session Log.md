@@ -431,8 +431,71 @@
 
 ---
 
-## Session 10–13
+## Session 10: Code Deduplication & Refactoring ✅
+
+**Date:** February 9, 2026
+**Effort:** ~45 min | **Planned:** ~45 min
+**Audit Items:** #21, #22, #37, A2
+
+### What Was Done
+
+1. **`src/types.ts` — 2 canonical utilities + 2 helpers:**
+   - **Fix #21:** Added canonical `formatDuration(minutes)` — returns `"Xh Ym"` / `"Xm"` format
+   - **Fix #22:** Added canonical `formatTime12h(time24)` — converts `"14:30"` → `"2:30 PM"`
+   - Added `parseTime12h(time12)` — converts `"2:30 PM"` → `"14:30"` (new, for 12h input support)
+   - Added `isValidTime12h(time)` — validates 12h format strings
+
+2. **Fix #21 — Removed duplicate `formatDuration()` from 6 files:**
+
+   | File | Calls Updated |
+   |------|--------------|
+   | `StatusBarManager.ts` | 1 |
+   | `SessionLogger.ts` | 2 |
+   | `DashboardView.ts` | 2 |
+   | `StatisticsModal.ts` | 11 |
+   | `SessionEditorModal.ts` | 2 |
+   | `CallLogModal.ts` | 1 |
+
+3. **Fix #22 — Removed duplicate `formatTime12h()` from 2 files:**
+   - `SwitchboardSettingTab.ts` — 3 calls updated
+   - `LineEditorModal.ts` — 2 calls updated
+
+4. **Fix #37 — OperatorModal business logic extraction:**
+   - Added `executeOperatorCommand(cmd)` private method to `SwitchboardPlugin` in `main.ts`
+   - `OperatorModal.executeCommand()` now delegates with one line: `this.plugin.executeOperatorCommand(cmd)`
+   - Removed unused `Notice` and `Logger` imports from `OperatorModal.ts`
+
+5. **Fix A2 — Command registration guard:**
+   - Added `registeredCommandIds: Set<string>` to `SwitchboardPlugin`
+   - `registerLineCommands()` skips already-registered command IDs
+
+6. **Bonus: 12h time input in schedule block editor:**
+   - Schedule block time inputs in `LineEditorModal.ts` now display and accept 12h format
+   - DOM sync in `validate()` converts 12h input back to 24h before storage
+   - Error messages updated to reference 12h format
+
+7. **Test file updated:**
+   - `status-bar-manager.test.ts` simplified — tests canonical `formatDuration` from `types.ts` directly (no mocks needed)
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 64 pass, 0 skipped, 0 fail
+- ✅ `npm run deploy:test` — deployed
+- ✅ `grep` confirms only canonical `formatDuration` and `formatTime12h` in `types.ts`
+- ✅ `grep` confirms zero `private formatDuration` / `private formatTime12h` in codebase
+- ✅ Manual: Status bar timer durations display correctly
+- ✅ Manual: Statistics modal durations render properly
+- ✅ Manual: Settings schedule times show in 12h format
+- ✅ Manual: Schedule block editor inputs use 12h format, save correctly
+- ✅ Manual: Operator Menu works normally
+
+### Notes
+- The 12h input enhancement was added during testing when Brad noticed the schedule block editor still used 24h format while the settings overview used 12h
+- DOM sync in `validate()` was overwriting parsed 24h values with raw 12h text — fixed by running `parseTime12h()` during sync
+
+---
+
+## Session 11–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
-
 

@@ -1,6 +1,6 @@
 import { App, Modal, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SessionRecord } from "../types";
+import { SessionRecord, formatDuration } from "../types";
 import { Logger } from "../services/Logger";
 
 /**
@@ -56,11 +56,11 @@ export class StatisticsModal extends Modal {
 
         const weekCard = cardsEl.createDiv("stats-card");
         weekCard.createEl("h3", { text: "This Week" });
-        weekCard.createEl("div", { text: this.formatDuration(weekMinutes), cls: "stats-big-number" });
+        weekCard.createEl("div", { text: formatDuration(weekMinutes), cls: "stats-big-number" });
         weekCard.createEl("div", { text: `${weekSessions.length} sessions`, cls: "stats-subtitle" });
         if (weekSessions.length > 0) {
             weekCard.createEl("div", {
-                text: `~${this.formatDuration(Math.round(weekMinutes / weekSessions.length))} avg`,
+                text: `~${formatDuration(Math.round(weekMinutes / weekSessions.length))} avg`,
                 cls: "stats-subtitle"
             });
         }
@@ -69,11 +69,11 @@ export class StatisticsModal extends Modal {
         const totalMinutes = history.reduce((sum, s) => sum + s.durationMinutes, 0);
         const allCard = cardsEl.createDiv("stats-card");
         allCard.createEl("h3", { text: "All Time" });
-        allCard.createEl("div", { text: this.formatDuration(totalMinutes), cls: "stats-big-number" });
+        allCard.createEl("div", { text: formatDuration(totalMinutes), cls: "stats-big-number" });
         allCard.createEl("div", { text: `${history.length} sessions`, cls: "stats-subtitle" });
         if (history.length > 0) {
             allCard.createEl("div", {
-                text: `~${this.formatDuration(Math.round(totalMinutes / history.length))} avg`,
+                text: `~${formatDuration(Math.round(totalMinutes / history.length))} avg`,
                 cls: "stats-subtitle"
             });
         }
@@ -115,7 +115,7 @@ export class StatisticsModal extends Modal {
             bar.style.width = `${(line.minutes / maxMinutes) * 100}%`;
             bar.style.backgroundColor = line.color;
 
-            barRow.createDiv({ text: this.formatDuration(line.minutes), cls: "stats-bar-value" });
+            barRow.createDiv({ text: formatDuration(line.minutes), cls: "stats-bar-value" });
         }
     }
 
@@ -141,7 +141,7 @@ export class StatisticsModal extends Modal {
                 cls: "stats-session-date"
             });
 
-            itemEl.createDiv({ text: this.formatDuration(session.durationMinutes), cls: "stats-session-duration" });
+            itemEl.createDiv({ text: formatDuration(session.durationMinutes), cls: "stats-session-duration" });
         }
     }
 
@@ -175,7 +175,7 @@ export class StatisticsModal extends Modal {
         }
         const lineStats = Object.entries(byLine)
             .sort((a, b) => b[1] - a[1])
-            .map(([name, mins]) => `- ${name}: ${this.formatDuration(mins)}`)
+            .map(([name, mins]) => `- ${name}: ${formatDuration(mins)}`)
             .join("\n");
 
         // By day
@@ -189,7 +189,7 @@ export class StatisticsModal extends Modal {
             .sort((a, b) => b[0].localeCompare(a[0]))
             .map(([date, data]) => {
                 const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-                return `- ${dayName} (${date}): ${this.formatDuration(data.minutes)} - ${[...data.lines].join(", ")}`;
+                return `- ${dayName} (${date}): ${formatDuration(data.minutes)} - ${[...data.lines].join(", ")}`;
             })
             .join("\n");
 
@@ -197,9 +197,9 @@ export class StatisticsModal extends Modal {
 Generated: ${new Date().toLocaleDateString()}
 
 ### This Week Summary
-- Total study time: ${this.formatDuration(weekMinutes)}
+- Total study time: ${formatDuration(weekMinutes)}
 - Sessions: ${weekSessions.length}
-- Average session: ${weekSessions.length > 0 ? this.formatDuration(Math.round(weekMinutes / weekSessions.length)) : "N/A"}
+- Average session: ${weekSessions.length > 0 ? formatDuration(Math.round(weekMinutes / weekSessions.length)) : "N/A"}
 
 ### By Subject
 ${lineStats || "No sessions this week"}
@@ -208,19 +208,14 @@ ${lineStats || "No sessions this week"}
 ${dayStats || "No sessions this week"}
 
 ### All Time
-- Total study time: ${this.formatDuration(totalMinutes)}
+- Total study time: ${formatDuration(totalMinutes)}
 - Total sessions: ${history.length}
 
 ---
 *Analyze my study habits. What patterns do you see? Suggestions for improvement?*`;
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) return `${minutes}m`;
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 
     private formatDate(dateStr: string): string {
         const date = new Date(dateStr);

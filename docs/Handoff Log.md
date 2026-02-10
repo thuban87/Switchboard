@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9+S10 Complete
 **Version:** 1.5.0
 
 ---
@@ -409,6 +409,29 @@ tags:
 
 **Audit Items Resolved:** #5, #17, #18, #19, #29, #49, #50, #51, #56, A5
 
+## Session: Code Deduplication & Refactoring (S10) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| types.ts Fix #21 | Canonical `formatDuration()` — removed duplicates from 6 files (19 call sites) |
+| types.ts Fix #22 | Canonical `formatTime12h()` — removed duplicates from 2 files (5 call sites) |
+| types.ts (new) | `parseTime12h()` + `isValidTime12h()` — 12h input parsing and validation |
+| OperatorModal Fix #37 | Business logic extracted to `SwitchboardPlugin.executeOperatorCommand()` — modal is now pure UI |
+| main.ts Fix A2 | `registeredCommandIds: Set<string>` prevents duplicate command registration |
+| LineEditorModal | Schedule block time inputs switched to 12h format with `parseTime12h()` conversion |
+| status-bar-manager.test.ts | Simplified to test canonical function directly (no mocks needed) |
+
+**Modified Files:**
+- `src/types.ts`, `src/main.ts`, `src/modals/OperatorModal.ts`
+- `src/services/StatusBarManager.ts`, `src/services/SessionLogger.ts`
+- `src/views/DashboardView.ts`
+- `src/modals/StatisticsModal.ts`, `src/modals/SessionEditorModal.ts`, `src/modals/CallLogModal.ts`
+- `src/settings/SwitchboardSettingTab.ts`, `src/settings/LineEditorModal.ts`
+- `test/status-bar-manager.test.ts`
+
+**Audit Items Resolved:** #21, #22, #37, A2
+
 ---
 
 ## Quick Reference
@@ -459,4 +482,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 10 of the Master Pre-Launch Plan: Code Deduplication & Refactoring. Extract `formatDuration()` and `formatTime12h()` into shared utilities, move business logic out of `OperatorModal.executeCommand()`, and fix `registerLineCommands()` accumulation. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 11 of the Master Pre-Launch Plan: CSS & Accessibility Polish. Audit `!important` usage (12 instances), add `:focus-visible` outlines to interactive elements, and standardize hover states. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

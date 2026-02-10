@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine, ScheduledBlock } from "../types";
+import { SwitchboardLine, ScheduledBlock, formatDuration } from "../types";
 
 export const DASHBOARD_VIEW_TYPE = "switchboard-dashboard";
 
@@ -9,7 +9,7 @@ export const DASHBOARD_VIEW_TYPE = "switchboard-dashboard";
  */
 export class DashboardView extends ItemView {
     plugin: SwitchboardPlugin;
-    private refreshInterval: ReturnType<typeof setInterval> | null = null;
+
 
     constructor(leaf: WorkspaceLeaf, plugin: SwitchboardPlugin) {
         super(leaf);
@@ -33,27 +33,30 @@ export class DashboardView extends ItemView {
         this.render();
 
         // Refresh every 30 seconds to update timer
-        this.refreshInterval = setInterval(() => {
-            this.render();
-        }, 30000);
+        // registerInterval() auto-cleans on view close AND plugin unload
+        this.registerInterval(
+            window.setInterval(() => {
+                this.render();
+            }, 30000)
+        );
     }
 
     async onClose() {
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-            this.refreshInterval = null;
-        }
+        // Interval is auto-cleaned by registerInterval()
     }
 
     /**
-     * Refresh the dashboard (called after patch-in/disconnect)
+     * Re-renders the dashboard (called by plugin when context changes)
      */
     refresh() {
         this.render();
     }
 
     private render() {
-        const container = this.containerEl.children[1] as HTMLElement;
+        // Fix #33: Use contentEl if available (Obsidian ItemView internal), fall back to children[1]
+        // Internal Obsidian API — ItemView exposes contentEl but it's not in the public type definitions
+        const container = ((this as any).contentEl || this.containerEl.children[1]) as HTMLElement;
+        if (!container) return;
         container.empty();
         container.addClass("dashboard-container");
 
@@ -93,7 +96,7 @@ export class DashboardView extends ItemView {
 
             // Timer
             const duration = this.plugin.sessionLogger.getCurrentDuration();
-            const durationStr = this.formatDuration(duration);
+            const durationStr = formatDuration(duration);
             content.createDiv({ text: `⏱️ ${durationStr}`, cls: "session-card-timer" });
 
             // Goal if set
@@ -166,7 +169,7 @@ export class DashboardView extends ItemView {
         const scheduleContainer = section.createDiv("dashboard-schedule");
         const today = new Date();
         const dayOfWeek = today.getDay();
-        const todayStr = today.toISOString().split("T")[0];
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
         const todayBlocks: Array<{ line: SwitchboardLine; block: ScheduledBlock }> = [];
 
@@ -232,18 +235,11 @@ export class DashboardView extends ItemView {
 
             sessionEl.createSpan({ text: session.lineName, cls: "dashboard-recent-name" });
             sessionEl.createSpan({
-                text: `${session.date} • ${this.formatDuration(session.durationMinutes)}`,
+                text: `${session.date} • ${formatDuration(session.durationMinutes)}`,
                 cls: "dashboard-recent-info"
             });
         }
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 }

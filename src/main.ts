@@ -1,10 +1,9 @@
 import { Plugin, Notice, Menu } from "obsidian";
-import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine } from "./types";
+import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine, OperatorCommand } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
 import { CallLogModal } from "./modals/CallLogModal";
 import { OperatorModal } from "./modals/OperatorModal";
-import { TimeUpModal } from "./modals/TimeUpModal";
 import { StatisticsModal } from "./modals/StatisticsModal";
 import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { GoalPromptModal } from "./modals/GoalPromptModal";
@@ -13,6 +12,9 @@ import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
 import { AudioService } from "./services/AudioService";
+import { StatusBarManager } from "./services/StatusBarManager";
+import { TimerManager } from "./services/TimerManager";
+import { Logger } from "./services/Logger";
 import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/DashboardView";
 
 /**
@@ -20,35 +22,34 @@ import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/DashboardView";
  * "Patch into your focus."
  */
 export default class SwitchboardPlugin extends Plugin {
-    settings: SwitchboardSettings;
-    circuitManager: CircuitManager;
-    wireService: WireService;
-    sessionLogger: SessionLogger;
-    audioService: AudioService;
+    settings!: SwitchboardSettings;
+    circuitManager!: CircuitManager;
+    wireService!: WireService;
+    sessionLogger!: SessionLogger;
+    audioService!: AudioService;
+    statusBarManager!: StatusBarManager;
+    timerManager!: TimerManager;
     missedCalls: Array<{ lineName: string; taskTitle: string; time: Date }> = [];
     currentGoal: string | null = null;
     private missedCallsAcknowledged: boolean = true;
-    private statusBarItem: HTMLElement | null = null;
-    private timerInterval: ReturnType<typeof setInterval> | null = null;
-    private autoDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
-    private breakReminderTimer: ReturnType<typeof setTimeout> | null = null;
+    private chronosStartupTimer: ReturnType<typeof setTimeout> | null = null;
+    private registeredCommandIds: Set<string> = new Set();
 
     async onload() {
-        console.log("Switchboard: Loading plugin...");
+        Logger.info("Plugin", "Loading plugin...");
 
-        // Initialize circuit manager
-        this.circuitManager = new CircuitManager(this.app);
-
-        // Initialize wire service for Chronos integration
-        this.wireService = new WireService(this.app, this);
-
-        // Initialize session logger
-        this.sessionLogger = new SessionLogger(this.app, this);
-
-        // Initialize audio service
-        this.audioService = new AudioService(this);
-
+        // Fix #35 / A3: Load settings BEFORE initializing services
+        // so AudioService.loadAudioFile() has access to settings
         await this.loadSettings();
+        Logger.setDebugMode(this.settings.debugMode);
+
+        // Initialize services (settings are now available)
+        this.circuitManager = new CircuitManager(this.app);
+        this.wireService = new WireService(this.app, this);
+        this.sessionLogger = new SessionLogger(this.app, this);
+        this.audioService = new AudioService(this);
+        this.statusBarManager = new StatusBarManager(this);
+        this.timerManager = new TimerManager(this);
 
         // Add ribbon icon
         this.addRibbonIcon("plug", "Switchboard", () => {
@@ -145,41 +146,42 @@ export default class SwitchboardPlugin extends Plugin {
         const activeLine = this.getActiveLine();
         if (activeLine) {
             this.circuitManager.activate(activeLine, false);
-            console.log(`Switchboard: Restored connection to "${activeLine.name}"`);
+            Logger.debug("Plugin", `Restored connection to "${activeLine.name}"`);
         }
 
         // Start wire service if Chronos integration is enabled
         if (this.settings.chronosIntegrationEnabled) {
             // Delay to allow Chronos to load first
-            setTimeout(() => {
+            // Partial fix #20: store handle so it can be cleared in onunload
+            this.chronosStartupTimer = setTimeout(() => {
                 this.wireService.start();
             }, 2000);
         }
 
-        // Add status bar item for session timer
-        this.statusBarItem = this.addStatusBarItem();
-        this.statusBarItem.addClass("switchboard-status-bar");
-        this.statusBarItem.addEventListener("click", (event) => {
-            this.showStatusBarMenu(event);
-        });
-        this.updateStatusBar();
+        // Initialize status bar
+        this.statusBarManager.init();
 
         // Register commands for each Line (Speed Dial)
         this.registerLineCommands();
 
-        console.log("Switchboard: Plugin loaded successfully.");
+        Logger.info("Plugin", "Plugin loaded successfully.");
     }
 
     onunload() {
-        // Stop timer updates
-        this.stopTimerUpdates();
-
-        // Stop wire service
+        // Fix #1, #2: Properly clean up all resources
+        this.statusBarManager.destroy();
+        this.timerManager.destroy();        // breakReminder + autoDisconnect timers
         this.wireService.stop();
-
-        // Clean up circuit when plugin is disabled
         this.circuitManager.deactivate();
-        console.log("Switchboard: Unloading plugin...");
+        this.audioService.destroy();        // CRITICAL: was missing (audit #1)
+
+        // Partial fix #20: clear Chronos startup timer
+        if (this.chronosStartupTimer) {
+            clearTimeout(this.chronosStartupTimer);
+            this.chronosStartupTimer = null;
+        }
+
+        Logger.info("Plugin", "Unloading plugin...");
     }
 
     /**
@@ -241,22 +243,26 @@ export default class SwitchboardPlugin extends Plugin {
      * Opens the Call Waiting file
      */
     async openCallWaiting() {
-        const filePath = "Call Waiting.md";
-        let file = this.app.vault.getAbstractFileByPath(filePath);
+        try {
+            // TODO: "Call Waiting.md" could be user-configurable (settings.callWaitingFile) (#42)
+            const filePath = "Call Waiting.md";
+            let file = this.app.vault.getAbstractFileByPath(filePath);
 
-        if (!file) {
-            // Create the file if it doesn't exist
-            const content = `# Call Waiting
+            if (!file) {
+                // Create the file if it doesn't exist
+                const content = `# Call Waiting\n\nTasks that were declined but saved for later.\n`;
+                await this.app.vault.create(filePath, content);
+                file = this.app.vault.getAbstractFileByPath(filePath);
+            }
 
-Tasks that were declined but saved for later.
-`;
-            await this.app.vault.create(filePath, content);
-            file = this.app.vault.getAbstractFileByPath(filePath);
-        }
-
-        if (file) {
-            const leaf = this.app.workspace.getLeaf();
-            await leaf.openFile(file as any);
+            if (file) {
+                const leaf = this.app.workspace.getLeaf();
+                // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
+                await leaf.openFile(file as any);
+            }
+        } catch (e) {
+            Logger.error("Plugin", "Error opening Call Waiting:", e);
+            new Notice("⚠️ Error opening Call Waiting — see console");
         }
     }
 
@@ -320,45 +326,51 @@ Tasks that were declined but saved for later.
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
-        console.log(`Switchboard: Patching in to "${line.name}"...`);
+        try {
+            Logger.debug("Plugin", `Patching in to "${line.name}"...`);
 
-        // Set active line
-        this.settings.activeLine = line.id;
-        await this.saveSettings();
+            // Set active line
+            this.settings.activeLine = line.id;
+            await this.saveSettings();
 
-        // Activate the circuit (CSS injection)
-        this.circuitManager.activate(line);
+            // Activate the circuit (CSS injection)
+            this.circuitManager.activate(line);
 
-        // Start session tracking
-        this.sessionLogger.startSession(line);
+            // Start session tracking
+            this.sessionLogger.startSession(line);
 
-        // Play patch-in sound
-        this.audioService.playPatchIn();
+            // Play patch-in sound
+            this.audioService.playPatchIn();
 
-        // Start status bar timer updates
-        this.startTimerUpdates();
+            // Start status bar timer updates
+            this.statusBarManager.startTimerUpdates();
 
-        // Start break reminder timer if enabled
-        this.startBreakReminderTimer();
+            // Start break reminder timer if enabled
+            this.timerManager.startBreakReminder();
 
-        // Show notice
-        new Notice(`📞 Patched in: ${line.name}`);
+            // Show notice
+            new Notice(`📞 Patched in: ${line.name}`);
 
-        // Open landing page if specified
-        if (line.landingPage) {
-            const file = this.app.vault.getAbstractFileByPath(line.landingPage);
-            if (file) {
-                const leaf = this.app.workspace.getLeaf();
-                await leaf.openFile(file as any);
-            } else {
-                new Notice(`Landing page not found: ${line.landingPage}`);
+            // Open landing page if specified
+            if (line.landingPage) {
+                const file = this.app.vault.getAbstractFileByPath(line.landingPage);
+                if (file) {
+                    const leaf = this.app.workspace.getLeaf();
+                    // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
+                    await leaf.openFile(file as any);
+                } else {
+                    new Notice(`Landing page not found: ${line.landingPage}`);
+                }
             }
+
+            Logger.debug("Plugin", `Now connected to "${line.name}"`);
+
+            // Refresh dashboard if open
+            this.refreshDashboard();
+        } catch (e) {
+            Logger.error("Plugin", "Error during patch-in:", e);
+            new Notice("⚠️ Error patching in — see console");
         }
-
-        console.log(`Switchboard: ✅ Now connected to "${line.name}"`);
-
-        // Refresh dashboard if open
-        this.refreshDashboard();
     }
 
     /**
@@ -392,62 +404,67 @@ Tasks that were declined but saved for later.
             return;
         }
 
-        console.log(`Switchboard: Disconnecting from "${activeLine.name}"...`);
+        try {
+            Logger.debug("Plugin", `Disconnecting from "${activeLine.name}"...`);
 
-        // Store goal for reflection before clearing
-        const sessionGoal = this.currentGoal;
+            // Store goal for reflection before clearing
+            const sessionGoal = this.currentGoal;
 
-        // Clear active line and goal
-        this.settings.activeLine = null;
-        this.currentGoal = null;
-        await this.saveSettings();
+            // Clear active line and goal
+            this.settings.activeLine = null;
+            this.currentGoal = null;
+            await this.saveSettings();
 
-        // Deactivate the circuit (remove CSS)
-        this.circuitManager.deactivate();
+            // Deactivate the circuit (remove CSS)
+            this.circuitManager.deactivate();
 
-        // Get duration before ending session (endSession clears it)
-        const sessionDuration = this.sessionLogger.getCurrentDuration();
+            // Get duration before ending session (endSession clears it)
+            const sessionDuration = this.sessionLogger.getCurrentDuration();
 
-        // End session and check for call log
-        const sessionInfo = this.sessionLogger.endSession();
+            // End session and check for call log
+            const sessionInfo = this.sessionLogger.endSession();
 
-        // Stop status bar timer updates
-        this.stopTimerUpdates();
-        this.updateStatusBar();
+            // Stop status bar timer updates
+            this.statusBarManager.stopTimerUpdates();
+            this.statusBarManager.update();
 
-        // Cancel any pending auto-disconnect and break reminder
-        this.cancelAutoDisconnect();
-        this.stopBreakReminderTimer();
+            // Cancel any pending auto-disconnect and break reminder
+            this.timerManager.cancelAutoDisconnect();
+            this.timerManager.stopBreakReminder();
 
-        if (sessionInfo) {
-            // Session was 5+ minutes, show call log modal with goal reflection
-            new CallLogModal(this.app, sessionInfo, async (summary) => {
-                if (summary) {
-                    // Include goal in summary if it was set
-                    const fullSummary = sessionGoal
-                        ? `Goal: ${sessionGoal}\n${summary}`
-                        : summary;
-                    await this.sessionLogger.logSession(sessionInfo, fullSummary);
-                    new Notice("📝 Session logged");
-                }
-                // Log to daily note with summary (after modal)
-                await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
-            }, sessionGoal).open();
-        } else {
-            // Session was < 5 minutes, log to daily note without summary
-            await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
+            if (sessionInfo) {
+                // Session was 5+ minutes, show call log modal with goal reflection
+                new CallLogModal(this.app, sessionInfo, async (summary) => {
+                    if (summary) {
+                        // Include goal in summary if it was set
+                        const fullSummary = sessionGoal
+                            ? `Goal: ${sessionGoal}\n${summary}`
+                            : summary;
+                        await this.sessionLogger.logSession(sessionInfo, fullSummary);
+                        new Notice("📝 Session logged");
+                    }
+                    // Log to daily note with summary (after modal)
+                    await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
+                }, sessionGoal).open();
+            } else {
+                // Session was < 5 minutes, log to daily note without summary
+                await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
+            }
+
+            // Show notice
+            new Notice(`🔌 Disconnected from: ${activeLine.name}`);
+
+            // Play disconnect sound
+            this.audioService.playDisconnect();
+
+            Logger.debug("Plugin", "Disconnected");
+
+            // Refresh dashboard if open
+            this.refreshDashboard();
+        } catch (e) {
+            Logger.error("Plugin", "Error during disconnect:", e);
+            new Notice("⚠️ Error disconnecting — see console");
         }
-
-        // Show notice
-        new Notice(`🔌 Disconnected from: ${activeLine.name}`);
-
-        // Play disconnect sound
-        this.audioService.playDisconnect();
-
-        console.log("Switchboard: ✅ Disconnected");
-
-        // Refresh dashboard if open
-        this.refreshDashboard();
     }
 
     /**
@@ -462,9 +479,19 @@ Tasks that were declined but saved for later.
 
     /**
      * Loads settings from data.json
+     * Fix #36: Schema version for future migrations
+     * Fix A8: Corrupted data.json recovery
      */
     async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        try {
+            const data = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+            // Future: if (data.schemaVersion < 2) migrateV1toV2(data);
+            this.settings = data;
+        } catch (e) {
+            Logger.error("Plugin", "Failed to load settings, using defaults", e);
+            new Notice("Switchboard: Settings corrupted, using defaults. Your Lines may need to be reconfigured.");
+            this.settings = { ...DEFAULT_SETTINGS };
+        }
     }
 
     /**
@@ -481,9 +508,10 @@ Tasks that were declined but saved for later.
      * Allows users to bind hotkeys to specific Lines
      */
     registerLineCommands(): void {
-        // Register patch-in command for each line
+        // Fix A2: Prevent duplicate command registration
         for (const line of this.settings.lines) {
             const commandId = `patch-in-${line.id}`;
+            if (this.registeredCommandIds.has(commandId)) continue;
             this.addCommand({
                 id: commandId,
                 name: `Patch In: ${line.name}`,
@@ -491,233 +519,89 @@ Tasks that were declined but saved for later.
                     this.patchIn(line);
                 },
             });
+            this.registeredCommandIds.add(commandId);
         }
-        console.log(`Switchboard: Registered ${this.settings.lines.length} Speed Dial commands`);
+        Logger.debug("Plugin", `Registered ${this.settings.lines.length} Speed Dial commands`);
     }
 
     /**
-     * Update the status bar with current session info
+     * Execute an operator command (Fix #37)
+     * Business logic extracted from OperatorModal to keep modals as pure UI.
      */
-    private updateStatusBar(): void {
-        if (!this.statusBarItem) return;
+    executeOperatorCommand(cmd: OperatorCommand): void {
+        switch (cmd.action) {
+            case "command":
+                try {
+                    // as any: app.commands is an undocumented Obsidian internal for command registry
+                    const commands = (this.app as any).commands;
+                    if (commands.commands[cmd.value]) {
+                        commands.executeCommandById(cmd.value);
+                    } else {
+                        new Notice(`Command not found: ${cmd.value}\n\nTip: Use Command Palette (Ctrl+P) and copy the command ID`);
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error executing command:", cmd.value, e);
+                    new Notice(`⚠️ Error executing command: ${cmd.name}`);
+                }
+                break;
 
-        const activeLine = this.getActiveLine();
-        if (!activeLine) {
-            this.statusBarItem.empty();
-            this.statusBarItem.style.display = "none";
-            return;
-        }
+            case "insert":
+                try {
+                    const editor = this.app.workspace.activeEditor?.editor;
+                    if (editor) {
+                        const cursor = editor.getCursor();
+                        const text = cmd.value
+                            .replace("{{date}}", new Date().toLocaleDateString())
+                            .replace("{{time}}", new Date().toLocaleTimeString());
+                        editor.replaceRange(text, cursor);
 
-        this.statusBarItem.style.display = "flex";
-        this.statusBarItem.empty();
+                        if (text.includes("$  $")) {
+                            editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
+                        }
+                    } else {
+                        new Notice("No active editor - open a note first");
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error inserting text:", cmd.name, e);
+                    new Notice(`⚠️ Error inserting text: ${cmd.name}`);
+                }
+                break;
 
-        // Color dot
-        const dot = this.statusBarItem.createSpan("switchboard-status-dot");
-        dot.style.backgroundColor = activeLine.color;
-
-        // Line name, timer, and optional goal
-        const duration = this.sessionLogger.getCurrentDuration();
-        const durationStr = this.formatDuration(duration);
-
-        let statusText = `${activeLine.name} • ${durationStr}`;
-        if (this.currentGoal) {
-            // Abbreviate goal to 20 chars
-            const goalAbbrev = this.currentGoal.length > 20
-                ? this.currentGoal.substring(0, 20) + "..."
-                : this.currentGoal;
-            statusText += ` • 🎯 ${goalAbbrev}`;
-        }
-        this.statusBarItem.createSpan({ text: statusText });
-
-        // Add missed calls indicator if there are unacknowledged missed calls
-        if (this.missedCalls.length > 0 && !this.missedCallsAcknowledged) {
-            this.statusBarItem.addClass("switchboard-status-blink");
-        } else {
-            this.statusBarItem.removeClass("switchboard-status-blink");
-        }
-    }
-
-    /**
-     * Start the timer update interval
-     */
-    private startTimerUpdates(): void {
-        this.stopTimerUpdates();
-        this.updateStatusBar();
-        // Update every 30 seconds
-        this.timerInterval = setInterval(() => {
-            this.updateStatusBar();
-        }, 30000);
-    }
-
-    /**
-     * Stop the timer update interval
-     */
-    private stopTimerUpdates(): void {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-    }
-
-    /**
-     * Start break reminder timer
-     */
-    private startBreakReminderTimer(): void {
-        this.stopBreakReminderTimer();
-
-        const minutes = this.settings.breakReminderMinutes;
-        if (minutes <= 0) return;
-
-        const ms = minutes * 60 * 1000;
-        this.breakReminderTimer = setTimeout(() => {
-            const activeLine = this.getActiveLine();
-            if (activeLine) {
-                new Notice(`☕ You've been on ${activeLine.name} for ${minutes} minutes - consider a break!`, 10000);
-                // Restart timer for another interval
-                this.startBreakReminderTimer();
-            }
-        }, ms);
-    }
-
-    /**
-     * Stop break reminder timer
-     */
-    private stopBreakReminderTimer(): void {
-        if (this.breakReminderTimer) {
-            clearTimeout(this.breakReminderTimer);
-            this.breakReminderTimer = null;
+            case "open":
+                try {
+                    if (!cmd.value) {
+                        new Notice("No file path specified");
+                        break;
+                    }
+                    const file = this.app.vault.getAbstractFileByPath(cmd.value);
+                    if (file) {
+                        // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
+                        this.app.workspace.getLeaf().openFile(file as any);
+                    } else {
+                        new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
+                    }
+                } catch (e) {
+                    Logger.error("Operator", "Error opening file:", cmd.value, e);
+                    new Notice(`⚠️ Error opening file: ${cmd.name}`);
+                }
+                break;
         }
     }
 
     /**
-     * Format duration as "Xh Ym" or "Xm"
-     */
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-
-    /**
-     * Show status bar context menu
-     */
-    private showStatusBarMenu(event: MouseEvent): void {
-        const activeLine = this.getActiveLine();
-        if (!activeLine) return;
-
-        const menu = new Menu();
-
-        // When menu is opened, acknowledge missed calls (stop blinking)
-        if (this.missedCalls.length > 0) {
-            this.missedCallsAcknowledged = true;
-            this.updateStatusBar();
-        }
-
-        menu.addItem((item) =>
-            item
-                .setTitle(`🔌 Disconnect from ${activeLine.name}`)
-                .setIcon("unplug")
-                .onClick(() => {
-                    this.disconnect();
-                })
-        );
-
-        menu.addItem((item) =>
-            item
-                .setTitle("🏛️ Open Operator Menu")
-                .setIcon("headphones")
-                .onClick(() => {
-                    this.openOperatorModal();
-                })
-        );
-
-        menu.addItem((item) =>
-            item
-                .setTitle("📊 Statistics")
-                .setIcon("bar-chart-2")
-                .onClick(() => {
-                    this.openStatistics();
-                })
-        );
-
-        menu.addItem((item) =>
-            item
-                .setTitle("📝 Edit Sessions")
-                .setIcon("pencil")
-                .onClick(() => {
-                    this.openSessionEditor();
-                })
-        );
-
-        // Show missed calls if any
-        if (this.missedCalls.length > 0) {
-            menu.addSeparator();
-            menu.addItem((item) =>
-                item
-                    .setTitle(`📞 Missed Calls (${this.missedCalls.length})`)
-                    .setIcon("phone-missed")
-                    .setDisabled(true)
-            );
-
-            for (const call of this.missedCalls) {
-                const timeStr = call.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-                menu.addItem((item) =>
-                    item
-                        .setTitle(`  ${call.lineName} - ${timeStr}`)
-                        .onClick(() => {
-                            // Clear this missed call
-                            this.missedCalls = this.missedCalls.filter(c => c !== call);
-                        })
-                );
-            }
-
-            menu.addItem((item) =>
-                item
-                    .setTitle("Clear all missed calls")
-                    .setIcon("x")
-                    .onClick(() => {
-                        this.missedCalls = [];
-                        new Notice("Cleared missed calls");
-                    })
-            );
-        }
-
-        menu.showAtMouseEvent(event);
-    }
-
-    /**
-     * Schedule auto-disconnect at a specific time
+     * Schedule auto-disconnect at a specific time.
+     * Thin wrapper — delegates to TimerManager.
+     * External callers (WireService, TimeUpModal) use this via plugin reference.
      */
     scheduleAutoDisconnect(endTime: Date): void {
-        this.cancelAutoDisconnect();
-
-        if (!this.settings.autoDisconnect) return;
-
-        const now = new Date();
-        const delay = endTime.getTime() - now.getTime();
-
-        if (delay <= 0) return;
-
-        this.autoDisconnectTimer = setTimeout(() => {
-            const activeLine = this.getActiveLine();
-            if (activeLine) {
-                new TimeUpModal(this.app, this, activeLine).open();
-            } else {
-                this.disconnect();
-            }
-        }, delay);
+        this.timerManager.scheduleAutoDisconnect(endTime);
     }
 
     /**
-     * Cancel any pending auto-disconnect
+     * Cancel any pending auto-disconnect.
+     * Thin wrapper — delegates to TimerManager.
      */
     cancelAutoDisconnect(): void {
-        if (this.autoDisconnectTimer) {
-            clearTimeout(this.autoDisconnectTimer);
-            this.autoDisconnectTimer = null;
-        }
+        this.timerManager.cancelAutoDisconnect();
     }
 }

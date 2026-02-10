@@ -83,6 +83,8 @@ export interface SessionRecord {
  * Plugin settings stored in data.json
  */
 export interface SwitchboardSettings {
+    /** Schema version for future migrations */
+    schemaVersion: number;
     /** All configured lines */
     lines: SwitchboardLine[];
     /** Currently active line ID, or null if disconnected */
@@ -109,12 +111,15 @@ export interface SwitchboardSettings {
     dailyNotesFolder: string;
     /** Heading to append logs under in daily notes */
     dailyNoteHeading: string;
+    /** Enable debug logging to console */
+    debugMode: boolean;
 }
 
 /**
  * Default settings for new installations
  */
 export const DEFAULT_SETTINGS: SwitchboardSettings = {
+    schemaVersion: 1,
     lines: [],
     activeLine: null,
     chronosIntegrationEnabled: true,
@@ -128,6 +133,7 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     enableDailyNoteLogging: false,
     dailyNotesFolder: "",
     dailyNoteHeading: "### Switchboard Logs",
+    debugMode: false,
 };
 
 /**
@@ -150,8 +156,78 @@ export const PRESET_COLORS: string[] = [
  * Generates a slug ID from a name
  */
 export function generateId(name: string): string {
+    if (!name || !name.trim()) return "";
     return name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "");
+}
+
+/**
+ * Validate a vault path — reject traversal, absolute paths, dot-prefix.
+ * Note: dot-prefix rejection blocks .obsidian/ (prevents plugin data corruption)
+ * but also blocks user folders like .hidden-folder/. This is an intentional
+ * conservative security choice — session log files should not target hidden dirs.
+ */
+export function validatePath(path: string): boolean {
+    if (!path) return false;
+    // Normalize backslashes for Windows path support
+    const normalized = path.replace(/\\/g, "/");
+    if (normalized.includes("..")) return false;
+    if (/^[a-zA-Z]:/.test(normalized) || normalized.startsWith("/")) return false;
+    if (normalized.startsWith(".")) return false;
+    return true;
+}
+
+/** Validate hex color (#RRGGBB format) */
+export function isValidHexColor(color: string): boolean {
+    return /^#[0-9a-fA-F]{6}$/.test(color);
+}
+
+/** Validate time string (HH:MM 24h format) */
+export function isValidTime(time: string): boolean {
+    const match = time.match(/^(\d{2}):(\d{2})$/);
+    if (!match) return false;
+    const h = parseInt(match[1]), m = parseInt(match[2]);
+    return h >= 0 && h <= 23 && m >= 0 && m <= 59;
+}
+
+/** Validate date string (YYYY-MM-DD) */
+export function isValidDate(date: string): boolean {
+    const d = new Date(date + "T00:00:00");
+    return !isNaN(d.getTime());
+}
+
+/** Format duration as "Xh Ym" or "Xm" */
+export function formatDuration(minutes: number): string {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+/** Format 24h time to 12h format */
+export function formatTime12h(time24: string): string {
+    const [h, m] = time24.split(":").map(Number);
+    const period = h >= 12 ? "PM" : "AM";
+    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/** Parse 12h time string (e.g. "9:00 AM", "2:30 PM") to 24h format ("09:00", "14:30"). Returns null if invalid. */
+export function parseTime12h(time12: string): string | null {
+    const match = time12.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return null;
+    let h = parseInt(match[1]);
+    const m = parseInt(match[2]);
+    const period = match[3].toUpperCase();
+    if (h < 1 || h > 12 || m < 0 || m > 59) return null;
+    if (period === "AM" && h === 12) h = 0;
+    else if (period === "PM" && h !== 12) h += 12;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/** Validate 12h time string */
+export function isValidTime12h(time: string): boolean {
+    return parseTime12h(time) !== null;
 }

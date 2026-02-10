@@ -1,6 +1,7 @@
 import { App, TFile, TFolder } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine } from "../types";
+import { SwitchboardLine, validatePath, formatDuration } from "../types";
+import { Logger } from "./Logger";
 
 /**
  * Session information for logging
@@ -19,6 +20,8 @@ export class SessionLogger {
     private app: App;
     private plugin: SwitchboardPlugin;
     private currentSession: { line: SwitchboardLine; startTime: Date } | null = null;
+    /** Fix #25: Promise queue to prevent concurrent write interleaving */
+    private writeQueue: Promise<void> = Promise.resolve();
 
     constructor(app: App, plugin: SwitchboardPlugin) {
         this.app = app;
@@ -62,9 +65,20 @@ export class SessionLogger {
     }
 
     /**
-     * Log a session summary to the configured file
+     * Log a session summary to the configured file.
+     * Fix #25: Chains through writeQueue to prevent concurrent write interleaving.
      */
     async logSession(session: SessionInfo, summary: string): Promise<void> {
+        this.writeQueue = this.writeQueue
+            .then(() => this._doLogSession(session, summary))
+            .catch(e => Logger.error("Session", "Failed to log session", e));
+        return this.writeQueue;
+    }
+
+    /**
+     * Internal: performs the actual session logging (called via writeQueue).
+     */
+    private async _doLogSession(session: SessionInfo, summary: string): Promise<void> {
         // Save to session history for statistics
         await this.saveToHistory(session, summary);
 
@@ -72,7 +86,7 @@ export class SessionLogger {
         const logFile = await this.getOrCreateLogFile(session.line);
 
         if (!logFile) {
-            console.error("SessionLogger: Could not create or find log file");
+            Logger.error("Session", "Could not create or find log file");
             return;
         }
 
@@ -80,8 +94,11 @@ export class SessionLogger {
         let content = await this.app.vault.read(logFile);
 
         // Find the heading and append after it
+        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
         const heading = session.line.sessionLogHeading || "## Session Log";
-        const headingIndex = content.indexOf(heading);
+        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+        const headingMatch = content.match(headingRegex);
+        const headingIndex = headingMatch ? headingMatch.index! : -1;
 
         if (headingIndex !== -1) {
             // Find end of the heading line
@@ -101,25 +118,30 @@ export class SessionLogger {
         }
 
         await this.app.vault.modify(logFile, content);
-        console.log("SessionLogger: Appended log entry to", logFile.path);
+        Logger.debug("Session", "Appended log entry to", logFile.path);
     }
 
     /**
      * Save session to history for statistics
      */
     private async saveToHistory(session: SessionInfo, summary: string): Promise<void> {
+        // Fix #26: Use local date instead of UTC to match daily note behavior
+        const year = session.startTime.getFullYear();
+        const month = String(session.startTime.getMonth() + 1).padStart(2, "0");
+        const day = String(session.startTime.getDate()).padStart(2, "0");
+
         const record = {
             lineId: session.line.id,
             lineName: session.line.name,
-            date: session.startTime.toISOString().split("T")[0],
+            date: `${year}-${month}-${day}`,
             startTime: this.formatTime24(session.startTime),
             endTime: this.formatTime24(session.endTime),
             durationMinutes: session.durationMinutes,
             summary,
         };
 
-        console.log("Switchboard: Saving session to history", record);
-        console.log("Switchboard: Current history length:", this.plugin.settings.sessionHistory?.length || 0);
+        Logger.debug("Session", "Saving session to history", record);
+        Logger.debug("Session", "Current history length:", this.plugin.settings.sessionHistory?.length || 0);
 
         // Ensure sessionHistory array exists
         if (!this.plugin.settings.sessionHistory) {
@@ -127,10 +149,16 @@ export class SessionLogger {
         }
 
         this.plugin.settings.sessionHistory.push(record);
-        console.log("Switchboard: New history length:", this.plugin.settings.sessionHistory.length);
+
+        // Fix #8: Prune to keep last 1000 sessions
+        if (this.plugin.settings.sessionHistory.length > 1000) {
+            this.plugin.settings.sessionHistory = this.plugin.settings.sessionHistory.slice(-1000);
+        }
+
+        Logger.debug("Session", "New history length:", this.plugin.settings.sessionHistory.length);
 
         await this.plugin.saveSettings();
-        console.log("Switchboard: Settings saved");
+        Logger.debug("Session", "Settings saved");
     }
 
     /**
@@ -151,7 +179,7 @@ export class SessionLogger {
         });
         const startStr = this.formatTime(session.startTime);
         const endStr = this.formatTime(session.endTime);
-        const durationStr = this.formatDuration(session.durationMinutes);
+        const durationStr = formatDuration(session.durationMinutes);
 
         return `### 📞 ${dateStr} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
     }
@@ -163,17 +191,7 @@ export class SessionLogger {
         return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     }
 
-    /**
-     * Format duration as "1h 45m" or "45m"
-     */
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 
     /**
      * Get or create the log file
@@ -181,11 +199,14 @@ export class SessionLogger {
     private async getOrCreateLogFile(line: SwitchboardLine): Promise<TFile | null> {
         let logPath: string;
 
-        // Use line's configured file if specified
-        if (line.sessionLogFile) {
+        // Use line's configured file if specified and safe
+        if (line.sessionLogFile && validatePath(line.sessionLogFile)) {
             logPath = line.sessionLogFile;
-            console.log("SessionLogger: Using configured log file path:", logPath);
+            Logger.debug("Session", "Using configured log file path:", logPath);
         } else {
+            if (line.sessionLogFile && !validatePath(line.sessionLogFile)) {
+                Logger.warn("Session", "Session log file path rejected (unsafe):", line.sessionLogFile);
+            }
             // Default: create in same folder as landing page
             let folderPath = "";
             if (line.landingPage) {
@@ -197,13 +218,13 @@ export class SessionLogger {
             logPath = folderPath
                 ? `${folderPath}/${line.name} - Session Log.md`
                 : `${line.name} - Session Log.md`;
-            console.log("SessionLogger: Using default log file path:", logPath);
+            Logger.debug("Session", "Using default log file path:", logPath);
         }
 
         // Try exact path match first
         let file = this.app.vault.getAbstractFileByPath(logPath);
         if (file instanceof TFile) {
-            console.log("SessionLogger: Found file at exact path");
+            Logger.debug("Session", "Found file at exact path");
             return file;
         }
 
@@ -212,12 +233,12 @@ export class SessionLogger {
         const lowerLogPath = logPath.toLowerCase();
         const matchingFile = allFiles.find(f => f.path.toLowerCase() === lowerLogPath);
         if (matchingFile) {
-            console.log("SessionLogger: Found file via case-insensitive match:", matchingFile.path);
+            Logger.debug("Session", "Found file via case-insensitive match:", matchingFile.path);
             return matchingFile;
         }
 
         // File doesn't exist - try to create it
-        console.log("SessionLogger: File not found, attempting to create:", logPath);
+        Logger.debug("Session", "File not found, attempting to create:", logPath);
         try {
             // Ensure parent folders exist
             const parts = logPath.split("/");
@@ -226,14 +247,14 @@ export class SessionLogger {
             if (folderPath) {
                 const folder = this.app.vault.getAbstractFileByPath(folderPath);
                 if (!folder) {
-                    console.log("SessionLogger: Creating folder:", folderPath);
+                    Logger.debug("Session", "Creating folder:", folderPath);
                     await this.app.vault.createFolder(folderPath);
                 }
             }
 
             return await this.app.vault.create(logPath, this.getDefaultLogContent(line));
         } catch (e) {
-            console.error("SessionLogger: Failed to create log file:", e);
+            Logger.error("Session", "Failed to create log file:", e);
             return null;
         }
     }
@@ -283,7 +304,7 @@ export class SessionLogger {
         const filePath = `${settings.dailyNotesFolder}/${filename}`;
 
         // Format: LINE: DURATION - SUMMARY
-        const durationStr = this.formatDuration(durationMinutes);
+        const durationStr = formatDuration(durationMinutes);
         const bulletEntry = summary
             ? `- **${lineName}**: ${durationStr} - ${summary}`
             : `- **${lineName}**: ${durationStr}`;
@@ -297,16 +318,16 @@ export class SessionLogger {
                 const heading = settings.dailyNoteHeading || "### Switchboard Logs";
                 const content = `# ${dateStr}, ${dayName}\n\n${heading}\n${bulletEntry}\n`;
                 await this.app.vault.create(filePath, content);
-                console.log("SessionLogger: Created daily note with session log:", filePath);
+                Logger.debug("Session", "Created daily note with session log:", filePath);
                 return;
             } catch (e) {
-                console.error("SessionLogger: Failed to create daily note:", e);
+                Logger.error("Session", "Failed to create daily note:", e);
                 return;
             }
         }
 
         if (!(file instanceof TFile)) {
-            console.error("SessionLogger: Daily note path is not a file:", filePath);
+            Logger.error("Session", "Daily note path is not a file:", filePath);
             return;
         }
 
@@ -314,8 +335,10 @@ export class SessionLogger {
         let content = await this.app.vault.read(file);
         const heading = settings.dailyNoteHeading || "### Switchboard Logs";
 
-        // Find the heading
-        const headingIndex = content.indexOf(heading);
+        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+        const headingMatch = content.match(headingRegex);
+        const headingIndex = headingMatch ? headingMatch.index! : -1;
 
         if (headingIndex !== -1) {
             // Find the end of the heading line
@@ -353,6 +376,6 @@ export class SessionLogger {
         }
 
         await this.app.vault.modify(file, content);
-        console.log("SessionLogger: Appended to daily note:", bulletEntry);
+        Logger.debug("Session", "Appended to daily note:", bulletEntry);
     }
 }

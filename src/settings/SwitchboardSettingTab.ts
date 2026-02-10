@@ -1,7 +1,8 @@
 import { PluginSettingTab, App, Setting } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
-import { SwitchboardLine } from "../types";
+import { SwitchboardLine, formatTime12h } from "../types";
+import { Logger } from "../services/Logger";
 
 /**
  * Settings tab for configuring Switchboard Lines
@@ -14,6 +15,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
+    /** Renders the settings tab with Line management, audio, break, and Chronos options */
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
@@ -105,8 +107,8 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     .addOption("synthesized", "Synthesized (Web Audio)")
                     .addOption("realistic", "Realistic (Sample)")
                     .setValue(this.plugin.settings.soundType)
-                    .onChange(async (value: "synthesized" | "realistic") => {
-                        this.plugin.settings.soundType = value;
+                    .onChange(async (value) => {
+                        this.plugin.settings.soundType = value as "synthesized" | "realistic";
                         await this.plugin.saveSettings();
                     })
             );
@@ -185,7 +187,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
                         if (folders.length > 0 && value.length > 0) {
                             const popover = containerEl.createDiv("daily-note-folder-suggestions suggestion-container");
-                            popover.style.position = "absolute";
+                            popover.style.position = "fixed";
                             popover.style.zIndex = "1000";
 
                             for (const folder of folders) {
@@ -199,17 +201,18 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                                 });
                             }
 
-                            // Position popover
-                            const rect = inputEl.getBoundingClientRect();
-                            popover.style.top = `${inputEl.offsetTop + inputEl.offsetHeight}px`;
-                            popover.style.left = `${inputEl.offsetLeft}px`;
-                            popover.style.width = `${inputEl.offsetWidth}px`;
+                            // Position popover directly below the input using viewport coordinates
+                            const inputRect = inputEl.getBoundingClientRect();
+                            popover.style.top = `${inputRect.bottom}px`;
+                            popover.style.left = `${inputRect.left}px`;
+                            popover.style.width = `${inputRect.width}px`;
                         }
                     });
 
                     // Hide suggestions on blur (with delay to allow click)
                     inputEl.addEventListener("blur", () => {
                         setTimeout(() => {
+                            if (!inputEl.isConnected) return;
                             const popover = containerEl.querySelector(".daily-note-folder-suggestions");
                             if (popover) popover.remove();
                         }, 200);
@@ -251,7 +254,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                             this.plugin.saveSettings();
                             this.plugin.restartWireService();
                             this.display();
-                        }).open();
+                        }, this.plugin.settings.lines).open();
                     })
             );
 
@@ -268,6 +271,22 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         for (const line of this.plugin.settings.lines) {
             this.renderLineItem(linesContainer, line);
         }
+
+        // Advanced Section
+        containerEl.createEl("h2", { text: "Advanced" });
+
+        new Setting(containerEl)
+            .setName("Debug mode")
+            .setDesc("Log detailed debug information to the developer console. Useful for troubleshooting.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.debugMode)
+                    .onChange(async (value) => {
+                        this.plugin.settings.debugMode = value;
+                        Logger.setDebugMode(value);
+                        await this.plugin.saveSettings();
+                    })
+            );
     }
 
     private renderLineItem(containerEl: HTMLElement, line: SwitchboardLine) {
@@ -305,7 +324,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     this.plugin.restartWireService();
                     this.display();
                 }
-            }).open();
+            }, this.plugin.settings.lines).open();
         });
 
         // Delete button
@@ -378,8 +397,8 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                         desc = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
                     }
 
-                    const timeStart = this.formatTime12h(block.startTime);
-                    const timeEnd = this.formatTime12h(block.endTime);
+                    const timeStart = formatTime12h(block.startTime);
+                    const timeEnd = formatTime12h(block.endTime);
                     desc += ` ${timeStart} - ${timeEnd}`;
 
                     blockEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
@@ -399,7 +418,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
                 // Format task info
                 const dateStr = task.date ? new Date(task.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
-                const timeStr = task.time ? this.formatTime12h(task.time) : "All day";
+                const timeStr = task.time ? formatTime12h(task.time) : "All day";
                 const desc = `${dateStr} ${timeStr} - ${task.title}`;
 
                 taskEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
@@ -449,7 +468,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             // Get today's date string for filtering past tasks
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const todayStr = today.toISOString().split("T")[0];
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
             // Filter to only tasks that have switchboard-related tags (optimization)
             const switchboardTasks = syncedTasks.filter((task: any) => {
@@ -461,7 +480,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                 });
             });
 
-            console.log("Switchboard: Filtered to", switchboardTasks.length, "tasks with switchboard tags");
+            Logger.debug("Settings", "Filtered to", switchboardTasks.length, "tasks with switchboard tags");
 
             for (const task of switchboardTasks) {
                 const tags = task.tags || [];
@@ -481,13 +500,13 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     if (tag.toLowerCase().startsWith("switchboard/")) {
                         // Format: #switchboard/line-name
                         targetLine = tag.split("/")[1] || "";
-                        console.log("Switchboard: Found switchboard/ tag, targetLine:", targetLine);
+                        Logger.debug("Settings", "Found switchboard/ tag, targetLine:", targetLine);
                         break;
                     } else if (tag.toLowerCase() === "switchboard") {
                         // Format: #switchboard with /line-name in title
                         const match = title.match(/\/([a-z0-9-]+)/i);
                         if (match) targetLine = match[1];
-                        console.log("Switchboard: Found switchboard tag, checking title for /line-name, targetLine:", targetLine);
+                        Logger.debug("Settings", "Found switchboard tag, checking title for /line-name, targetLine:", targetLine);
                         break;
                     }
                 }
@@ -506,18 +525,10 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
             return result;
         } catch (e) {
-            console.error("Switchboard: Error getting Chronos tasks:", e);
+            Logger.error("Settings", "Error getting Chronos tasks:", e);
             return [];
         }
     }
 
-    /**
-     * Format 24h time to 12h format
-     */
-    private formatTime12h(time24: string): string {
-        const [hours, minutes] = time24.split(":").map(Number);
-        const period = hours >= 12 ? "PM" : "AM";
-        const hours12 = hours % 12 || 12;
-        return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
-    }
+
 }

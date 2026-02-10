@@ -1,5 +1,6 @@
 import { App, Modal } from "obsidian";
 import { SessionInfo } from "../services/SessionLogger";
+import { formatDuration } from "../types";
 
 /**
  * CallLogModal - Shows when disconnecting from a session (5+ min)
@@ -9,7 +10,7 @@ import { SessionInfo } from "../services/SessionLogger";
 export class CallLogModal extends Modal {
     private session: SessionInfo;
     private onSubmit: (summary: string | null) => void;
-    private textArea: HTMLTextAreaElement;
+    private textArea!: HTMLTextAreaElement;
     private goal: string | null;
 
     constructor(
@@ -24,6 +25,7 @@ export class CallLogModal extends Modal {
         this.goal = goal;
     }
 
+    /** Renders the session summary form with textarea, buttons, and keyboard shortcuts */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -44,7 +46,7 @@ export class CallLogModal extends Modal {
         colorDot.style.backgroundColor = this.session.line.color;
         lineEl.createEl("span", { text: this.session.line.name });
 
-        const durationStr = this.formatDuration(this.session.durationMinutes);
+        const durationStr = formatDuration(this.session.durationMinutes);
         const timeRange = `${this.formatTime(this.session.startTime)} - ${this.formatTime(this.session.endTime)}`;
         infoEl.createEl("p", { text: `⏱️ ${durationStr} (${timeRange})`, cls: "call-log-duration" });
 
@@ -68,12 +70,23 @@ export class CallLogModal extends Modal {
         });
 
         // Text area
+        // Fix #47: Character limit prevents excessively long summaries
         this.textArea = contentEl.createEl("textarea", {
             cls: "call-log-textarea",
             attr: {
                 placeholder: "Brief summary of your session...",
-                rows: "3"
+                rows: "3",
+                maxlength: "2000"
             }
+        });
+
+        // Character counter
+        const counterEl = contentEl.createEl("div", {
+            cls: "call-log-char-counter",
+            text: "0 / 2,000"
+        });
+        this.textArea.addEventListener("input", () => {
+            counterEl.textContent = `${this.textArea.value.length.toLocaleString()} / 2,000`;
         });
 
         // Focus the textarea
@@ -102,9 +115,9 @@ export class CallLogModal extends Modal {
             this.onSubmit(null);
         });
 
-        // Handle Enter key to submit
+        // Handle Enter key to submit (Fix #46: support Cmd+Enter on Mac)
         this.textArea.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && e.ctrlKey) {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                 const summary = this.textArea.value.trim();
                 this.close();
                 this.onSubmit(summary || "No summary provided");
@@ -112,6 +125,7 @@ export class CallLogModal extends Modal {
         });
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();
@@ -121,12 +135,5 @@ export class CallLogModal extends Modal {
         return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) {
-            return `${minutes}m`;
-        }
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 }

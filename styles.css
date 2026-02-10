@@ -511,6 +511,15 @@
 	background: var(--background-secondary-alt);
 }
 
+.call-log-char-counter,
+.goal-prompt-char-counter {
+	text-align: right;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	margin-top: 4px;
+	padding-right: 2px;
+}
+
 /* ========================================
    Operator Modal
    ======================================== */
@@ -558,35 +567,7 @@
 	gap: 10px;
 }
 
-.operator-cmd-btn {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 16px 12px;
-	background: var(--background-secondary);
-	border: 2px solid transparent;
-	border-radius: 12px;
-	cursor: pointer;
-	transition: all 0.15s ease;
-}
-
-.operator-cmd-btn:hover {
-	background: var(--background-secondary-alt);
-	border-color: var(--operator-color, var(--interactive-accent));
-	transform: translateY(-2px);
-}
-
-.operator-cmd-icon {
-	font-size: 1.5rem;
-}
-
-.operator-cmd-name {
-	font-size: 0.85rem;
-	font-weight: 500;
-	text-align: center;
-}
+/* operator-cmd-btn, operator-cmd-icon, operator-cmd-name defined in Operator Menu Modal section below */
 
 /* ========================================
    Schedule Blocks (Line Editor)
@@ -898,10 +879,10 @@
 }
 
 .operator-cmd-btn {
-	display: flex !important;
-	flex-direction: row !important;
-	align-items: center !important;
-	justify-content: flex-start !important;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
 	gap: 14px;
 	width: 100%;
 	min-height: 52px;
@@ -1394,7 +1375,8 @@
 }
 
 .session-btn-delete:hover {
-	background: var(--background-modifier-error) !important;
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
 }
 
 .session-editor-buttons {
@@ -1417,17 +1399,17 @@
 	border-top: 1px solid var(--background-modifier-border);
 }
 
-.incoming-call-btn-secondary {
-	background: var(--background-secondary) !important;
-	border: 1px solid var(--background-modifier-border) !important;
-	color: var(--text-normal) !important;
-	padding: 8px 16px !important;
-	font-size: 13px !important;
-	justify-content: flex-start !important;
+.incoming-call-decline-options .incoming-call-btn-secondary {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-normal);
+	padding: 8px 16px;
+	font-size: 13px;
+	justify-content: flex-start;
 }
 
-.incoming-call-btn-secondary:hover {
-	background: var(--background-modifier-hover) !important;
+.incoming-call-decline-options .incoming-call-btn-secondary:hover {
+	background: var(--background-modifier-hover);
 }
 
 /* ==========================================
@@ -1708,8 +1690,8 @@
 }
 
 .dashboard-section-title {
-	margin: 0;
-	font-size: 0.8rem;
+	margin: 0 0 4px 0;
+	font-size: 1.1rem;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
@@ -1932,4 +1914,51 @@
 	font-style: italic;
 	font-size: 0.85rem;
 	padding: 8px 0;
+}
+
+/* ========================================
+   Accessibility: Focus Visible Outlines
+   ======================================== */
+
+/* Primary action buttons */
+.incoming-call-btn-connect:focus-visible,
+.call-log-btn-done:focus-visible,
+.goal-prompt-btn-primary:focus-visible,
+.timeup-extend:focus-visible,
+.stats-export-btn:focus-visible,
+.dashboard-line-btn:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+/* Secondary / neutral interactive elements */
+.operator-cmd-btn:focus-visible,
+.switchboard-patch-line:focus-visible,
+.incoming-call-btn:focus-visible,
+.call-log-btn-skip:focus-visible,
+.goal-prompt-btn-secondary:focus-visible,
+.timeup-disconnect:focus-visible,
+.quick-switch-line:focus-visible,
+.quick-switch-disconnect:focus-visible,
+.switchboard-disconnect-btn:focus-visible,
+.session-card-disconnect:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+/* Small interactive controls */
+.switchboard-color-swatch:focus-visible,
+.switchboard-line-btn:focus-visible,
+.schedule-block-delete:focus-visible,
+.custom-command-delete:focus-visible,
+.session-editor-session-actions button:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 1px;
+}
+
+/* Text inputs — ring for keyboard nav, keep existing border-color change */
+.call-log-textarea:focus-visible,
+.goal-prompt-input:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: -1px;
 }

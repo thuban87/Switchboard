@@ -22,6 +22,7 @@ export class PatchInModal extends Modal {
         this.onSelect = onSelect;
     }
 
+    /** Renders the Line selection grid with color-coded buttons and a disconnect option */
     onOpen() {
         const { contentEl } = this;
         contentEl.empty();
@@ -88,6 +89,7 @@ export class PatchInModal extends Modal {
         }
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

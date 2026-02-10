@@ -1,6 +1,7 @@
 import { App, Modal, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SessionRecord } from "../types";
+import { SessionRecord, formatDuration } from "../types";
+import { Logger } from "../services/Logger";
 
 /**
  * StatisticsModal - Dashboard showing session statistics
@@ -13,6 +14,7 @@ export class StatisticsModal extends Modal {
         this.plugin = plugin;
     }
 
+    /** Renders the statistics dashboard with weekly/all-time stats and export button */
     onOpen() {
         const { contentEl, modalEl } = this;
         modalEl.addClass("switchboard-statistics-modal");
@@ -49,17 +51,17 @@ export class StatisticsModal extends Modal {
         // This week stats
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        const weekStr = weekAgo.toISOString().split("T")[0];
+        const weekStr = `${weekAgo.getFullYear()}-${String(weekAgo.getMonth() + 1).padStart(2, "0")}-${String(weekAgo.getDate()).padStart(2, "0")}`;
         const weekSessions = history.filter(s => s.date >= weekStr);
         const weekMinutes = weekSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
 
         const weekCard = cardsEl.createDiv("stats-card");
         weekCard.createEl("h3", { text: "This Week" });
-        weekCard.createEl("div", { text: this.formatDuration(weekMinutes), cls: "stats-big-number" });
+        weekCard.createEl("div", { text: formatDuration(weekMinutes), cls: "stats-big-number" });
         weekCard.createEl("div", { text: `${weekSessions.length} sessions`, cls: "stats-subtitle" });
         if (weekSessions.length > 0) {
             weekCard.createEl("div", {
-                text: `~${this.formatDuration(Math.round(weekMinutes / weekSessions.length))} avg`,
+                text: `~${formatDuration(Math.round(weekMinutes / weekSessions.length))} avg`,
                 cls: "stats-subtitle"
             });
         }
@@ -68,11 +70,11 @@ export class StatisticsModal extends Modal {
         const totalMinutes = history.reduce((sum, s) => sum + s.durationMinutes, 0);
         const allCard = cardsEl.createDiv("stats-card");
         allCard.createEl("h3", { text: "All Time" });
-        allCard.createEl("div", { text: this.formatDuration(totalMinutes), cls: "stats-big-number" });
+        allCard.createEl("div", { text: formatDuration(totalMinutes), cls: "stats-big-number" });
         allCard.createEl("div", { text: `${history.length} sessions`, cls: "stats-subtitle" });
         if (history.length > 0) {
             allCard.createEl("div", {
-                text: `~${this.formatDuration(Math.round(totalMinutes / history.length))} avg`,
+                text: `~${formatDuration(Math.round(totalMinutes / history.length))} avg`,
                 cls: "stats-subtitle"
             });
         }
@@ -114,7 +116,7 @@ export class StatisticsModal extends Modal {
             bar.style.width = `${(line.minutes / maxMinutes) * 100}%`;
             bar.style.backgroundColor = line.color;
 
-            barRow.createDiv({ text: this.formatDuration(line.minutes), cls: "stats-bar-value" });
+            barRow.createDiv({ text: formatDuration(line.minutes), cls: "stats-bar-value" });
         }
     }
 
@@ -140,24 +142,29 @@ export class StatisticsModal extends Modal {
                 cls: "stats-session-date"
             });
 
-            itemEl.createDiv({ text: this.formatDuration(session.durationMinutes), cls: "stats-session-duration" });
+            itemEl.createDiv({ text: formatDuration(session.durationMinutes), cls: "stats-session-duration" });
         }
     }
 
     private renderExportButton(containerEl: HTMLElement, history: SessionRecord[]) {
         const buttonEl = containerEl.createDiv("stats-export");
         const btn = buttonEl.createEl("button", { text: "📤 Export for AI Analysis", cls: "stats-export-btn" });
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
             const markdown = this.generateExport(history);
-            navigator.clipboard.writeText(markdown);
-            new Notice("📋 Statistics copied to clipboard!");
+            try {
+                await navigator.clipboard.writeText(markdown);
+                new Notice("📋 Statistics copied to clipboard!");
+            } catch (e) {
+                Logger.error("Statistics", "Failed to copy to clipboard:", e);
+                new Notice("⚠️ Failed to copy to clipboard");
+            }
         });
     }
 
     private generateExport(history: SessionRecord[]): string {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        const weekStr = weekAgo.toISOString().split("T")[0];
+        const weekStr = `${weekAgo.getFullYear()}-${String(weekAgo.getMonth() + 1).padStart(2, "0")}-${String(weekAgo.getDate()).padStart(2, "0")}`;
         const weekSessions = history.filter(s => s.date >= weekStr);
         const weekMinutes = weekSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
         const totalMinutes = history.reduce((sum, s) => sum + s.durationMinutes, 0);
@@ -169,7 +176,7 @@ export class StatisticsModal extends Modal {
         }
         const lineStats = Object.entries(byLine)
             .sort((a, b) => b[1] - a[1])
-            .map(([name, mins]) => `- ${name}: ${this.formatDuration(mins)}`)
+            .map(([name, mins]) => `- ${name}: ${formatDuration(mins)}`)
             .join("\n");
 
         // By day
@@ -183,38 +190,33 @@ export class StatisticsModal extends Modal {
             .sort((a, b) => b[0].localeCompare(a[0]))
             .map(([date, data]) => {
                 const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
-                return `- ${dayName} (${date}): ${this.formatDuration(data.minutes)} - ${[...data.lines].join(", ")}`;
+                return `- ${dayName} (${date}): ${formatDuration(data.minutes)} - ${[...data.lines].join(", ")}`;
             })
             .join("\n");
 
-        return `## Study Statistics Export
+        return `## Switchboard Statistics Export
 Generated: ${new Date().toLocaleDateString()}
 
 ### This Week Summary
-- Total study time: ${this.formatDuration(weekMinutes)}
+- Total time: ${formatDuration(weekMinutes)}
 - Sessions: ${weekSessions.length}
-- Average session: ${weekSessions.length > 0 ? this.formatDuration(Math.round(weekMinutes / weekSessions.length)) : "N/A"}
+- Average session: ${weekSessions.length > 0 ? formatDuration(Math.round(weekMinutes / weekSessions.length)) : "N/A"}
 
-### By Subject
+### By Line
 ${lineStats || "No sessions this week"}
 
 ### Daily Breakdown
 ${dayStats || "No sessions this week"}
 
 ### All Time
-- Total study time: ${this.formatDuration(totalMinutes)}
+- Total time: ${formatDuration(totalMinutes)}
 - Total sessions: ${history.length}
 
 ---
-*Analyze my study habits. What patterns do you see? Suggestions for improvement?*`;
+*Analyze my time usage. What patterns do you see? Suggestions for improvement?*`;
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) return `${minutes}m`;
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
+
 
     private formatDate(dateStr: string): string {
         const date = new Date(dateStr);
@@ -222,11 +224,15 @@ ${dayStats || "No sessions this week"}
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
 
-        if (dateStr === today.toISOString().split("T")[0]) return "Today";
-        if (dateStr === yesterday.toISOString().split("T")[0]) return "Yesterday";
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+        if (dateStr === todayStr) return "Today";
+        if (dateStr === yesterdayStr) return "Yesterday";
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

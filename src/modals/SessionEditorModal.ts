@@ -1,6 +1,6 @@
 import { App, Modal, Notice, Setting } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SessionRecord, SwitchboardLine } from "../types";
+import { SessionRecord, SwitchboardLine, formatDuration } from "../types";
 
 /**
  * SessionEditorModal - Browse and edit session history
@@ -15,6 +15,7 @@ export class SessionEditorModal extends Modal {
         this.plugin = plugin;
     }
 
+    /** Renders the session history list with edit/delete actions per session */
     onOpen() {
         const { contentEl, modalEl } = this;
         modalEl.addClass("switchboard-session-editor-modal");
@@ -69,7 +70,7 @@ export class SessionEditorModal extends Modal {
 
             const lineName = data.line?.name || data.sessions[0].record.lineName;
             const totalMins = data.sessions.reduce((sum, s) => sum + s.record.durationMinutes, 0);
-            headerEl.createSpan({ text: `${lineName} (${data.sessions.length} sessions, ${this.formatDuration(totalMins)})` });
+            headerEl.createSpan({ text: `${lineName} (${data.sessions.length} sessions, ${formatDuration(totalMins)})` });
 
             const expandIcon = headerEl.createSpan({ text: "▶", cls: "session-editor-expand" });
 
@@ -94,7 +95,7 @@ export class SessionEditorModal extends Modal {
                     cls: "session-editor-session-date"
                 });
                 infoEl.createEl("span", {
-                    text: this.formatDuration(record.durationMinutes),
+                    text: formatDuration(record.durationMinutes),
                     cls: "session-editor-session-duration"
                 });
 
@@ -202,7 +203,9 @@ export class SessionEditorModal extends Modal {
         const [endH, endM] = record.endTime.split(":").map(Number);
         const startMins = startH * 60 + startM;
         const endMins = endH * 60 + endM;
-        record.durationMinutes = Math.max(0, endMins - startMins);
+        let duration = endMins - startMins;
+        if (duration < 0) duration += 24 * 60; // midnight crossing
+        record.durationMinutes = Math.max(0, Math.round(duration));
     }
 
     private async deleteSession(index: number) {
@@ -215,13 +218,9 @@ export class SessionEditorModal extends Modal {
         this.renderSessionList();
     }
 
-    private formatDuration(minutes: number): string {
-        if (minutes < 60) return `${minutes}m`;
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
 
+
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

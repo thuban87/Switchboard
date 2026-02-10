@@ -21,6 +21,7 @@ export class GoalPromptModal extends Modal {
         this.onSubmit = onSubmit;
     }
 
+    /** Renders the goal input form with text field and action buttons */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -35,7 +36,7 @@ export class GoalPromptModal extends Modal {
             cls: "goal-prompt-subtitle"
         });
 
-        // Goal input
+        // Goal input (Fix #47: character limit on goal text)
         new Setting(contentEl)
             .setClass("goal-prompt-input-container")
             .addText((text) => {
@@ -44,6 +45,7 @@ export class GoalPromptModal extends Modal {
                         this.goal = value;
                     });
                 text.inputEl.addClass("goal-prompt-input");
+                text.inputEl.setAttribute("maxlength", "200");
                 text.inputEl.addEventListener("keydown", (e) => {
                     if (e.key === "Enter") {
                         this.close();
@@ -53,6 +55,19 @@ export class GoalPromptModal extends Modal {
                 // Auto-focus
                 setTimeout(() => text.inputEl.focus(), 50);
             });
+
+        // Character counter
+        const counterEl = contentEl.createEl("div", {
+            cls: "goal-prompt-char-counter",
+            text: "0 / 200"
+        });
+        // Need to find the input we just created to wire up the counter
+        const goalInput = contentEl.querySelector(".goal-prompt-input") as HTMLInputElement;
+        if (goalInput) {
+            goalInput.addEventListener("input", () => {
+                counterEl.textContent = `${goalInput.value.length} / 200`;
+            });
+        }
 
         // Buttons
         const actionsEl = contentEl.createDiv("goal-prompt-actions");
@@ -77,6 +92,7 @@ export class GoalPromptModal extends Modal {
         });
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

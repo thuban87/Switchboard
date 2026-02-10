@@ -1,5 +1,5 @@
-import { Modal, App, Setting, TextComponent } from "obsidian";
-import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId } from "../types";
+import { Modal, App, Setting, TextComponent, Notice } from "obsidian";
+import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId, isValidHexColor, isValidTime, isValidDate, formatTime12h, parseTime12h, isValidTime12h } from "../types";
 import { FolderSuggest, FileSuggest } from "./PathSuggest";
 
 /**
@@ -9,35 +9,46 @@ export class LineEditorModal extends Modal {
     private line: SwitchboardLine;
     private onSave: (line: SwitchboardLine) => void;
     private isNew: boolean;
+    private existingLines: SwitchboardLine[];
+    private scheduleContainer: HTMLElement | null = null;
 
     constructor(
         app: App,
         line: SwitchboardLine | null,
-        onSave: (line: SwitchboardLine) => void
+        onSave: (line: SwitchboardLine) => void,
+        existingLines: SwitchboardLine[] = []
     ) {
         super(app);
         this.onSave = onSave;
+        this.existingLines = existingLines;
         this.isNew = line === null;
-        this.line = line ?? {
-            id: "",
-            name: "",
-            color: PRESET_COLORS[0],
-            safePaths: [""],
-            landingPage: "",
-            sessionLogFile: "",
-            sessionLogHeading: "## Session Log",
-            scheduledBlocks: [],
-            customCommands: [],
-        };
-        // Ensure arrays exist for older saved lines
-        if (!this.line.scheduledBlocks) {
-            this.line.scheduledBlocks = [];
-        }
-        if (!this.line.customCommands) {
-            this.line.customCommands = [];
+        if (line) {
+            // Deep copy to prevent modal edits from mutating the original settings
+            this.line = {
+                ...line,
+                safePaths: [...line.safePaths],
+                scheduledBlocks: (line.scheduledBlocks || []).map(b => ({
+                    ...b,
+                    days: b.days ? [...b.days] : undefined,
+                })),
+                customCommands: (line.customCommands || []).map(c => ({ ...c })),
+            };
+        } else {
+            this.line = {
+                id: "",
+                name: "",
+                color: PRESET_COLORS[0],
+                safePaths: [""],
+                landingPage: "",
+                sessionLogFile: "",
+                sessionLogHeading: "## Session Log",
+                scheduledBlocks: [],
+                customCommands: [],
+            };
         }
     }
 
+    /** Renders the Line configuration form with all editable fields */
     onOpen() {
         const { contentEl } = this;
         contentEl.empty();
@@ -224,7 +235,8 @@ export class LineEditorModal extends Modal {
         // Remove existing path inputs
         containerEl.querySelectorAll(".switchboard-path-input").forEach((el) => el.remove());
 
-        for (let i = 0; i < this.line.safePaths.length; i++) {
+        for (const [i, path] of this.line.safePaths.entries()) {
+            const currentPath = path;
             const pathSetting = new Setting(containerEl)
                 .setClass("switchboard-path-input")
                 .addText((text) => {
@@ -239,7 +251,8 @@ export class LineEditorModal extends Modal {
                 })
                 .addExtraButton((btn) =>
                     btn.setIcon("x").setTooltip("Remove").onClick(() => {
-                        this.line.safePaths.splice(i, 1);
+                        const idx = this.line.safePaths.indexOf(currentPath);
+                        if (idx >= 0) this.line.safePaths.splice(idx, 1);
                         if (this.line.safePaths.length === 0) {
                             this.line.safePaths.push("");
                         }
@@ -262,6 +275,7 @@ export class LineEditorModal extends Modal {
 
         // Container for schedule blocks
         const scheduleContainer = containerEl.createDiv("schedule-blocks-container");
+        this.scheduleContainer = scheduleContainer;
         this.renderScheduleBlocks(scheduleContainer);
 
         // Add block button
@@ -308,14 +322,15 @@ export class LineEditorModal extends Modal {
                 const date = new Date(block.date + "T00:00:00");
                 summary = date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
             }
-            summary += ` ${this.formatTime12h(block.startTime)} - ${this.formatTime12h(block.endTime)}`;
+            summary += ` ${formatTime12h(block.startTime)} - ${formatTime12h(block.endTime)}`;
             headerEl.createSpan({ text: summary, cls: "schedule-block-summary" });
 
             // Delete button
             const deleteBtn = headerEl.createEl("button", { cls: "schedule-block-delete" });
             deleteBtn.textContent = "×";
             deleteBtn.addEventListener("click", () => {
-                this.line.scheduledBlocks.splice(i, 1);
+                const idx = this.line.scheduledBlocks.findIndex(b => b.id === block.id);
+                if (idx >= 0) this.line.scheduledBlocks.splice(idx, 1);
                 this.renderScheduleBlocks(containerEl);
             });
 
@@ -337,7 +352,10 @@ export class LineEditorModal extends Modal {
                                 if (!block.days) block.days = [1, 3, 5];
                             } else {
                                 block.days = undefined;
-                                if (!block.date) block.date = new Date().toISOString().split("T")[0];
+                                if (!block.date) {
+                                    const now = new Date();
+                                    block.date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+                                }
                             }
                             this.renderScheduleBlocks(containerEl);
                         })
@@ -375,34 +393,55 @@ export class LineEditorModal extends Modal {
                             .setPlaceholder("YYYY-MM-DD")
                             .onChange((value) => {
                                 block.date = value;
+                                if (value && !isValidDate(value)) {
+                                    text.inputEl.style.borderColor = "var(--text-error)";
+                                } else {
+                                    text.inputEl.style.borderColor = "";
+                                }
                             })
                     );
             }
 
-            // Time inputs
+            // Time inputs (12h format)
             const timeEl = fieldsEl.createDiv("schedule-times");
 
             new Setting(timeEl)
                 .setName("Start")
-                .addText((text) =>
+                .addText((text) => {
                     text
-                        .setValue(block.startTime)
-                        .setPlaceholder("09:00")
+                        .setValue(formatTime12h(block.startTime))
+                        .setPlaceholder("9:00 AM")
                         .onChange((value) => {
-                            block.startTime = value;
-                        })
-                );
+                            const parsed = parseTime12h(value);
+                            if (parsed) {
+                                block.startTime = parsed;
+                                text.inputEl.style.borderColor = "";
+                            } else {
+                                text.inputEl.style.borderColor = "var(--text-error)";
+                            }
+                        });
+                    text.inputEl.setAttribute("data-block-id", block.id);
+                    text.inputEl.setAttribute("data-field", "startTime");
+                });
 
             new Setting(timeEl)
                 .setName("End")
-                .addText((text) =>
+                .addText((text) => {
                     text
-                        .setValue(block.endTime)
-                        .setPlaceholder("10:00")
+                        .setValue(formatTime12h(block.endTime))
+                        .setPlaceholder("10:00 AM")
                         .onChange((value) => {
-                            block.endTime = value;
-                        })
-                );
+                            const parsed = parseTime12h(value);
+                            if (parsed) {
+                                block.endTime = parsed;
+                                text.inputEl.style.borderColor = "";
+                            } else {
+                                text.inputEl.style.borderColor = "var(--text-error)";
+                            }
+                        });
+                    text.inputEl.setAttribute("data-block-id", block.id);
+                    text.inputEl.setAttribute("data-field", "endTime");
+                });
         }
 
         if (this.line.scheduledBlocks.length === 0) {
@@ -413,21 +452,72 @@ export class LineEditorModal extends Modal {
         }
     }
 
-    /**
-     * Format 24h time to 12h format
-     */
-    private formatTime12h(time24: string): string {
-        const [hours, minutes] = time24.split(":").map(Number);
-        const period = hours >= 12 ? "PM" : "AM";
-        const hours12 = hours % 12 || 12;
-        return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
-    }
+
 
     private validate(): boolean {
+        // Sync schedule block values from DOM inputs before validating
+        // (guards against onChange not having fired yet on fast clicks)
+        if (this.scheduleContainer) {
+            const inputs = this.scheduleContainer.querySelectorAll("input[data-block-id]") as NodeListOf<HTMLInputElement>;
+            for (const input of Array.from(inputs)) {
+                const blockId = input.getAttribute("data-block-id");
+                const field = input.getAttribute("data-field");
+                const block = this.line.scheduledBlocks.find(b => b.id === blockId);
+                if (block && field && (field === "startTime" || field === "endTime")) {
+                    // Convert 12h display value back to 24h for storage
+                    const parsed = parseTime12h(input.value);
+                    if (parsed) {
+                        // as any: dynamically assigning to startTime/endTime via computed field name
+                        (block as any)[field] = parsed;
+                    } else {
+                        // as any: same pattern — keeping raw value for validation error display
+                        (block as any)[field] = input.value; // Keep raw for validation error message
+                    }
+                }
+            }
+        }
+
         if (!this.line.name.trim()) {
-            // Show error
+            new Notice("Switchboard: Line name cannot be empty");
             return false;
         }
+
+        // Fix #14: Check for duplicate Line ID on creation
+        if (this.isNew) {
+            const newId = generateId(this.line.name);
+            if (!newId) {
+                new Notice("Switchboard: Line name must contain at least one letter or number");
+                return false;
+            }
+            const collision = this.existingLines.find(l => l.id === newId);
+            if (collision) {
+                new Notice(`Switchboard: A Line with ID \"${newId}\" already exists (\"${collision.name}\")`);
+                return false;
+            }
+        }
+
+        // Fix #23: Validate hex color
+        if (!isValidHexColor(this.line.color)) {
+            new Notice("Switchboard: Invalid color format — use #RRGGBB hex");
+            return false;
+        }
+
+        // Fix #13: Validate schedule block times/dates
+        for (const block of this.line.scheduledBlocks) {
+            if (!isValidTime(block.startTime)) {
+                new Notice(`Switchboard: Invalid start time \"${block.startTime}\" — use format like 9:00 AM`);
+                return false;
+            }
+            if (!isValidTime(block.endTime)) {
+                new Notice(`Switchboard: Invalid end time \"${block.endTime}\" — use format like 10:00 AM`);
+                return false;
+            }
+            if (!block.recurring && block.date && !isValidDate(block.date)) {
+                new Notice(`Switchboard: Invalid date \"${block.date}\" — use YYYY-MM-DD format`);
+                return false;
+            }
+        }
+
         // Filter out empty paths
         this.line.safePaths = this.line.safePaths.filter((p) => p.trim() !== "");
         if (this.line.safePaths.length === 0) {
@@ -551,12 +641,14 @@ export class LineEditorModal extends Modal {
                 text: "×",
             });
             deleteBtn.addEventListener("click", () => {
-                this.line.customCommands.splice(i, 1);
+                const idx = this.line.customCommands.indexOf(cmd);
+                if (idx >= 0) this.line.customCommands.splice(idx, 1);
                 this.renderCustomCommands(containerEl);
             });
         }
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

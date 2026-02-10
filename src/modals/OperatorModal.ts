@@ -1,9 +1,14 @@
-import { App, Modal, Notice } from "obsidian";
+import { App, Modal } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, OperatorCommand } from "../types";
 
 /**
- * Default commands for academic Lines
+ * Default commands available when no custom commands are configured on a Line.
+ * Some entries reference external plugins (e.g., Excalidraw, QuickAdd) — if those
+ * plugins aren't installed, the command will fail with a Notice (see executeOperatorCommand
+ * in main.ts). Users are expected to override these with custom commands per Line.
+ *
+ * TODO: Could be user-configurable as a global "default command template" in settings (#43/#44)
  */
 const DEFAULT_COMMANDS: Record<string, OperatorCommand[]> = {
     // Math-related commands
@@ -52,6 +57,7 @@ export class OperatorModal extends Modal {
         this.line = line;
     }
 
+    /** Renders the command grid with Line-specific actions and click handlers */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -92,6 +98,7 @@ export class OperatorModal extends Modal {
         // Close on Escape is handled by Modal base class
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();
@@ -117,52 +124,9 @@ export class OperatorModal extends Modal {
     }
 
     /**
-     * Execute a command
+     * Execute a command — delegates to plugin (Fix #37)
      */
     private executeCommand(cmd: OperatorCommand): void {
-        switch (cmd.action) {
-            case "command":
-                // Execute an Obsidian command
-                const commands = (this.app as any).commands;
-                if (commands.commands[cmd.value]) {
-                    commands.executeCommandById(cmd.value);
-                } else {
-                    new Notice(`Command not found: ${cmd.value}\n\nTip: Use Command Palette (Ctrl+P) and copy the command ID`);
-                }
-                break;
-
-            case "insert":
-                // Insert text at cursor
-                const editor = this.app.workspace.activeEditor?.editor;
-                if (editor) {
-                    const cursor = editor.getCursor();
-                    const text = cmd.value
-                        .replace("{{date}}", new Date().toLocaleDateString())
-                        .replace("{{time}}", new Date().toLocaleTimeString());
-                    editor.replaceRange(text, cursor);
-
-                    // Position cursor in the middle of inline elements
-                    if (text.includes("$  $")) {
-                        editor.setCursor({ line: cursor.line, ch: cursor.ch + 2 });
-                    }
-                } else {
-                    new Notice("No active editor - open a note first");
-                }
-                break;
-
-            case "open":
-                // Open a file
-                if (!cmd.value) {
-                    new Notice("No file path specified");
-                    break;
-                }
-                const file = this.app.vault.getAbstractFileByPath(cmd.value);
-                if (file) {
-                    this.app.workspace.getLeaf().openFile(file as any);
-                } else {
-                    new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
-                }
-                break;
-        }
+        this.plugin.executeOperatorCommand(cmd);
     }
 }

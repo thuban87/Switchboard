@@ -1,28 +1,39 @@
 {
     "name": "switchboard",
     "version": "1.5.0",
-    "description": "Context manager for the ADHD brain. Patch into your focus.",
+    "description": "Context manager for the distracted brain. Patch into your focus.",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs",
         "build": "node esbuild.config.mjs production",
         "deploy:test": "node esbuild.config.mjs production && node scripts/deploy.mjs test",
-        "deploy:production": "node esbuild.config.mjs production && node scripts/deploy.mjs production"
+        "deploy:production": "node esbuild.config.mjs production && node scripts/deploy.mjs production",
+        "test": "vitest run",
+        "test:watch": "vitest"
     },
     "keywords": [
         "obsidian",
         "plugin",
-        "adhd",
+        "productivity",
         "focus",
         "context-switching"
     ],
     "author": "Brad Wales",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/thuban87/Switchboard.git"
+    },
+    "engines": {
+        "node": ">=18"
+    },
     "devDependencies": {
         "@types/node": "^20.10.0",
         "builtin-modules": "^3.3.0",
         "esbuild": "^0.19.8",
-        "obsidian": "latest",
-        "typescript": "^5.3.2"
+        "happy-dom": "^20.6.0",
+        "obsidian": "^1.7.2",
+        "typescript": "^5.3.2",
+        "vitest": "^4.0.18"
     }
 }

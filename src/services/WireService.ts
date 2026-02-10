@@ -2,6 +2,7 @@ import { App, Notice } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, ScheduledBlock, generateId } from "../types";
 import { IncomingCallModal, IncomingCallAction } from "../modals/IncomingCallModal";
+import { Logger } from "./Logger";
 
 /**
  * Represents a scheduled incoming call
@@ -76,6 +77,8 @@ export class WireService {
             clearTimeout(call.timerId);
         }
         this.scheduledCalls.clear();
+        this.snoozedCalls.clear();
+        this.declinedCalls.clear();
 
         // Unsubscribe from Chronos events
         if (this.unsubscribeSyncComplete) {
@@ -106,30 +109,34 @@ export class WireService {
         const now = new Date();
 
         for (const task of syncedTasks) {
-            // Check for #switchboard/* tags (also checks title for /line-name pattern)
-            const taskTitle = task.taskTitle || task.title || "";
-            const lineMatch = this.findMatchingLine(task.tags || [], taskTitle);
-            if (!lineMatch) continue;
+            try {
+                // Check for #switchboard/* tags (also checks title for /line-name pattern)
+                const taskTitle = task.taskTitle || task.title || "";
+                const lineMatch = this.findMatchingLine(task.tags || [], taskTitle);
+                if (!lineMatch) continue;
 
-            // Parse task datetime
-            const taskTime = this.parseTaskTime(task);
-            if (!taskTime) continue;
+                // Parse task datetime
+                const taskTime = this.parseTaskTime(task);
+                if (!taskTime) continue;
 
-            // Skip past tasks (allow 1 min grace)
-            if (taskTime.getTime() < now.getTime() - 60000) continue;
+                // Skip past tasks (allow 1 min grace)
+                if (taskTime.getTime() < now.getTime() - 60000) continue;
 
-            // Skip declined tasks
-            const taskId = this.generateTaskId(task);
-            if (this.declinedCalls.has(taskId)) continue;
+                // Skip declined tasks
+                const taskId = this.generateTaskId(task);
+                if (this.declinedCalls.has(taskId)) continue;
 
-            // Check if snoozed
-            const snoozed = this.snoozedCalls.get(taskId);
-            if (snoozed && snoozed.snoozeUntil.getTime() > now.getTime()) {
-                // Schedule for after snooze
-                this.scheduleCall(task, lineMatch, snoozed.snoozeUntil);
-            } else {
-                // Schedule for task time
-                this.scheduleCall(task, lineMatch, taskTime);
+                // Check if snoozed
+                const snoozed = this.snoozedCalls.get(taskId);
+                if (snoozed && snoozed.snoozeUntil.getTime() > now.getTime()) {
+                    // Schedule for after snooze
+                    this.scheduleCall(task, lineMatch, snoozed.snoozeUntil);
+                } else {
+                    // Schedule for task time
+                    this.scheduleCall(task, lineMatch, taskTime);
+                }
+            } catch (e) {
+                Logger.error("Wire", "Error processing task during timer refresh:", e);
             }
         }
 
@@ -185,7 +192,7 @@ export class WireService {
                 taskTitle: taskTitle,
                 time: new Date()
             });
-            // Mark as unacknowledged so status bar blinks
+            // as any: missedCallsAcknowledged is private on SwitchboardPlugin but needed by WireService for status bar coordination
             (this.plugin as any).missedCallsAcknowledged = false;
             new Notice(`📞 ${line.name} is calling - Busy on ${activeLine.name}`);
             return;
@@ -211,12 +218,12 @@ export class WireService {
     /**
      * Handle the user's action on the incoming call
      */
-    private handleCallAction(
+    private async handleCallAction(
         task: any,
         line: SwitchboardLine,
         action: IncomingCallAction,
         snoozeMinutes?: number
-    ): void {
+    ): Promise<void> {
         const taskId = this.generateTaskId(task);
 
         switch (action) {
@@ -232,13 +239,13 @@ export class WireService {
                     endTime.setHours(endHours, endMinutes, 0, 0);
 
                     const now = new Date();
-                    console.log("Switchboard: Auto-disconnect scheduled for", endTime.toLocaleString(), "now is", now.toLocaleString());
+                    Logger.debug("Wire", "Auto-disconnect scheduled for", endTime.toLocaleString(), "now is", now.toLocaleString());
 
                     // If end time is in the future, schedule auto-disconnect
                     if (endTime.getTime() > now.getTime()) {
                         this.plugin.scheduleAutoDisconnect(endTime);
                     } else {
-                        console.log("Switchboard: End time already passed, not scheduling auto-disconnect");
+                        Logger.debug("Wire", "End time already passed, not scheduling auto-disconnect");
                     }
                 }
                 break;
@@ -254,15 +261,24 @@ export class WireService {
                 new Notice(`📞 Call on hold for ${snoozeMinutes || 5} minutes`);
                 break;
 
-            case "decline":
+            case "decline": {
+                // Remove from snoozed to prevent re-trigger
+                this.snoozedCalls.delete(taskId);
+                // Cancel any scheduled timer for this task
+                const scheduled = this.scheduledCalls.get(taskId);
+                if (scheduled) {
+                    clearTimeout(scheduled.timerId);
+                    this.scheduledCalls.delete(taskId);
+                }
                 // Mark as declined (won't trigger again this session)
                 this.declinedCalls.add(taskId);
                 new Notice(`📞 Call declined: ${line.name}`);
                 break;
+            }
 
             case "call-waiting":
-                // Save to Call Waiting file
-                this.saveToCallWaiting(task, line);
+                // Save to Call Waiting file (Fix #9: properly await async operation)
+                await this.saveToCallWaiting(task, line);
                 this.declinedCalls.add(taskId);
                 new Notice(`📼 Saved to Call Waiting: ${line.name}`);
                 break;
@@ -334,6 +350,7 @@ export class WireService {
      * Save a declined task to the Call Waiting file
      */
     private async saveToCallWaiting(task: any, line: SwitchboardLine): Promise<void> {
+        // TODO: "Call Waiting.md" could be user-configurable (settings.callWaitingFile) (#42)
         const filePath = "Call Waiting.md";
         const taskTitle = task.title || task.taskTitle || "Untitled Task";
         const now = new Date();
@@ -346,7 +363,7 @@ export class WireService {
             const file = this.app.vault.getAbstractFileByPath(filePath);
 
             if (file) {
-                // Append to existing file
+                // as any: vault.read/modify expect TFile but we have TAbstractFile from getAbstractFileByPath
                 const content = await this.app.vault.read(file as any);
                 await this.app.vault.modify(file as any, content + "\n" + entry);
             } else {
@@ -359,9 +376,9 @@ ${entry}`;
                 await this.app.vault.create(filePath, content);
             }
 
-            console.log("WireService: Saved to Call Waiting:", entry);
+            Logger.debug("Wire", "Saved to Call Waiting:", entry);
         } catch (error) {
-            console.error("WireService: Failed to save to Call Waiting:", error);
+            Logger.error("Wire", "Failed to save to Call Waiting:", error);
             new Notice("Failed to save to Call Waiting file");
         }
     }
@@ -372,11 +389,12 @@ ${entry}`;
      */
     private getChronosPlugin(): any {
         try {
+            // as any: app.plugins is an undocumented Obsidian internal for accessing installed plugins
             const plugins = (this.app as any).plugins?.plugins;
             if (!plugins) return null;
             return plugins["chronos-google-calendar-sync"] || null;
         } catch (error) {
-            console.warn("Switchboard: Error accessing Chronos plugin:", error);
+            Logger.warn("Wire", "Error accessing Chronos plugin:", error);
             return null;
         }
     }
@@ -393,7 +411,7 @@ ${entry}`;
             }
             return [];
         } catch (error) {
-            console.error("WireService: Error getting synced tasks:", error);
+            Logger.error("Wire", "Error getting synced tasks:", error);
             return [];
         }
     }
@@ -404,21 +422,24 @@ ${entry}`;
     private parseTaskTime(task: any): Date | null {
         // Try datetime field first
         if (task.datetime) {
-            return new Date(task.datetime);
+            const d = new Date(task.datetime);
+            return isNaN(d.getTime()) ? null : d;
         }
 
         // Try date + time fields
         if (task.date) {
             const dateStr = task.date;
             const timeStr = task.time || "00:00";
-            return new Date(`${dateStr}T${timeStr}:00`);
+            const d = new Date(`${dateStr}T${timeStr}:00`);
+            return isNaN(d.getTime()) ? null : d;
         }
 
         // Try taskDate + taskTime (SyncedTaskInfo format)
         if (task.taskDate) {
             const dateStr = task.taskDate;
             const timeStr = task.taskTime || "00:00";
-            return new Date(`${dateStr}T${timeStr}:00`);
+            const d = new Date(`${dateStr}T${timeStr}:00`);
+            return isNaN(d.getTime()) ? null : d;
         }
 
         return null;

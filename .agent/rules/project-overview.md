@@ -34,6 +34,33 @@ Instructions for AI assistants working on this project.
 
 ---
 
+## Known Tooling Issues (CRITICAL — Read Before Searching)
+
+The **`grep_search` tool does NOT work** in this repository. It returns zero results for any query on any file — this is a tool-level issue, not an encoding problem. The files are standard UTF-8 with CRLF line endings.
+
+**What does NOT work:**
+- ❌ `grep_search` — Returns "No results found" for every query, every file
+- ❌ Any tool that relies on ripgrep internally with the same configuration
+
+**What DOES work (use these instead):**
+- ✅ `Select-String -Path "path\to\file" -Pattern "search term"` via `run_command` — PowerShell's built-in grep equivalent, fully reliable
+- ✅ `rg "search term" "path\to\file"` via `run_command` — Direct ripgrep invocation works fine
+- ✅ `view_file` tool — Reading file contents works perfectly
+- ✅ `view_file_outline` tool — File structure exploration works
+- ✅ `find_by_name` tool — File/directory discovery works
+- ✅ `view_code_item` tool — Symbol lookup works
+
+**Example — searching for all `!important` in styles.css:**
+```powershell
+# ✅ DO THIS:
+Select-String -Path "styles.css" -Pattern "!important" | ForEach-Object { "$($_.LineNumber): $($_.Line.Trim())" }
+
+# ❌ NOT THIS (will return nothing):
+# grep_search with Query="!important" SearchPath="styles.css"
+```
+
+---
+
 ## Core Metaphors
 
 | Term | Meaning |

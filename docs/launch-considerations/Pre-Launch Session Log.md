@@ -558,6 +558,51 @@
 
 ---
 
-## Session 11, 13
+## Session 11: CSS & Accessibility Polish ✅
+
+**Date:** February 10, 2026
+**Effort:** ~25 min | **Planned:** ~30 min
+**Audit Items:** #30, #45, #54
+
+### What Was Done
+
+1. **Fix #30 — `!important` Reduction (16 → 2):**
+   - **`styles.css`:** Removed all 12 `!important` instances
+     - Deleted dead duplicate `.operator-cmd-btn` block (old grid layout superseded by list layout)
+     - Stripped `!important` from active `.operator-cmd-btn` block (cascade order already wins)
+     - Removed `!important` from `.session-btn-delete:hover` (class specificity already wins)
+     - Refactored `.incoming-call-btn-secondary` to use parent selector (`.incoming-call-decline-options .incoming-call-btn-secondary`) for specificity instead of `!important`
+   - **`CircuitManager.ts`:** Removed 2 `!important` from safe path selectors by adding `lineId` parameter to `generateSafePathSelectors()` for higher specificity
+   - **Kept 2 justified instances:** `--interactive-accent` and `--interactive-accent-hover` theme variable overrides in dynamic CSS
+
+2. **Fix #45 — Accessible Focus Indicators:**
+   - Added `:focus-visible` outlines to 26 interactive elements across 4 groups:
+     - Primary action buttons (6) — `outline-offset: 2px`
+     - Secondary/neutral elements (10) — `outline-offset: 2px`
+     - Small controls (5) — `outline-offset: 1px`
+     - Text inputs (2) — `outline-offset: -1px`
+   - All use `outline: 2px solid var(--interactive-accent)`
+
+3. **Fix #54 — Hover State Audit:**
+   - Assessed current hover patterns — they map to an intentional visual hierarchy (primary → brightness, neutral → background, destructive → error, disconnect → opacity)
+   - **Decision:** No changes needed — flattening would break the design
+
+4. **Tooling Documentation:**
+   - Added `grep_search` workaround section to `CLAUDE.md` documenting the tool-level search issue and reliable alternatives (`Select-String`, `rg`, `view_file`)
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 64 pass, 0 fail
+- ✅ Manual: Focus rings visible on all interactive elements via Tab
+- ✅ Manual: Signal Isolation safe path opacity works after `!important` removal
+- ✅ Manual: Hover states smooth with correct visual hierarchy
+
+### Notes
+- Original audit counted 12 `!important` in `styles.css`; actual count was 12 in CSS + 4 in dynamic CSS = 16 total
+- `grep_search` tool returns zero results in this repo — all searches done via `Select-String` or `rg` through `run_command`
+
+---
+
+## Session 13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs

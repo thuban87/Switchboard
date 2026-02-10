@@ -41,7 +41,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 27 | ✅ IncomingCallModal double-click race on action buttons | **S6** | MEDIUM |
 | 28 | ✅ PathSuggest full vault scan per keystroke — TTL cache added | **S12** | MEDIUM |
 | 29 | ✅ tsconfig target ES6 mismatches esbuild ES2018 | **S9** | MEDIUM |
-| 30 | `!important` overuse in CSS (12 instances) | **S11** | MEDIUM |
+| 30 | ✅ `!important` overuse in CSS — reduced from 16 to 2 (justified theme overrides only) | **S11** | MEDIUM |
 | 31 | ✅ SwitchboardSettingTab event listener leak on re-render | **S7** | MEDIUM |
 | 32 | ✅ `QuickSwitchModal.lineElements` not cleared in `onClose()` | **S7** | MEDIUM |
 | 33 | ✅ Dashboard `containerEl.children[1]` — contentEl guard added | **S12** | MEDIUM |
@@ -56,7 +56,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 42 | ✅ Hardcoded "Call Waiting.md" — configurability comment added | **S12** | LOW |
 | 43 | ✅ Hardcoded snooze options — configurability comment added | **S12** | LOW |
 | 44 | ✅ Hardcoded extend options — configurability comment added | **S12** | LOW |
-| 45 | CSS focus outline removed without accessible replacement | **S11** | LOW |
+| 45 | ✅ CSS focus outline removed — `:focus-visible` added to 26 interactive elements | **S11** | LOW |
 | 46 | ✅ `CallLogModal` Ctrl+Enter — `metaKey` added for Mac | **S12** | LOW |
 | 47 | ✅ maxlength added to goal input (200) and call log textarea (2000) | **S12** | LOW |
 | 48 | ✅ Default operator commands — JSDoc added explaining external plugin deps | **S12** | LOW |
@@ -65,7 +65,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 51 | ✅ `allowJs: true` with no .js files | **S9** | LOW |
 | 52 | ✅ 19 `as any` casts across 7 files — JSDoc justification comments added | **S12** | LOW |
 | 53 | ✅ 5 files exceed 300-line guideline | **S3** | LOW |
-| 54 | Hover state inconsistency in CSS | **S11** | LOW |
+| 54 | ✅ Hover state audit — patterns are intentional per button type, no changes needed | **S11** | LOW |
 | 55 | ✅ Empty input in PathSuggest — returns [] now | **S12** | LOW |
 | 56 | ✅ Hardcoded esbuild deploy path | **S9** | LOW |
 | A1 | ✅ `snoozedCalls` timers not cleared in `WireService.stop()` | **S6** | HIGH |
@@ -871,42 +871,46 @@ registerLineCommands(): void {
 
 ---
 
-## Session 11: CSS & Accessibility Polish
+## Session 11: CSS & Accessibility Polish ✅
 
-**Effort:** ~30 min | **Risk:** Low | **Audit items:** #30, #45, #54
+**Effort:** ~25 min | **Risk:** Low | **Audit items:** #30, #45, #54
 
-### Changes
+### What Was Done
 
-#### [MODIFY] `styles.css`
+#### Fix #30 — `!important` Reduction (16 → 2)
 
-- **Fix #30:** Audit all 12 `!important` uses. Remove where possible by increasing specificity instead. Keep only those that must override Obsidian theme variables (like `--interactive-accent` in dynamic CSS).
+- **`styles.css`:** Removed all 12 `!important` instances:
+  - Deleted dead duplicate `.operator-cmd-btn` block (L570-598) and stripped `!important` from the active block (L910-913)
+  - Removed `!important` from `.session-btn-delete:hover`, increased specificity
+  - Refactored `.incoming-call-btn-secondary` to use parent selector (`.incoming-call-decline-options .incoming-call-btn-secondary`) instead of `!important`
+- **`CircuitManager.ts`:** Removed 2 `!important` from safe path selectors by passing `lineId` parameter to `generateSafePathSelectors()` for higher specificity
+- **Kept 2 justified instances:** `--interactive-accent` and `--interactive-accent-hover` theme variable overrides (L141-142)
 
-- **Fix #45:** Add accessible focus indicators:
+#### Fix #45 — Accessible Focus Indicators
 
-```css
-.switchboard-operator-modal .operator-cmd-btn:focus-visible {
-    outline: 2px solid var(--interactive-accent);
-    outline-offset: 2px;
-}
-```
+- Added `:focus-visible` outlines to 26 interactive elements across 4 groups:
+  - Primary action buttons (connect, extend, export, goal) — `outline-offset: 2px`
+  - Secondary/neutral elements (operator, patch, hold, decline, quick switch) — `outline-offset: 2px`
+  - Small controls (color swatches, delete buttons, line buttons) — `outline-offset: 1px`
+  - Text inputs (call log textarea, goal input) — `outline-offset: -1px`
+- All use `outline: 2px solid var(--interactive-accent)`
 
-Apply same pattern to all interactive elements that removed outlines.
+#### Fix #54 — Hover State Audit
 
-- **Fix #54:** Standardize hover states — pick one pattern (brightness filter) and apply consistently:
-
-```css
-/* Standard hover pattern for all Switchboard buttons */
-.switchboard-btn:hover {
-    filter: brightness(1.1);
-    transition: filter 0.15s ease;
-}
-```
+- **Assessment:** Current hover patterns are intentional and map to a visual hierarchy:
+  - Primary actions → `brightness(1.1)` + transform
+  - Neutral/secondary → `background-secondary-alt` or `modifier-hover`
+  - Destructive → `background-modifier-error`
+  - Disconnect → `opacity: 0.9`
+- **Decision:** No changes needed — flattening to one pattern would break the visual design
 
 ### Verification
 
-1. `npm run build` — passes
-2. Manual: Tab through Operator Menu → confirm visible focus ring on each button
-3. Manual: Visual scan of all modals — hover states look consistent
+1. ✅ `npm run build` — passes
+2. ✅ `npx vitest run` — 64/64 pass
+3. ✅ Manual: Tab through modals — visible focus rings confirmed
+4. ✅ Manual: Signal Isolation — safe path opacity confirmed after `!important` removal
+5. ✅ Manual: Hover states — smooth transitions, correct visual hierarchy
 
 ---
 

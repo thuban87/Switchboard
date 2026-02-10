@@ -131,7 +131,7 @@ export class CircuitManager {
      * Generates the dynamic CSS for Signal Isolation
      */
     private generateCSS(line: SwitchboardLine): string {
-        const safePathSelectors = this.generateSafePathSelectors(line.safePaths);
+        const safePathSelectors = this.generateSafePathSelectors(line.safePaths, line.id);
 
         return `
 /* Switchboard Circuit - ${line.name} */
@@ -173,7 +173,7 @@ body.switchboard-active-${line.id} .nav-folder-title.is-active {
      * Generates CSS selectors for safe paths
      * Uses data-path attribute which contains the folder path
      */
-    private generateSafePathSelectors(safePaths: string[]): string {
+    private generateSafePathSelectors(safePaths: string[], lineId: string): string {
         if (safePaths.length === 0 || (safePaths.length === 1 && !safePaths[0])) {
             return "/* No safe paths defined */";
         }
@@ -190,13 +190,13 @@ body.switchboard-active-${line.id} .nav-folder-title.is-active {
             // Obsidian uses data-path attribute on nav-folder-title and nav-file-title
             selectors.push(`
 /* Safe path: ${path} */
-body.switchboard-active .nav-folder-title[data-path="${escapedPath}"],
-body.switchboard-active .nav-folder-title[data-path^="${escapedPath}/"],
-body.switchboard-active .nav-file-title[data-path^="${escapedPath}/"],
-body.switchboard-active .nav-folder-title[data-path="${escapedPath}"] ~ .nav-folder-children .nav-folder-title,
-body.switchboard-active .nav-folder-title[data-path="${escapedPath}"] ~ .nav-folder-children .nav-file-title {
-	opacity: 1 !important;
-	filter: none !important;
+body.switchboard-active-${lineId} .nav-folder-title[data-path="${escapedPath}"],
+body.switchboard-active-${lineId} .nav-folder-title[data-path^="${escapedPath}/"],
+body.switchboard-active-${lineId} .nav-file-title[data-path^="${escapedPath}/"],
+body.switchboard-active-${lineId} .nav-folder-title[data-path="${escapedPath}"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-${lineId} .nav-folder-title[data-path="${escapedPath}"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
 }`);
         }
 

@@ -7,8 +7,8 @@ tags:
 ---
 # Switchboard Handoff Log
 
-**Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9+S10+S12 Complete
+**Last Updated:** February 10, 2026
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9+S10+S11+S12 Complete
 **Version:** 1.5.0
 
 ---
@@ -465,6 +465,25 @@ tags:
 
 ---
 
+## Pre-Launch Session 11: CSS & Accessibility Polish ✅
+**Date:** February 10, 2026
+
+| Component | Description |
+|-----------|-------------|
+| Fix #30: `!important` reduction | Removed 14 of 16 instances (12 CSS + 2 dynamic). Kept 2 justified theme overrides |
+| Fix #45: Focus indicators | Added `:focus-visible` outlines to 26 interactive elements across 4 groups |
+| Fix #54: Hover state audit | Patterns are intentional per button type — no changes needed |
+| Dead code removal | Deleted duplicate `.operator-cmd-btn` block (old grid layout) |
+| CircuitManager fix | `generateSafePathSelectors()` now accepts `lineId` for proper specificity |
+| Tooling docs | Added `grep_search` workaround section to `CLAUDE.md` |
+
+**Modified Files:**
+- `styles.css`, `src/services/CircuitManager.ts`, `CLAUDE.md`
+
+**Audit Items Resolved:** #30, #45, #54
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -513,4 +532,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 11 of the Master Pre-Launch Plan: CSS & Accessibility Polish. Audit `!important` usage (12 instances), add `:focus-visible` outlines to interactive elements, and standardize hover states. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 13 of the Master Pre-Launch Plan: Service Integration Tests. This is the final session — write integration-level tests for the riskiest service interactions. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

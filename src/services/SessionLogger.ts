@@ -1,6 +1,6 @@
 import { App, TFile, TFolder } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine } from "../types";
+import { SwitchboardLine, validatePath } from "../types";
 import { Logger } from "./Logger";
 
 /**
@@ -182,11 +182,14 @@ export class SessionLogger {
     private async getOrCreateLogFile(line: SwitchboardLine): Promise<TFile | null> {
         let logPath: string;
 
-        // Use line's configured file if specified
-        if (line.sessionLogFile) {
+        // Use line's configured file if specified and safe
+        if (line.sessionLogFile && validatePath(line.sessionLogFile)) {
             logPath = line.sessionLogFile;
             Logger.debug("Session", "Using configured log file path:", logPath);
         } else {
+            if (line.sessionLogFile && !validatePath(line.sessionLogFile)) {
+                Logger.warn("Session", "Session log file path rejected (unsafe):", line.sessionLogFile);
+            }
             // Default: create in same folder as landing page
             let folderPath = "";
             if (line.landingPage) {

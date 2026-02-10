@@ -196,7 +196,63 @@
 
 ---
 
-## Session 5–13
+## Session 5: Input Validation & Path Safety ✅
+
+**Date:** February 9, 2026
+**Effort:** ~1.5 hours | **Planned:** ~1.5 hours
+**Audit Items:** #3, #6, #13, #14, #15, #23, #38
+
+### What Was Done
+
+1. **`src/types.ts` — 4 new validation utilities + 1 fix:**
+   - `validatePath(path)` — Rejects `..` traversal, absolute paths, dot-prefix (#3 support)
+   - `isValidHexColor(color)` — Validates `#RRGGBB` format (#23)
+   - `isValidTime(time)` — Validates `HH:MM` 24h format (#13)
+   - `isValidDate(date)` — Validates `YYYY-MM-DD` format (#13)
+   - **Fix #38:** `generateId()` now returns `""` for empty/whitespace-only/special-char-only input
+
+2. **`src/services/SessionLogger.ts` — Fix #3 (CRITICAL):**
+   - `getOrCreateLogFile()` validates `sessionLogFile` with `validatePath()` before use
+   - Rejected paths fall through to default path with a `Logger.warn` message
+
+3. **`src/settings/LineEditorModal.ts` — 5 fixes + 1 bonus bug:**
+   - **Fix #6:** Replaced loop-index closures with value-captured closures in 3 delete handlers (safe paths, schedule blocks, custom commands)
+   - **Fix #13:** Added `isValidTime()`/`isValidDate()` validation on schedule block inputs with red border visual feedback
+   - **Fix #14:** Duplicate Line ID detection on creation — generates ID from name and checks against existing lines
+   - **Fix #15:** `validate()` now shows `Notice` for each failure case (empty name, duplicate ID, invalid color, invalid time/date)
+   - **Fix #23:** Hex color validation with `isValidHexColor()` before save
+   - **Constructor deep copy:** Fixed shallow copy bug where modal edits leaked into original settings data through shared array references (`scheduledBlocks`, `safePaths`, `customCommands`)
+   - **DOM sync in validate():** Reads schedule block text input values directly from DOM before validating, preventing race condition with `onChange` timing
+
+4. **`src/settings/SwitchboardSettingTab.ts`:**
+   - Updated both `LineEditorModal` constructor calls to pass `this.plugin.settings.lines` for duplicate ID detection
+
+5. **`test/validation.test.ts` — 18 new tests:**
+
+   | Suite | Tests | What's Tested |
+   |-------|------:|---------------|
+   | `validatePath` | 7 | Normal paths, backslash normalization, traversal, absolute, dot-prefix, empty |
+   | `isValidHexColor` | 4 | Valid hex, missing #, invalid chars, shorthand |
+   | `isValidTime` | 6 | Valid, midnight, 23:59, invalid hour/minute, single-digit |
+   | `isValidDate` | 3 | Valid, non-date string, empty |
+   | `generateId (S5)` | 4 | Empty, whitespace, special-char-only, valid name |
+
+### Bug Found During Testing
+- **Shallow copy mutation:** When editing existing Lines, the modal received `{ ...line }` (shallow copy) but arrays like `scheduledBlocks` were shared references. Adding a schedule block in the modal mutated the original settings immediately, bypassing `validate()` and `onSave()`. Fixed by deep-copying all arrays in the constructor.
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 58 pass, 6 skipped, 0 fail (18 new validation tests)
+- ✅ Manual: Empty name → "Line name cannot be empty" Notice
+- ✅ Manual: Duplicate ID → collision Notice
+- ✅ Manual: Invalid time "99:99" → red border + Notice, save blocked
+- ✅ Manual: Invalid color → "Invalid color format" Notice
+- ✅ Manual: Path traversal (debug mode) → warning in console, default path used
+
+---
+
+## Session 6–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
+
 

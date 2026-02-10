@@ -14,19 +14,19 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 |---|---|---|---|
 | 1 | ✅ `audioService.destroy()` not called in `onunload()` | **S3** | CRITICAL |
 | 2 | ✅ `breakReminderTimer` / `autoDisconnectTimer` not cleared in `onunload()` | **S3** | CRITICAL |
-| 3 | `sessionLogFile` path traversal — no validation | **S5** | CRITICAL |
+| 3 | ✅ `sessionLogFile` path traversal — no validation | **S5** | CRITICAL |
 | 4 | ✅ `OperatorModal.executeCommand()` — no try-catch, `as any`, null access | **S2** | CRITICAL |
 | 5 | `obsidian` dependency set to `"latest"` | **S9** | CRITICAL |
-| 6 | Array index closure bug in delete buttons | **S5** | CRITICAL |
+| 6 | ✅ Array index closure bug in delete buttons | **S5** | CRITICAL |
 | 7 | Snooze/Decline race condition | **S6** | HIGH |
 | 8 | Session history unbounded growth | **S8** | HIGH |
 | 9 | ✅ `saveToCallWaiting()` not awaited | **S2** | HIGH |
 | 10 | `parseTaskTime()` no validation — invalid dates cause immediate setTimeout | **S6** | HIGH |
 | 11 | ✅ Daily note heading insertion null access | **S2** | HIGH |
 | 12 | ✅ `navigator.clipboard.writeText()` not awaited | **S2** | HIGH |
-| 13 | No time/date validation on scheduled block inputs | **S5** | HIGH |
-| 14 | No duplicate Line ID detection on creation | **S5** | HIGH |
-| 15 | `validate()` shows no error feedback | **S5** | HIGH |
+| 13 | ✅ No time/date validation on scheduled block inputs | **S5** | HIGH |
+| 14 | ✅ No duplicate Line ID detection on creation | **S5** | HIGH |
+| 15 | ✅ `validate()` shows no error feedback | **S5** | HIGH |
 | 16 | HTMLAudioElement memory leak — new `Audio()` per play | **S7** | HIGH |
 | 17 | `isDesktopOnly: false` — mobile untested | **S9** | HIGH |
 | 18 | `minAppVersion: "1.0.0"` — too old | **S9** | HIGH |
@@ -34,7 +34,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 20 | Chronos startup `setTimeout(2000)` untracked | **S6** | HIGH |
 | 21 | `formatDuration()` duplicated in 6 files | **S10** | MEDIUM |
 | 22 | `formatTime12h()` duplicated in 2 files | **S10** | MEDIUM |
-| 23 | No color validation utility | **S5** | MEDIUM |
+| 23 | ✅ No color validation utility | **S5** | MEDIUM |
 | 24 | Heading detection uses `indexOf()` — substring not line-aware | **S8** | MEDIUM |
 | 25 | Concurrent session logging race condition | **S8** | MEDIUM |
 | 26 | Timezone inconsistency — UTC in history, local in daily notes | **S8** | MEDIUM |
@@ -49,7 +49,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 35 | ✅ Services initialized before settings loaded | **S3** | MEDIUM |
 | 36 | No schema version in settings | **S8** | MEDIUM |
 | 37 | Business logic in `OperatorModal.executeCommand()` | **S10** | MEDIUM |
-| 38 | `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
+| 38 | ✅ `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
 | 39 | `recalculateDuration()` doesn't handle midnight crossing | **S8** | MEDIUM |
 | 40 | DashboardView refresh interval not cleared on plugin unload | **S7** | MEDIUM |
 | 41 | Missing JSDoc on modal and settings methods | **S12** | LOW |

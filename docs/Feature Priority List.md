@@ -146,6 +146,7 @@ tags:
 | — | **Error Handling Audit** | try-catch across all services | ✅ |
 | — | **main.ts Decomposition** | Extract StatusBarManager + TimerManager (743 → 457 lines) | ✅ |
 | — | **Targeted Unit Tests** | Vitest setup + 40 tests for riskiest pure logic (34 pass, 6 skipped for S6/S8) | ✅ |
+| — | **Input Validation & Path Safety** | 4 validation utilities, path traversal fix, closure bug fix, time/date/color/ID validation + 18 tests | ✅ |
 
 ---
 

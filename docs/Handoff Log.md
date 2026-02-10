@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5 Complete
 **Version:** 1.5.0
 
 ---
@@ -278,6 +278,34 @@ tags:
 
 ---
 
+## Session: Input Validation & Path Safety (S5) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| types.ts | 4 new validation utilities: `validatePath()`, `isValidHexColor()`, `isValidTime()`, `isValidDate()` |
+| Fix #38 | `generateId()` guards empty/whitespace/special-char-only input |
+| Fix #3 (CRITICAL) | `SessionLogger.getOrCreateLogFile()` validates paths, rejects traversal |
+| Fix #6 (CRITICAL) | Value-captured closures replace loop-index closures in 3 delete handlers |
+| Fix #13 | Time/date validation on schedule block inputs with red border feedback |
+| Fix #14 | Duplicate Line ID detection on creation |
+| Fix #15 | `validate()` shows error Notices for all failure cases |
+| Fix #23 | Hex color validation before save |
+| Deep copy fix | Constructor deep-copies arrays to prevent modal edits leaking to settings |
+| DOM sync | `validate()` reads schedule inputs from DOM, preventing onChange race |
+| validation.test.ts | 18 new tests covering all validation utilities |
+
+**New Files:**
+- `test/validation.test.ts`
+
+**Modified Files:**
+- `src/types.ts`, `src/services/SessionLogger.ts`
+- `src/settings/LineEditorModal.ts`, `src/settings/SwitchboardSettingTab.ts`
+
+**Audit Items Resolved:** #3, #6, #13, #14, #15, #23, #38
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -327,4 +355,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 5 of the Master Pre-Launch Plan: Settings Validation. Add runtime validation to Line creation/editing (blank names, duplicate IDs, path traversal). See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 6 of the Master Pre-Launch Plan: Timer & Race Condition Fixes. Fix snooze/decline race conditions, parseTaskTime validation, and IncomingCallModal double-click guard. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

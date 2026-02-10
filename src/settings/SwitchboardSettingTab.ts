@@ -252,7 +252,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                             this.plugin.saveSettings();
                             this.plugin.restartWireService();
                             this.display();
-                        }).open();
+                        }, this.plugin.settings.lines).open();
                     })
             );
 
@@ -322,7 +322,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     this.plugin.restartWireService();
                     this.display();
                 }
-            }).open();
+            }, this.plugin.settings.lines).open();
         });
 
         // Delete button

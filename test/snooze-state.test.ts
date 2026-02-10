@@ -121,9 +121,8 @@ describe("WireService snooze/decline state", () => {
         expect(declinedCalls.has(taskId)).toBe(true);
     });
 
-    // S6 Fix #7: Declining should also remove from snoozedCalls
-    // Currently, decline only adds to declinedCalls without clearing snoozedCalls
-    it.skip("decline after snooze removes from snoozedCalls (requires S6 #7 fix)", async () => {
+    // S6 Fix #7: Declining also removes from snoozedCalls (fixed)
+    it("decline after snooze removes from snoozedCalls", async () => {
         const { service } = createWireService();
         const snoozedCalls = (service as any).snoozedCalls as Map<string, any>;
 
@@ -139,9 +138,8 @@ describe("WireService snooze/decline state", () => {
         expect(snoozedCalls.has(taskId)).toBe(false);
     });
 
-    // S6 Fix A1: stop() should clear snoozedCalls and declinedCalls
-    // Currently, stop() only clears scheduledCalls
-    it.skip("stop() clears all state including snoozed and declined (requires S6 A1 fix)", async () => {
+    // S6 Fix A1: stop() clears snoozedCalls and declinedCalls (fixed)
+    it("stop() clears all state including snoozed and declined", async () => {
         const { service } = createWireService();
 
         // Add some state
@@ -151,6 +149,9 @@ describe("WireService snooze/decline state", () => {
             mockLine,
             "decline",
         );
+
+        // Set isRunning so stop() doesn't early-return
+        (service as any).isRunning = true;
 
         // Stop should clear everything
         service.stop();

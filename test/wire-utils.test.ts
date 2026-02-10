@@ -87,9 +87,8 @@ describe("WireService.parseTaskTime", () => {
         expect(result).toBeNull();
     });
 
-    // S6 Fix #10/A4: parseTaskTime should return null for invalid date strings
-    // Currently returns an invalid Date object instead of null (no isNaN check)
-    it.skip("returns null for invalid date strings (requires S6 isNaN fix)", () => {
+    // S6 Fix #10/A4: parseTaskTime returns null for invalid date strings (isNaN check added)
+    it("returns null for invalid date strings", () => {
         const service = createWireService();
         const result = (service as any).parseTaskTime({ datetime: "not-a-date" });
         expect(result).toBeNull();

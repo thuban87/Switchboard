@@ -26,6 +26,7 @@ export class IncomingCallModal extends Modal {
     private defaultSnoozeMinutes: number;
     private onAction: (action: IncomingCallAction, snoozeMinutes?: number) => void;
     private showingDeclineOptions: boolean = false;
+    private actionTaken: boolean = false;
 
     constructor(
         app: App,
@@ -67,7 +68,7 @@ export class IncomingCallModal extends Modal {
         taskEl.createEl("p", { text: `⏰ ${timeStr}`, cls: "incoming-call-task-time" });
 
         if (this.data.filePath) {
-            const fileName = this.data.filePath.split("/").pop() || this.data.filePath;
+            const fileName = this.data.filePath.split(/[\\/]/).pop() || this.data.filePath;
             taskEl.createEl("p", { text: `📄 ${fileName}`, cls: "incoming-call-task-file" });
         }
 
@@ -81,6 +82,8 @@ export class IncomingCallModal extends Modal {
         connectBtn.style.backgroundColor = this.data.lineColor;
         connectBtn.createEl("span", { text: "📞 Connect" });
         connectBtn.addEventListener("click", () => {
+            if (this.actionTaken) return;
+            this.actionTaken = true;
             this.close();
             this.onAction("connect");
         });
@@ -93,6 +96,8 @@ export class IncomingCallModal extends Modal {
         });
         holdBtn.createEl("span", { text: `🕒 Hold (${this.defaultSnoozeMinutes}m)` });
         holdBtn.addEventListener("click", () => {
+            if (this.actionTaken) return;
+            this.actionTaken = true;
             this.close();
             this.onAction("hold", this.defaultSnoozeMinutes);
         });
@@ -126,6 +131,8 @@ export class IncomingCallModal extends Modal {
         declineBtn.addEventListener("click", () => {
             if (this.showingDeclineOptions) {
                 // If already showing, just dismiss
+                if (this.actionTaken) return;
+                this.actionTaken = true;
                 this.close();
                 this.onAction("decline");
             } else {
@@ -151,6 +158,8 @@ export class IncomingCallModal extends Modal {
         });
         thirtyMinBtn.createEl("span", { text: "⏰ Call back in 30 minutes" });
         thirtyMinBtn.addEventListener("click", () => {
+            if (this.actionTaken) return;
+            this.actionTaken = true;
             this.close();
             this.onAction("reschedule", 30);
         });
@@ -161,6 +170,8 @@ export class IncomingCallModal extends Modal {
         });
         oneHourBtn.createEl("span", { text: "⏰ Call back in 1 hour" });
         oneHourBtn.addEventListener("click", () => {
+            if (this.actionTaken) return;
+            this.actionTaken = true;
             this.close();
             this.onAction("reschedule", 60);
         });
@@ -171,6 +182,8 @@ export class IncomingCallModal extends Modal {
         });
         tomorrowBtn.createEl("span", { text: "📅 Call back tomorrow" });
         tomorrowBtn.addEventListener("click", () => {
+            if (this.actionTaken) return;
+            this.actionTaken = true;
             // Calculate minutes until 9 AM tomorrow
             const now = new Date();
             const tomorrow9AM = new Date(now);

@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6 Complete
 **Version:** 1.5.0
 
 ---
@@ -306,6 +306,29 @@ tags:
 
 ---
 
+## Session: Timer & Race Condition Fixes (S6) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| WireService Fix A1 | `stop()` now clears `snoozedCalls` and `declinedCalls` in addition to `scheduledCalls` |
+| WireService Fix #7 | Decline handler removes from snoozed + cancels scheduled timer |
+| WireService Fix #10/A4 | `parseTaskTime()` validates all 3 return sites with `isNaN` guard |
+| IncomingCallModal Fix #27 | `actionTaken` double-click guard on all 6 action buttons |
+| IncomingCallModal Fix #34 | File path split uses `/[\\/]/` regex for Windows compatibility |
+| Fix #20 | Already done in S3 — no additional work needed |
+| Test un-skips | 3 S6-dependent tests un-skipped and passing |
+
+**Modified Files:**
+- `src/services/WireService.ts`
+- `src/modals/IncomingCallModal.ts`
+- `test/wire-utils.test.ts`
+- `test/snooze-state.test.ts`
+
+**Audit Items Resolved:** #7, #10, #20, #27, #34, A1, A4
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -349,10 +372,10 @@ tags:
 | Issue | Impact |
 |-------|--------|
 | tslib lint error | None - IDE spurious error |
-| 6 skipped tests | Awaiting S6/S8 code fixes — will un-skip when those sessions are done |
+| 3 skipped tests | Awaiting S8 code fixes — heading detection tests will un-skip when S8 is done |
 
 ---
 
 ## Next Session Prompt
 
-> "Let's start Session 6 of the Master Pre-Launch Plan: Timer & Race Condition Fixes. Fix snooze/decline race conditions, parseTaskTime validation, and IncomingCallModal double-click guard. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 7 of the Master Pre-Launch Plan: Memory Leak Fixes. Reuse HTMLAudioElement, clear QuickSwitchModal lineElements, fix SwitchboardSettingTab event listener leak, and register DashboardView refresh interval for cleanup. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

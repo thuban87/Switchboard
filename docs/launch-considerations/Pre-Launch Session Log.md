@@ -251,8 +251,43 @@
 
 ---
 
-## Session 6–13
+## Session 6: Timer & Race Condition Fixes ✅
+
+**Date:** February 9, 2026
+**Effort:** ~20 min | **Planned:** ~45 min
+**Audit Items:** #7, #10, #20, #27, #34, A1, A4
+
+### What Was Done
+
+1. **`src/services/WireService.ts` — 3 fixes:**
+   - **Fix A1:** `stop()` now clears `snoozedCalls` and `declinedCalls` maps in addition to `scheduledCalls`
+   - **Fix #7:** Decline handler removes taskId from `snoozedCalls`, cancels any pending `scheduledCalls` timer, then marks as declined
+   - **Fix #10 / A4:** `parseTaskTime()` validates all 3 return sites with `isNaN(d.getTime())` — invalid dates now return `null` instead of invalid `Date` objects
+
+2. **`src/modals/IncomingCallModal.ts` — 2 fixes:**
+   - **Fix #27:** Added `actionTaken` boolean guard on all 6 action button click handlers (Connect, Hold, Decline/Just Dismiss, Call back 30m, Call back 1h, Call back tomorrow) — prevents double-click race
+   - **Fix #34:** File path split changed from `.split("/")` to `.split(/[\\/]/)` for Windows compatibility
+
+3. **Fix #20 — No changes needed:** Already addressed in S3 (Chronos startup `setTimeout` stored and cleared in `onunload`)
+
+4. **Un-skipped 3 tests from S4:**
+   - `wire-utils.test.ts`: "returns null for invalid date strings" (was awaiting #10/A4)
+   - `snooze-state.test.ts`: "decline after snooze removes from snoozedCalls" (was awaiting #7)
+   - `snooze-state.test.ts`: "stop() clears all state including snoozed and declined" (was awaiting A1)
+   - Fixed stop() test to set `isRunning = true` before calling `stop()` (early-return guard)
+
+### Testing Results
+- ✅ `npx vitest run` — 61 pass, 3 skipped (S8 heading tests only)
+- ✅ `npm run build` — clean
+- ✅ `npm run deploy:test` — deployed
+
+### Notes
+- Session came in well under the 45min estimate — all changes were surgical and well-specified in the Master Pre-Launch Plan
+- S6 un-skipped the last 3 S6-dependent tests. Only 3 S8-dependent heading detection tests remain skipped.
+
+---
+
+## Session 7–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
-
 

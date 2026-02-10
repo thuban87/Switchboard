@@ -77,6 +77,8 @@ export class WireService {
             clearTimeout(call.timerId);
         }
         this.scheduledCalls.clear();
+        this.snoozedCalls.clear();
+        this.declinedCalls.clear();
 
         // Unsubscribe from Chronos events
         if (this.unsubscribeSyncComplete) {
@@ -259,11 +261,20 @@ export class WireService {
                 new Notice(`📞 Call on hold for ${snoozeMinutes || 5} minutes`);
                 break;
 
-            case "decline":
+            case "decline": {
+                // Remove from snoozed to prevent re-trigger
+                this.snoozedCalls.delete(taskId);
+                // Cancel any scheduled timer for this task
+                const scheduled = this.scheduledCalls.get(taskId);
+                if (scheduled) {
+                    clearTimeout(scheduled.timerId);
+                    this.scheduledCalls.delete(taskId);
+                }
                 // Mark as declined (won't trigger again this session)
                 this.declinedCalls.add(taskId);
                 new Notice(`📞 Call declined: ${line.name}`);
                 break;
+            }
 
             case "call-waiting":
                 // Save to Call Waiting file (Fix #9: properly await async operation)
@@ -409,21 +420,24 @@ ${entry}`;
     private parseTaskTime(task: any): Date | null {
         // Try datetime field first
         if (task.datetime) {
-            return new Date(task.datetime);
+            const d = new Date(task.datetime);
+            return isNaN(d.getTime()) ? null : d;
         }
 
         // Try date + time fields
         if (task.date) {
             const dateStr = task.date;
             const timeStr = task.time || "00:00";
-            return new Date(`${dateStr}T${timeStr}:00`);
+            const d = new Date(`${dateStr}T${timeStr}:00`);
+            return isNaN(d.getTime()) ? null : d;
         }
 
         // Try taskDate + taskTime (SyncedTaskInfo format)
         if (task.taskDate) {
             const dateStr = task.taskDate;
             const timeStr = task.taskTime || "00:00";
-            return new Date(`${dateStr}T${timeStr}:00`);
+            const d = new Date(`${dateStr}T${timeStr}:00`);
+            return isNaN(d.getTime()) ? null : d;
         }
 
         return null;

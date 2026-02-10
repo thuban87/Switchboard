@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7 Complete
 **Version:** 1.5.0
 
 ---
@@ -329,6 +329,30 @@ tags:
 
 ---
 
+## Session: Memory Leak Fixes (S7) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| AudioService Fix #16 | Reuse single `Audio` element + embed click.mp3 as base64 data URI |
+| audio-data.ts | New file with embedded click.mp3 (~21KB base64) — eliminates external file dependency |
+| SwitchboardSettingTab Fix #31 | `isConnected` guard on setTimeout callback + fixed autocomplete positioning |
+| QuickSwitchModal Fix #32 | Clear `lineElements` array in `onClose()` |
+| DashboardView Fix #40 | `registerInterval()` for automatic cleanup on view close + plugin unload |
+
+**New Files:**
+- `src/services/audio-data.ts`
+
+**Modified Files:**
+- `src/services/AudioService.ts`
+- `src/settings/SwitchboardSettingTab.ts`
+- `src/modals/QuickSwitchModal.ts`
+- `src/views/DashboardView.ts`
+
+**Audit Items Resolved:** #16, #31, #32, #40
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -378,4 +402,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 7 of the Master Pre-Launch Plan: Memory Leak Fixes. Reuse HTMLAudioElement, clear QuickSwitchModal lineElements, fix SwitchboardSettingTab event listener leak, and register DashboardView refresh interval for cleanup. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 8 of the Master Pre-Launch Plan: Data Integrity & Robustness. Implement session history cap, heading detection regex fix, concurrent logging mutex, timezone consistency, schema versioning, midnight-crossing duration fix, and corrupted data.json recovery. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

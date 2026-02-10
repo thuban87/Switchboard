@@ -27,7 +27,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 13 | ✅ No time/date validation on scheduled block inputs | **S5** | HIGH |
 | 14 | ✅ No duplicate Line ID detection on creation | **S5** | HIGH |
 | 15 | ✅ `validate()` shows no error feedback | **S5** | HIGH |
-| 16 | HTMLAudioElement memory leak — new `Audio()` per play | **S7** | HIGH |
+| 16 | ✅ HTMLAudioElement memory leak — new `Audio()` per play | **S7** | HIGH |
 | 17 | `isDesktopOnly: false` — mobile untested | **S9** | HIGH |
 | 18 | `minAppVersion: "1.0.0"` — too old | **S9** | HIGH |
 | 19 | Empty `authorUrl` in manifest | **S9** | HIGH |
@@ -42,8 +42,8 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 28 | PathSuggest full vault scan per keystroke — no debounce | **S12** | MEDIUM |
 | 29 | tsconfig target ES6 mismatches esbuild ES2018 | **S9** | MEDIUM |
 | 30 | `!important` overuse in CSS (12 instances) | **S11** | MEDIUM |
-| 31 | SwitchboardSettingTab event listener leak on re-render | **S7** | MEDIUM |
-| 32 | `QuickSwitchModal.lineElements` not cleared in `onClose()` | **S7** | MEDIUM |
+| 31 | ✅ SwitchboardSettingTab event listener leak on re-render | **S7** | MEDIUM |
+| 32 | ✅ `QuickSwitchModal.lineElements` not cleared in `onClose()` | **S7** | MEDIUM |
 | 33 | Dashboard `containerEl.children[1]` hard-indexed | **S12** | MEDIUM |
 | 34 | ✅ File path splitting assumes Unix separator | **S6** | MEDIUM |
 | 35 | ✅ Services initialized before settings loaded | **S3** | MEDIUM |
@@ -51,7 +51,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 37 | Business logic in `OperatorModal.executeCommand()` | **S10** | MEDIUM |
 | 38 | ✅ `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
 | 39 | `recalculateDuration()` doesn't handle midnight crossing | **S8** | MEDIUM |
-| 40 | DashboardView refresh interval not cleared on plugin unload | **S7** | MEDIUM |
+| 40 | ✅ DashboardView refresh interval not cleared on plugin unload | **S7** | MEDIUM |
 | 41 | Missing JSDoc on modal and settings methods | **S12** | LOW |
 | 42 | Hardcoded "Call Waiting.md" path | **S12** | LOW |
 | 43 | Hardcoded snooze options (5/10/15/30 min) | **S12** | LOW |
@@ -512,7 +512,7 @@ this.actionTaken = true;
 
 ---
 
-## Session 7: Memory Leak Fixes
+## Session 7: Memory Leak Fixes ✅
 
 **Effort:** ~30 min | **Risk:** Low | **Audit items:** #16, #31, #32, #40
 

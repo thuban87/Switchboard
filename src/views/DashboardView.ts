@@ -9,7 +9,7 @@ export const DASHBOARD_VIEW_TYPE = "switchboard-dashboard";
  */
 export class DashboardView extends ItemView {
     plugin: SwitchboardPlugin;
-    private refreshInterval: ReturnType<typeof setInterval> | null = null;
+
 
     constructor(leaf: WorkspaceLeaf, plugin: SwitchboardPlugin) {
         super(leaf);
@@ -33,16 +33,16 @@ export class DashboardView extends ItemView {
         this.render();
 
         // Refresh every 30 seconds to update timer
-        this.refreshInterval = setInterval(() => {
-            this.render();
-        }, 30000);
+        // registerInterval() auto-cleans on view close AND plugin unload
+        this.registerInterval(
+            window.setInterval(() => {
+                this.render();
+            }, 30000)
+        );
     }
 
     async onClose() {
-        if (this.refreshInterval) {
-            clearInterval(this.refreshInterval);
-            this.refreshInterval = null;
-        }
+        // Interval is auto-cleaned by registerInterval()
     }
 
     /**

@@ -181,5 +181,6 @@ export class QuickSwitchModal extends Modal {
     onClose() {
         const { contentEl } = this;
         contentEl.empty();
+        this.lineElements = [];
     }
 }

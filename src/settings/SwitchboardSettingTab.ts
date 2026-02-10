@@ -186,7 +186,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
                         if (folders.length > 0 && value.length > 0) {
                             const popover = containerEl.createDiv("daily-note-folder-suggestions suggestion-container");
-                            popover.style.position = "absolute";
+                            popover.style.position = "fixed";
                             popover.style.zIndex = "1000";
 
                             for (const folder of folders) {
@@ -200,17 +200,18 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                                 });
                             }
 
-                            // Position popover
-                            const rect = inputEl.getBoundingClientRect();
-                            popover.style.top = `${inputEl.offsetTop + inputEl.offsetHeight}px`;
-                            popover.style.left = `${inputEl.offsetLeft}px`;
-                            popover.style.width = `${inputEl.offsetWidth}px`;
+                            // Position popover directly below the input using viewport coordinates
+                            const inputRect = inputEl.getBoundingClientRect();
+                            popover.style.top = `${inputRect.bottom}px`;
+                            popover.style.left = `${inputRect.left}px`;
+                            popover.style.width = `${inputRect.width}px`;
                         }
                     });
 
                     // Hide suggestions on blur (with delay to allow click)
                     inputEl.addEventListener("blur", () => {
                         setTimeout(() => {
+                            if (!inputEl.isConnected) return;
                             const popover = containerEl.querySelector(".daily-note-folder-suggestions");
                             if (popover) popover.remove();
                         }, 200);

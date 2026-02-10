@@ -287,7 +287,46 @@
 
 ---
 
-## Session 7–13
+## Session 7: Memory Leak Fixes ✅
+
+**Date:** February 9, 2026
+**Effort:** ~20 min | **Planned:** ~30 min
+**Audit Items:** #16, #31, #32, #40
+
+### What Was Done
+
+1. **`src/services/AudioService.ts` — Fix #16 + base64 embedding:**
+   - Replaced `playRealisticClick()` to reuse a single `HTMLAudioElement` instead of creating new ones per click
+   - Embedded `click.mp3` as base64 data URI in new `src/services/audio-data.ts` (~21KB)
+   - Removed `loadAudioFile()` method, vault adapter dependency, and blob URL creation entirely
+   - Cleaned up `destroy()` to nullify audio element reference
+
+2. **`src/settings/SwitchboardSettingTab.ts` — Fix #31 + positioning fix:**
+   - Added `isConnected` guard on the `setTimeout` callback in blur handler — prevents operations on detached DOM after tab close
+   - Fixed autocomplete popover positioning: switched from `position: absolute` with `offsetTop`/`offsetLeft` to `position: fixed` with `getBoundingClientRect()` viewport coordinates
+
+3. **`src/modals/QuickSwitchModal.ts` — Fix #32:**
+   - Added `this.lineElements = []` in `onClose()` to release references to detached DOM nodes
+
+4. **`src/views/DashboardView.ts` — Fix #40:**
+   - Replaced raw `setInterval()` with Obsidian's `registerInterval(window.setInterval(...))` for automatic cleanup on view close AND plugin unload
+   - Removed manual `clearInterval` in `onClose()` and the `refreshInterval` field
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 61 pass, 3 skipped (S8 heading tests only)
+- ✅ `npm run deploy:test` — deployed
+- ✅ Manual: Quick Switch modal open/close — no issues
+- ✅ Manual: Realistic sound plays correctly via embedded base64
+- ✅ Manual: Settings autocomplete popover positions correctly below input
+- ✅ Manual: Dashboard + plugin disable/re-enable — no console errors
+
+### Bonus Changes (discovered during testing)
+- **Audio architecture overhaul:** Scrapped file-based audio loading entirely. Obsidian doesn't sync `.mp3` files in the plugin folder, making the original approach non-portable. Base64 embedding eliminates this limitation — the sound travels with the code.
+- **Autocomplete positioning bug:** Pre-existing issue where the daily notes folder autocomplete appeared in the wrong location. Fixed with viewport-relative positioning.
+
+---
+
+## Session 8–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
-

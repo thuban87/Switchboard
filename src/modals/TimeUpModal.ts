@@ -17,6 +17,7 @@ export class TimeUpModal extends Modal {
         this.line = line;
     }
 
+    /** Renders the time-up notification with extend/disconnect options */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -87,6 +88,7 @@ export class TimeUpModal extends Modal {
         this.close();
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

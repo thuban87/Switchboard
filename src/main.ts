@@ -244,6 +244,7 @@ export default class SwitchboardPlugin extends Plugin {
      */
     async openCallWaiting() {
         try {
+            // TODO: "Call Waiting.md" could be user-configurable (settings.callWaitingFile) (#42)
             const filePath = "Call Waiting.md";
             let file = this.app.vault.getAbstractFileByPath(filePath);
 
@@ -256,6 +257,7 @@ export default class SwitchboardPlugin extends Plugin {
 
             if (file) {
                 const leaf = this.app.workspace.getLeaf();
+                // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
                 await leaf.openFile(file as any);
             }
         } catch (e) {
@@ -354,6 +356,7 @@ export default class SwitchboardPlugin extends Plugin {
                 const file = this.app.vault.getAbstractFileByPath(line.landingPage);
                 if (file) {
                     const leaf = this.app.workspace.getLeaf();
+                    // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
                     await leaf.openFile(file as any);
                 } else {
                     new Notice(`Landing page not found: ${line.landingPage}`);
@@ -529,6 +532,7 @@ export default class SwitchboardPlugin extends Plugin {
         switch (cmd.action) {
             case "command":
                 try {
+                    // as any: app.commands is an undocumented Obsidian internal for command registry
                     const commands = (this.app as any).commands;
                     if (commands.commands[cmd.value]) {
                         commands.executeCommandById(cmd.value);
@@ -571,6 +575,7 @@ export default class SwitchboardPlugin extends Plugin {
                     }
                     const file = this.app.vault.getAbstractFileByPath(cmd.value);
                     if (file) {
+                        // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
                         this.app.workspace.getLeaf().openFile(file as any);
                     } else {
                         new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);

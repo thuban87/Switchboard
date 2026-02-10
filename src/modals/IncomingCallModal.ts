@@ -40,6 +40,7 @@ export class IncomingCallModal extends Modal {
         this.onAction = onAction;
     }
 
+    /** Renders the incoming call UI with connect/hold/decline/reschedule actions */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -195,6 +196,7 @@ export class IncomingCallModal extends Modal {
         });
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

@@ -511,6 +511,15 @@
 	background: var(--background-secondary-alt);
 }
 
+.call-log-char-counter,
+.goal-prompt-char-counter {
+	text-align: right;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	margin-top: 4px;
+	padding-right: 2px;
+}
+
 /* ========================================
    Operator Modal
    ======================================== */

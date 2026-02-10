@@ -192,7 +192,7 @@ export class WireService {
                 taskTitle: taskTitle,
                 time: new Date()
             });
-            // Mark as unacknowledged so status bar blinks
+            // as any: missedCallsAcknowledged is private on SwitchboardPlugin but needed by WireService for status bar coordination
             (this.plugin as any).missedCallsAcknowledged = false;
             new Notice(`📞 ${line.name} is calling - Busy on ${activeLine.name}`);
             return;
@@ -350,6 +350,7 @@ export class WireService {
      * Save a declined task to the Call Waiting file
      */
     private async saveToCallWaiting(task: any, line: SwitchboardLine): Promise<void> {
+        // TODO: "Call Waiting.md" could be user-configurable (settings.callWaitingFile) (#42)
         const filePath = "Call Waiting.md";
         const taskTitle = task.title || task.taskTitle || "Untitled Task";
         const now = new Date();
@@ -362,7 +363,7 @@ export class WireService {
             const file = this.app.vault.getAbstractFileByPath(filePath);
 
             if (file) {
-                // Append to existing file
+                // as any: vault.read/modify expect TFile but we have TAbstractFile from getAbstractFileByPath
                 const content = await this.app.vault.read(file as any);
                 await this.app.vault.modify(file as any, content + "\n" + entry);
             } else {
@@ -388,6 +389,7 @@ ${entry}`;
      */
     private getChronosPlugin(): any {
         try {
+            // as any: app.plugins is an undocumented Obsidian internal for accessing installed plugins
             const plugins = (this.app as any).plugins?.plugins;
             if (!plugins) return null;
             return plugins["chronos-google-calendar-sync"] || null;

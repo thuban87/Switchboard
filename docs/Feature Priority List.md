@@ -152,6 +152,7 @@ tags:
 | — | **Data Integrity & Session History** | Schema versioning, session history cap, heading regex fix, write queue concurrency, UTC→local timezone fix, midnight-crossing duration, corrupted data.json recovery, dashboard heading CSS | ✅ |
 | — | **Build & Manifest Hardening** | Pinned obsidian dep, manifest metadata (isDesktopOnly, minAppVersion, authorUrl), versions.json for BRAT, tsconfig strict mode + target alignment, 9 strict type fixes | ✅ |
 | — | **Code Deduplication & Refactoring** | Canonical `formatDuration()` + `formatTime12h()` in types.ts, removed from 8 files, OperatorModal logic extraction, command registration guard, 12h time input in schedule editor | ✅ |
+| — | **UX Polish & Documentation** | PathSuggest TTL cache, DashboardView contentEl guard, Cmd+Enter Mac support, input maxlength + character counters, JSDoc on 19 `as any` casts + 28 public methods, statistics export generalization | ✅ |
 
 ---
 

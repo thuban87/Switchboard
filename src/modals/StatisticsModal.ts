@@ -14,6 +14,7 @@ export class StatisticsModal extends Modal {
         this.plugin = plugin;
     }
 
+    /** Renders the statistics dashboard with weekly/all-time stats and export button */
     onOpen() {
         const { contentEl, modalEl } = this;
         modalEl.addClass("switchboard-statistics-modal");
@@ -193,26 +194,26 @@ export class StatisticsModal extends Modal {
             })
             .join("\n");
 
-        return `## Study Statistics Export
+        return `## Switchboard Statistics Export
 Generated: ${new Date().toLocaleDateString()}
 
 ### This Week Summary
-- Total study time: ${formatDuration(weekMinutes)}
+- Total time: ${formatDuration(weekMinutes)}
 - Sessions: ${weekSessions.length}
 - Average session: ${weekSessions.length > 0 ? formatDuration(Math.round(weekMinutes / weekSessions.length)) : "N/A"}
 
-### By Subject
+### By Line
 ${lineStats || "No sessions this week"}
 
 ### Daily Breakdown
 ${dayStats || "No sessions this week"}
 
 ### All Time
-- Total study time: ${formatDuration(totalMinutes)}
+- Total time: ${formatDuration(totalMinutes)}
 - Total sessions: ${history.length}
 
 ---
-*Analyze my study habits. What patterns do you see? Suggestions for improvement?*`;
+*Analyze my time usage. What patterns do you see? Suggestions for improvement?*`;
     }
 
 
@@ -231,6 +232,7 @@ ${dayStats || "No sessions this week"}
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

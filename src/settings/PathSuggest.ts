@@ -6,6 +6,10 @@ import { App, AbstractInputSuggest, TFolder, TAbstractFile } from "obsidian";
  */
 export class FolderSuggest extends AbstractInputSuggest<TFolder> {
     private inputEl: HTMLInputElement;
+    /** Cached folder list to avoid re-scanning vault on every keystroke (Fix #28) */
+    private cachedFolders: TFolder[] | null = null;
+    private cacheTimestamp: number = 0;
+    private static CACHE_TTL_MS = 5000; // 5 second TTL
 
     constructor(app: App, inputEl: HTMLInputElement) {
         super(app, inputEl);
@@ -13,26 +17,27 @@ export class FolderSuggest extends AbstractInputSuggest<TFolder> {
     }
 
     /**
-     * Get all folders that match the current input (case-insensitive)
+     * Get all folders that match the current input (case-insensitive).
+     * Uses a TTL cache to avoid re-scanning the vault on every keystroke.
+     * Returns empty array for empty input (Fix #55).
      */
     getSuggestions(inputStr: string): TFolder[] {
+        // Fix #55: empty input returns nothing
+        if (!inputStr) return [];
+
         const lowerInput = inputStr.toLowerCase();
-        const folders: TFolder[] = [];
 
-        // Get all folders from the vault
-        const allFiles = this.app.vault.getAllLoadedFiles();
-
-        for (const file of allFiles) {
-            if (file instanceof TFolder) {
-                // Skip root folder
-                if (file.path === "/") continue;
-
-                // Case-insensitive match
-                if (file.path.toLowerCase().includes(lowerInput)) {
-                    folders.push(file);
-                }
-            }
+        // Invalidate cache after TTL (Fix #28)
+        if (!this.cachedFolders || Date.now() - this.cacheTimestamp > FolderSuggest.CACHE_TTL_MS) {
+            this.cachedFolders = this.app.vault.getAllLoadedFiles()
+                .filter((f): f is TFolder => f instanceof TFolder && f.path !== "/");
+            this.cacheTimestamp = Date.now();
         }
+
+        // Filter cached folders by query
+        const folders = this.cachedFolders.filter(f =>
+            f.path.toLowerCase().includes(lowerInput)
+        );
 
         // Sort by path length (shorter paths first) then alphabetically
         folders.sort((a, b) => {
@@ -73,6 +78,10 @@ export class FolderSuggest extends AbstractInputSuggest<TFolder> {
  */
 export class FileSuggest extends AbstractInputSuggest<TAbstractFile> {
     private inputEl: HTMLInputElement;
+    /** Cached file list to avoid re-scanning vault on every keystroke (Fix #28) */
+    private cachedFiles: TAbstractFile[] | null = null;
+    private cacheTimestamp: number = 0;
+    private static CACHE_TTL_MS = 5000; // 5 second TTL
 
     constructor(app: App, inputEl: HTMLInputElement) {
         super(app, inputEl);
@@ -80,23 +89,27 @@ export class FileSuggest extends AbstractInputSuggest<TAbstractFile> {
     }
 
     /**
-     * Get all files that match the current input (case-insensitive)
+     * Get all files that match the current input (case-insensitive).
+     * Uses a TTL cache to avoid re-scanning the vault on every keystroke.
+     * Returns empty array for empty input (Fix #55).
      */
     getSuggestions(inputStr: string): TAbstractFile[] {
+        // Fix #55: empty input returns nothing
+        if (!inputStr) return [];
+
         const lowerInput = inputStr.toLowerCase();
-        const files: TAbstractFile[] = [];
 
-        const allFiles = this.app.vault.getAllLoadedFiles();
-
-        for (const file of allFiles) {
-            // Include both files and folders (user might want to specify a folder)
-            if (file.path === "/") continue;
-
-            // Case-insensitive match
-            if (file.path.toLowerCase().includes(lowerInput)) {
-                files.push(file);
-            }
+        // Invalidate cache after TTL (Fix #28)
+        if (!this.cachedFiles || Date.now() - this.cacheTimestamp > FileSuggest.CACHE_TTL_MS) {
+            this.cachedFiles = this.app.vault.getAllLoadedFiles()
+                .filter(f => f.path !== "/");
+            this.cacheTimestamp = Date.now();
         }
+
+        // Filter cached files by query
+        const files = this.cachedFiles.filter(f =>
+            f.path.toLowerCase().includes(lowerInput)
+        );
 
         // Sort: prioritize .md and .canvas files, then by length
         files.sort((a, b) => {

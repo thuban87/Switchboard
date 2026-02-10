@@ -142,6 +142,7 @@ export class AudioService {
     private getAudioContext(): AudioContext | null {
         if (!this.audioContext) {
             try {
+                // as any: webkitAudioContext is the Safari/older browser prefix, not in standard Window types
                 this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             } catch (e) {
                 Logger.warn("Audio", "AudioContext not supported", e);

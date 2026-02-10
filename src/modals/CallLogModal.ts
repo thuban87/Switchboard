@@ -25,6 +25,7 @@ export class CallLogModal extends Modal {
         this.goal = goal;
     }
 
+    /** Renders the session summary form with textarea, buttons, and keyboard shortcuts */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -69,12 +70,23 @@ export class CallLogModal extends Modal {
         });
 
         // Text area
+        // Fix #47: Character limit prevents excessively long summaries
         this.textArea = contentEl.createEl("textarea", {
             cls: "call-log-textarea",
             attr: {
                 placeholder: "Brief summary of your session...",
-                rows: "3"
+                rows: "3",
+                maxlength: "2000"
             }
+        });
+
+        // Character counter
+        const counterEl = contentEl.createEl("div", {
+            cls: "call-log-char-counter",
+            text: "0 / 2,000"
+        });
+        this.textArea.addEventListener("input", () => {
+            counterEl.textContent = `${this.textArea.value.length.toLocaleString()} / 2,000`;
         });
 
         // Focus the textarea
@@ -103,9 +115,9 @@ export class CallLogModal extends Modal {
             this.onSubmit(null);
         });
 
-        // Handle Enter key to submit
+        // Handle Enter key to submit (Fix #46: support Cmd+Enter on Mac)
         this.textArea.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && e.ctrlKey) {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                 const summary = this.textArea.value.trim();
                 this.close();
                 this.onSubmit(summary || "No summary provided");
@@ -113,6 +125,7 @@ export class CallLogModal extends Modal {
         });
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

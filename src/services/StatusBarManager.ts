@@ -65,7 +65,7 @@ export class StatusBarManager {
         }
         this.statusBarItem.createSpan({ text: statusText });
 
-        // Add missed calls indicator if there are unacknowledged missed calls
+        // as any: missedCallsAcknowledged is private on SwitchboardPlugin but needed here for UI coordination
         if (this.plugin.missedCalls.length > 0 && !(this.plugin as any).missedCallsAcknowledged) {
             this.statusBarItem.addClass("switchboard-status-blink");
         } else {
@@ -108,6 +108,7 @@ export class StatusBarManager {
 
         // When menu is opened, acknowledge missed calls (stop blinking)
         if (this.plugin.missedCalls.length > 0) {
+            // as any: missedCallsAcknowledged is private on SwitchboardPlugin
             (this.plugin as any).missedCallsAcknowledged = true;
             this.update();
         }

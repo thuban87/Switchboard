@@ -27,6 +27,7 @@ export class QuickSwitchModal extends Modal {
         this.onSelect = onSelect;
     }
 
+    /** Renders the keyboard-driven Line switcher with fuzzy search and hotkey navigation */
     onOpen() {
         const { contentEl, modalEl } = this;
         contentEl.empty();
@@ -178,6 +179,7 @@ export class QuickSwitchModal extends Modal {
         this.close();
     }
 
+    /** Cleans up modal content and keyboard listeners */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

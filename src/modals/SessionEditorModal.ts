@@ -15,6 +15,7 @@ export class SessionEditorModal extends Modal {
         this.plugin = plugin;
     }
 
+    /** Renders the session history list with edit/delete actions per session */
     onOpen() {
         const { contentEl, modalEl } = this;
         modalEl.addClass("switchboard-session-editor-modal");
@@ -219,6 +220,7 @@ export class SessionEditorModal extends Modal {
 
 
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

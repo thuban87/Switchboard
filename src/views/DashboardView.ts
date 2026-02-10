@@ -46,14 +46,17 @@ export class DashboardView extends ItemView {
     }
 
     /**
-     * Refresh the dashboard (called after patch-in/disconnect)
+     * Re-renders the dashboard (called by plugin when context changes)
      */
     refresh() {
         this.render();
     }
 
     private render() {
-        const container = this.containerEl.children[1] as HTMLElement;
+        // Fix #33: Use contentEl if available (Obsidian ItemView internal), fall back to children[1]
+        // Internal Obsidian API — ItemView exposes contentEl but it's not in the public type definitions
+        const container = ((this as any).contentEl || this.containerEl.children[1]) as HTMLElement;
+        if (!container) return;
         container.empty();
         container.addClass("dashboard-container");
 

@@ -86,7 +86,7 @@ export class CircuitManager {
      */
     private focusFolders(safePaths: string[]): void {
         try {
-            // Use native collapse-all command for performance (optimized for large vaults)
+            // as any: Obsidian's command API (app.commands) is not in the public type definitions
             (this.app as any).commands?.executeCommandById?.("file-explorer:collapse-all");
 
             const fileExplorer = this.app.workspace.getLeavesOfType("file-explorer")[0];
@@ -95,6 +95,7 @@ export class CircuitManager {
                 return;
             }
 
+            // as any: File explorer view internals (fileItems, setCollapsed) are not in public types
             const explorerView = fileExplorer.view as any;
             if (!explorerView?.fileItems) {
                 Logger.debug("Circuit", "File items not accessible");
@@ -112,6 +113,7 @@ export class CircuitManager {
                 for (const segment of segments) {
                     currentPath = currentPath ? `${currentPath}/${segment}` : segment;
                     const item = explorerView.fileItems[currentPath];
+                    // as any: FileExplorerItem.setCollapsed is an undocumented Obsidian internal
                     if (item && (item as any).setCollapsed) {
                         (item as any).setCollapsed(false);
                     }

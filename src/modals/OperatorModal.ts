@@ -3,7 +3,12 @@ import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, OperatorCommand } from "../types";
 
 /**
- * Default commands for academic Lines
+ * Default commands available when no custom commands are configured on a Line.
+ * Some entries reference external plugins (e.g., Excalidraw, QuickAdd) — if those
+ * plugins aren't installed, the command will fail with a Notice (see executeOperatorCommand
+ * in main.ts). Users are expected to override these with custom commands per Line.
+ *
+ * TODO: Could be user-configurable as a global "default command template" in settings (#43/#44)
  */
 const DEFAULT_COMMANDS: Record<string, OperatorCommand[]> = {
     // Math-related commands
@@ -52,6 +57,7 @@ export class OperatorModal extends Modal {
         this.line = line;
     }
 
+    /** Renders the command grid with Line-specific actions and click handlers */
     onOpen() {
         const { contentEl, modalEl } = this;
 
@@ -92,6 +98,7 @@ export class OperatorModal extends Modal {
         // Close on Escape is handled by Modal base class
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

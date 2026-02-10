@@ -15,6 +15,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
+    /** Renders the settings tab with Line management, audio, break, and Chronos options */
     display(): void {
         const { containerEl } = this;
         containerEl.empty();

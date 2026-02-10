@@ -495,7 +495,69 @@
 
 ---
 
-## Session 11–13
+## Session 12: UX Polish & Documentation ✅
+
+**Date:** February 9, 2026
+**Effort:** ~1.5 hours | **Planned:** ~2 hours
+**Audit Items:** #28, #33, #41, #42, #43, #44, #46, #47, #48, #52, #55
+
+### What Was Done
+
+1. **Fix #28 + #55 — PathSuggest TTL cache + empty query guard:**
+   - Added 5-second TTL cache to `FolderSuggest.getSuggestions()` and `FileSuggest.getSuggestions()` to avoid full vault scan per keystroke
+   - Empty input query now returns `[]` instead of all folders/files
+
+2. **Fix #33 — DashboardView container guard:**
+   - `render()` now uses `(this as any).contentEl` if available, falls back to `containerEl.children[1]` with null guard
+
+3. **Fix #46 — CallLogModal Mac shortcut:**
+   - Added `e.metaKey` check alongside `e.ctrlKey` for Cmd+Enter support
+
+4. **Fix #47 — Input maxlength:**
+   - `CallLogModal` textarea: `maxlength="2000"`
+   - `GoalPromptModal` input: `maxlength="200"`
+
+5. **Fix #48 + #43/#44 — Operator defaults + configurability comments:**
+   - Added JSDoc to `DEFAULT_COMMANDS` explaining external plugin dependencies
+   - Added `// TODO: Could be user-configurable...` comments to hardcoded values
+
+6. **Fix #52 — JSDoc for `as any` casts (19 across 7 files):**
+   - `CircuitManager.ts` — 4 casts (commands API, file explorer view, fileItems, setCollapsed)
+   - `WireService.ts` — 4 casts (missedCallsAcknowledged, vault read/modify TAbstractFile, plugins API)
+   - `StatusBarManager.ts` — 2 casts (missedCallsAcknowledged private access)
+   - `AudioService.ts` — 1 cast (webkitAudioContext polyfill)
+   - `main.ts` — 4 casts (3x openFile TAbstractFile, 1x commands registry)
+   - `LineEditorModal.ts` — 2 casts (dynamic field assignment on ScheduledBlock)
+   - `DashboardView.ts` — documented via Fix #33
+
+7. **Fix #42 — Call Waiting configurability:**
+   - Added `// TODO: Could be user-configurable (settings.callWaitingFile)` in `WireService.ts` and `main.ts`
+
+8. **Fix #41 — JSDoc on public methods (28 methods across 11 files):**
+   - All 9 modals: `onOpen()` and `onClose()` documented
+   - `SwitchboardSettingTab.display()` documented
+   - `DashboardView.refresh()` documented
+
+9. **Statistics export generalization:**
+   - Changed "Study Statistics Export" → "Switchboard Statistics Export"
+   - Changed "Total study time" → "Total time", "By Subject" → "By Line"
+   - Updated AI prompt from "study habits" to "time usage"
+
+10. **Character counters on input fields:**
+    - `CallLogModal` — live counter showing `X / 2,000` below textarea
+    - `GoalPromptModal` — live counter showing `X / 200` below input
+    - Added CSS for subtle right-aligned counter styling
+
+### Testing Results
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 64 pass, 0 skipped, 0 fail
+
+### Notes
+- `SwitchboardSettingTab.ts` has zero `as any` casts — the original audit count of 16 casts was revised to 19 across the actual 7 files
+- The statistics export generalization was a user request (not an audit item)
+
+---
+
+## Session 11, 13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
-

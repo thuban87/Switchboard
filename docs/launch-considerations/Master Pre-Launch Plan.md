@@ -39,12 +39,12 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 25 | ✅ Concurrent session logging race condition | **S8** | MEDIUM |
 | 26 | ✅ Timezone inconsistency — UTC in history, local in daily notes | **S8** | MEDIUM |
 | 27 | ✅ IncomingCallModal double-click race on action buttons | **S6** | MEDIUM |
-| 28 | PathSuggest full vault scan per keystroke — no debounce | **S12** | MEDIUM |
+| 28 | ✅ PathSuggest full vault scan per keystroke — TTL cache added | **S12** | MEDIUM |
 | 29 | ✅ tsconfig target ES6 mismatches esbuild ES2018 | **S9** | MEDIUM |
 | 30 | `!important` overuse in CSS (12 instances) | **S11** | MEDIUM |
 | 31 | ✅ SwitchboardSettingTab event listener leak on re-render | **S7** | MEDIUM |
 | 32 | ✅ `QuickSwitchModal.lineElements` not cleared in `onClose()` | **S7** | MEDIUM |
-| 33 | Dashboard `containerEl.children[1]` hard-indexed | **S12** | MEDIUM |
+| 33 | ✅ Dashboard `containerEl.children[1]` — contentEl guard added | **S12** | MEDIUM |
 | 34 | ✅ File path splitting assumes Unix separator | **S6** | MEDIUM |
 | 35 | ✅ Services initialized before settings loaded | **S3** | MEDIUM |
 | 36 | ✅ No schema version in settings | **S8** | MEDIUM |
@@ -52,21 +52,21 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 38 | ✅ `generateId()` returns empty string for empty/special-char names | **S5** | MEDIUM |
 | 39 | ✅ `recalculateDuration()` doesn't handle midnight crossing | **S8** | MEDIUM |
 | 40 | ✅ DashboardView refresh interval not cleared on plugin unload | **S7** | MEDIUM |
-| 41 | Missing JSDoc on modal and settings methods | **S12** | LOW |
-| 42 | Hardcoded "Call Waiting.md" path | **S12** | LOW |
-| 43 | Hardcoded snooze options (5/10/15/30 min) | **S12** | LOW |
-| 44 | Hardcoded extend options (15/30/60 min) | **S12** | LOW |
+| 41 | ✅ JSDoc added to all modal and settings public methods | **S12** | LOW |
+| 42 | ✅ Hardcoded "Call Waiting.md" — configurability comment added | **S12** | LOW |
+| 43 | ✅ Hardcoded snooze options — configurability comment added | **S12** | LOW |
+| 44 | ✅ Hardcoded extend options — configurability comment added | **S12** | LOW |
 | 45 | CSS focus outline removed without accessible replacement | **S11** | LOW |
-| 46 | `CallLogModal` Ctrl+Enter doesn't check `metaKey` for Mac | **S12** | LOW |
-| 47 | No max length on goal input or call log textarea | **S12** | LOW |
-| 48 | Default operator commands reference non-existent plugins | **S12** | LOW |
+| 46 | ✅ `CallLogModal` Ctrl+Enter — `metaKey` added for Mac | **S12** | LOW |
+| 47 | ✅ maxlength added to goal input (200) and call log textarea (2000) | **S12** | LOW |
+| 48 | ✅ Default operator commands — JSDoc added explaining external plugin deps | **S12** | LOW |
 | 49 | ✅ `strict: true` not set in tsconfig | **S9** | LOW |
 | 50 | ✅ tsconfig `inlineSourceMap`/`inlineSources` redundant with esbuild | **S9** | LOW |
 | 51 | ✅ `allowJs: true` with no .js files | **S9** | LOW |
-| 52 | 16 `as any` casts across 7 files — add justification comments | **S12** | LOW |
+| 52 | ✅ 19 `as any` casts across 7 files — JSDoc justification comments added | **S12** | LOW |
 | 53 | ✅ 5 files exceed 300-line guideline | **S3** | LOW |
 | 54 | Hover state inconsistency in CSS | **S11** | LOW |
-| 55 | Empty input in PathSuggest returns all folders | **S12** | LOW |
+| 55 | ✅ Empty input in PathSuggest — returns [] now | **S12** | LOW |
 | 56 | ✅ Hardcoded esbuild deploy path | **S9** | LOW |
 | A1 | ✅ `snoozedCalls` timers not cleared in `WireService.stop()` | **S6** | HIGH |
 | A2 | ✅ `registerLineCommands()` accumulates commands without deregistration | **S10** | MEDIUM |

@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9+S10 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9+S10+S12 Complete
 **Version:** 1.5.0
 
 ---
@@ -431,6 +431,37 @@ tags:
 - `test/status-bar-manager.test.ts`
 
 **Audit Items Resolved:** #21, #22, #37, A2
+
+## Session: UX Polish & Documentation (S12) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| PathSuggest Fix #28/#55 | TTL cache (5s) + empty query guard for folder/file suggesters |
+| DashboardView Fix #33 | `contentEl` guard with fallback to `containerEl.children[1]` |
+| CallLogModal Fix #46 | Added `metaKey` for Cmd+Enter on Mac |
+| Fix #47 | Maxlength on CallLogModal (2000) and GoalPromptModal (200) |
+| Fix #48/#43/#44 | JSDoc on default commands + configurability TODO comments |
+| Fix #52 | JSDoc on all 19 `as any` casts across 7 files |
+| Fix #42 | Configurability comment on hardcoded "Call Waiting.md" |
+| Fix #41 | JSDoc on 28 public methods across 11 files |
+| Statistics export | Generalized "study" verbiage to context-neutral language |
+| Character counters | Live `X / max` counters on CallLogModal textarea and GoalPromptModal input |
+
+**Modified Files:**
+- `src/settings/PathSuggest.ts`, `src/views/DashboardView.ts`
+- `src/modals/CallLogModal.ts`, `src/modals/GoalPromptModal.ts`
+- `src/modals/OperatorModal.ts`, `src/modals/StatisticsModal.ts`
+- `src/modals/PatchInModal.ts`, `src/modals/QuickSwitchModal.ts`
+- `src/modals/IncomingCallModal.ts`, `src/modals/TimeUpModal.ts`
+- `src/modals/SessionEditorModal.ts`
+- `src/services/CircuitManager.ts`, `src/services/WireService.ts`
+- `src/services/StatusBarManager.ts`, `src/services/AudioService.ts`
+- `src/main.ts`, `src/settings/LineEditorModal.ts`
+- `src/settings/SwitchboardSettingTab.ts`
+- `styles.css`
+
+**Audit Items Resolved:** #28, #33, #41, #42, #43, #44, #46, #47, #48, #52, #55
 
 ---
 

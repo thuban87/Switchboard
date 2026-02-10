@@ -48,6 +48,7 @@ export class LineEditorModal extends Modal {
         }
     }
 
+    /** Renders the Line configuration form with all editable fields */
     onOpen() {
         const { contentEl } = this;
         contentEl.empty();
@@ -466,8 +467,10 @@ export class LineEditorModal extends Modal {
                     // Convert 12h display value back to 24h for storage
                     const parsed = parseTime12h(input.value);
                     if (parsed) {
+                        // as any: dynamically assigning to startTime/endTime via computed field name
                         (block as any)[field] = parsed;
                     } else {
+                        // as any: same pattern — keeping raw value for validation error display
                         (block as any)[field] = input.value; // Keep raw for validation error message
                     }
                 }
@@ -645,6 +648,7 @@ export class LineEditorModal extends Modal {
         }
     }
 
+    /** Cleans up modal content */
     onClose() {
         const { contentEl } = this;
         contentEl.empty();

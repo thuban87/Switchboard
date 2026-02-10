@@ -1,6 +1,6 @@
 # Switchboard
 
-**Context manager for the ADHD brain.** Patch into your focus.
+**Context manager for the distracted brain.** Patch into your focus.
 
 Switchboard reduces context-switching friction by transforming your Obsidian vault based on what you're working on. Define your contexts ("Lines"), patch in, and let Switchboard fade away everything else so you can focus on what matters.
 

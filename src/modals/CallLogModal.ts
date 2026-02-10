@@ -9,7 +9,7 @@ import { SessionInfo } from "../services/SessionLogger";
 export class CallLogModal extends Modal {
     private session: SessionInfo;
     private onSubmit: (summary: string | null) => void;
-    private textArea: HTMLTextAreaElement;
+    private textArea!: HTMLTextAreaElement;
     private goal: string | null;
 
     constructor(

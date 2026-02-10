@@ -382,7 +382,57 @@
 
 ---
 
-## Session 9–13
+## Session 9: Build & Manifest Hardening ✅
+
+**Date:** February 9, 2026
+**Effort:** ~15 min | **Planned:** ~45 min
+**Audit Items:** #5, #17, #18, #19, #29, #49, #50, #51, #56, A5
+
+### What Was Done
+
+1. **`package.json` — Fix #5 + extras:**
+   - Pinned `obsidian` dependency from `"latest"` to `"^1.7.2"` (installed version is `1.11.4`)
+   - Added `"repository"` field pointing to GitHub repo
+   - Added `"engines": { "node": ">=18" }`
+
+2. **`manifest.json` — 3 fixes:**
+   - **Fix #17:** Set `"isDesktopOnly": true` (mobile untested)
+   - **Fix #18:** Updated `"minAppVersion"` from `"1.0.0"` to `"1.10.0"` (Brad's choice — reasonable minimum from ~1 year ago)
+   - **Fix #19:** Filled in `"authorUrl"` with GitHub repo URL
+
+3. **`versions.json` — Fix A5:**
+   - Created BRAT-required version tracking file: `{ "1.5.0": "1.10.0" }`
+
+4. **`tsconfig.json` — 4 fixes:**
+   - **Fix #29:** Aligned target `"ES6"` → `"ES2018"` (matches esbuild's `es2018`)
+   - **Fix #49:** Enabled `"strict": true`, removed individual `"noImplicitAny"` and `"strictNullChecks"` flags (strict includes both + more)
+   - **Fix #50:** Removed redundant `"inlineSourceMap"` and `"inlineSources"` (esbuild handles sourcemaps)
+   - **Fix #51:** Removed `"allowJs": true` (no `.js` source files in project)
+
+5. **Strict mode type error fixes (9 total):**
+   - `src/main.ts` — 7 `!` definite assignment assertions on lifecycle fields (standard Obsidian plugin pattern)
+   - `src/modals/CallLogModal.ts` — 1 `!` assertion on `textArea` (initialized in `onOpen()`)
+   - `src/settings/SwitchboardSettingTab.ts` — 1 `as` cast for dropdown `onChange` value (Obsidian API types it as `string`, we narrow to union)
+
+6. **Fix #56 — Already done:** Deploy path was moved to `scripts/deploy.mjs` in a prior session
+
+### Testing Results
+- ✅ `npx tsc --noEmit` — 0 errors (strict mode clean)
+- ✅ `npm run build` — clean
+- ✅ `npx vitest run` — 64 pass, 0 skipped, 0 fail
+- ✅ `npm ls obsidian` — confirms `^1.7.2` pin
+- ✅ `versions.json` — valid JSON
+- ✅ `npm run deploy:test` — deployed
+- ✅ Manual: Plugin loads correctly after reload in test vault
+
+### Notes
+- Strict mode only produced 9 errors vs the Master Plan's estimate of 15–30 — all were the expected `strictPropertyInitialization` pattern plus one `strictFunctionTypes` cast
+- `minAppVersion` changed from plan's suggested `1.5.0` to `1.10.0` per Brad's preference
+
+---
+
+## Session 10–13
 
 **Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
+
 

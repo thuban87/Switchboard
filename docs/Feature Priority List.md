@@ -150,6 +150,7 @@ tags:
 | — | **Timer & Race Condition Fixes** | Snooze/decline race fix, parseTaskTime validation, double-click guard, cross-platform path split | ✅ |
 | — | **Memory Leak Fixes** | Audio element reuse + base64 embedding, QuickSwitchModal cleanup, DashboardView registerInterval, settings setTimeout guard | ✅ |
 | — | **Data Integrity & Session History** | Schema versioning, session history cap, heading regex fix, write queue concurrency, UTC→local timezone fix, midnight-crossing duration, corrupted data.json recovery, dashboard heading CSS | ✅ |
+| — | **Build & Manifest Hardening** | Pinned obsidian dep, manifest metadata (isDesktopOnly, minAppVersion, authorUrl), versions.json for BRAT, tsconfig strict mode + target alignment, 9 strict type fixes | ✅ |
 
 ---
 

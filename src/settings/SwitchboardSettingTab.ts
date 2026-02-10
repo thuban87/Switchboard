@@ -106,8 +106,8 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     .addOption("synthesized", "Synthesized (Web Audio)")
                     .addOption("realistic", "Realistic (Sample)")
                     .setValue(this.plugin.settings.soundType)
-                    .onChange(async (value: "synthesized" | "realistic") => {
-                        this.plugin.settings.soundType = value;
+                    .onChange(async (value) => {
+                        this.plugin.settings.soundType = value as "synthesized" | "realistic";
                         await this.plugin.saveSettings();
                     })
             );

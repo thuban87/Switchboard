@@ -8,7 +8,7 @@ tags:
 # Switchboard Handoff Log
 
 **Last Updated:** February 9, 2026
-**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8 Complete
+**Status:** Pre-Launch Hardening — S1+S2+S3+S4+S5+S6+S7+S8+S9 Complete
 **Version:** 1.5.0
 
 ---
@@ -383,6 +383,34 @@ tags:
 
 ---
 
+## Session: Build & Manifest Hardening (S9) ✅
+**Date:** February 9, 2026
+
+| Item | Description |
+|------|-------------|
+| package.json Fix #5 | Pinned `obsidian` from `"latest"` to `"^1.7.2"`, added `repository` + `engines` fields |
+| manifest.json Fix #17 | Set `"isDesktopOnly": true` (mobile untested) |
+| manifest.json Fix #18 | Updated `"minAppVersion"` from `"1.0.0"` to `"1.10.0"` |
+| manifest.json Fix #19 | Filled in `"authorUrl"` with GitHub repo URL |
+| versions.json Fix A5 | Created BRAT version tracking: `{ "1.5.0": "1.10.0" }` |
+| tsconfig Fix #29 | Aligned target `"ES6"` → `"ES2018"` (matches esbuild) |
+| tsconfig Fix #49 | Enabled `"strict": true`, removed individual flags |
+| tsconfig Fix #50 | Removed redundant `inlineSourceMap` + `inlineSources` |
+| tsconfig Fix #51 | Removed `allowJs: true` (no .js files) |
+| Fix #56 | Already done — deploy path in `scripts/deploy.mjs` |
+| Strict mode fixes | 9 type errors fixed (7 `!` assertions in main.ts, 1 in CallLogModal.ts, 1 cast in SwitchboardSettingTab.ts) |
+
+**New Files:**
+- `versions.json`
+
+**Modified Files:**
+- `package.json`, `manifest.json`, `tsconfig.json`
+- `src/main.ts`, `src/modals/CallLogModal.ts`, `src/settings/SwitchboardSettingTab.ts`
+
+**Audit Items Resolved:** #5, #17, #18, #19, #29, #49, #50, #51, #56, A5
+
+---
+
 ## Quick Reference
 
 ### Key Commands
@@ -431,4 +459,4 @@ tags:
 
 ## Next Session Prompt
 
-> "Let's start Session 9 of the Master Pre-Launch Plan: Build & Manifest Cleanup. Fix the `obsidian` dependency version, set `isDesktopOnly: true`, update `minAppVersion`, fill in `authorUrl`, align tsconfig/esbuild targets, create `versions.json`, and clean up the esbuild deploy path. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."
+> "Let's start Session 10 of the Master Pre-Launch Plan: Code Deduplication & Refactoring. Extract `formatDuration()` and `formatTime12h()` into shared utilities, move business logic out of `OperatorModal.executeCommand()`, and fix `registerLineCommands()` accumulation. See `docs/launch-considerations/Master Pre-Launch Plan.md` for full spec."

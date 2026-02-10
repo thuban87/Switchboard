@@ -22,13 +22,13 @@ import { DashboardView, DASHBOARD_VIEW_TYPE } from "./views/DashboardView";
  * "Patch into your focus."
  */
 export default class SwitchboardPlugin extends Plugin {
-    settings: SwitchboardSettings;
-    circuitManager: CircuitManager;
-    wireService: WireService;
-    sessionLogger: SessionLogger;
-    audioService: AudioService;
-    statusBarManager: StatusBarManager;
-    timerManager: TimerManager;
+    settings!: SwitchboardSettings;
+    circuitManager!: CircuitManager;
+    wireService!: WireService;
+    sessionLogger!: SessionLogger;
+    audioService!: AudioService;
+    statusBarManager!: StatusBarManager;
+    timerManager!: TimerManager;
     missedCalls: Array<{ lineName: string; taskTitle: string; time: Date }> = [];
     currentGoal: string | null = null;
     private missedCallsAcknowledged: boolean = true;

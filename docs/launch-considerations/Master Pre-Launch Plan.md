@@ -16,7 +16,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 2 | ✅ `breakReminderTimer` / `autoDisconnectTimer` not cleared in `onunload()` | **S3** | CRITICAL |
 | 3 | ✅ `sessionLogFile` path traversal — no validation | **S5** | CRITICAL |
 | 4 | ✅ `OperatorModal.executeCommand()` — no try-catch, `as any`, null access | **S2** | CRITICAL |
-| 5 | `obsidian` dependency set to `"latest"` | **S9** | CRITICAL |
+| 5 | ✅ `obsidian` dependency set to `"latest"` | **S9** | CRITICAL |
 | 6 | ✅ Array index closure bug in delete buttons | **S5** | CRITICAL |
 | 7 | ✅ Snooze/Decline race condition | **S6** | HIGH |
 | 8 | ✅ Session history unbounded growth | **S8** | HIGH |
@@ -28,9 +28,9 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 14 | ✅ No duplicate Line ID detection on creation | **S5** | HIGH |
 | 15 | ✅ `validate()` shows no error feedback | **S5** | HIGH |
 | 16 | ✅ HTMLAudioElement memory leak — new `Audio()` per play | **S7** | HIGH |
-| 17 | `isDesktopOnly: false` — mobile untested | **S9** | HIGH |
-| 18 | `minAppVersion: "1.0.0"` — too old | **S9** | HIGH |
-| 19 | Empty `authorUrl` in manifest | **S9** | HIGH |
+| 17 | ✅ `isDesktopOnly: false` — mobile untested | **S9** | HIGH |
+| 18 | ✅ `minAppVersion: "1.0.0"` — too old | **S9** | HIGH |
+| 19 | ✅ Empty `authorUrl` in manifest | **S9** | HIGH |
 | 20 | ✅ Chronos startup `setTimeout(2000)` untracked | **S6** | HIGH |
 | 21 | `formatDuration()` duplicated in 6 files | **S10** | MEDIUM |
 | 22 | `formatTime12h()` duplicated in 2 files | **S10** | MEDIUM |
@@ -40,7 +40,7 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 26 | ✅ Timezone inconsistency — UTC in history, local in daily notes | **S8** | MEDIUM |
 | 27 | ✅ IncomingCallModal double-click race on action buttons | **S6** | MEDIUM |
 | 28 | PathSuggest full vault scan per keystroke — no debounce | **S12** | MEDIUM |
-| 29 | tsconfig target ES6 mismatches esbuild ES2018 | **S9** | MEDIUM |
+| 29 | ✅ tsconfig target ES6 mismatches esbuild ES2018 | **S9** | MEDIUM |
 | 30 | `!important` overuse in CSS (12 instances) | **S11** | MEDIUM |
 | 31 | ✅ SwitchboardSettingTab event listener leak on re-render | **S7** | MEDIUM |
 | 32 | ✅ `QuickSwitchModal.lineElements` not cleared in `onClose()` | **S7** | MEDIUM |
@@ -60,19 +60,19 @@ Every audit finding is assigned to exactly one session. Nothing is left out.
 | 46 | `CallLogModal` Ctrl+Enter doesn't check `metaKey` for Mac | **S12** | LOW |
 | 47 | No max length on goal input or call log textarea | **S12** | LOW |
 | 48 | Default operator commands reference non-existent plugins | **S12** | LOW |
-| 49 | `strict: true` not set in tsconfig | **S9** | LOW |
-| 50 | tsconfig `inlineSourceMap`/`inlineSources` redundant with esbuild | **S9** | LOW |
-| 51 | `allowJs: true` with no .js files | **S9** | LOW |
+| 49 | ✅ `strict: true` not set in tsconfig | **S9** | LOW |
+| 50 | ✅ tsconfig `inlineSourceMap`/`inlineSources` redundant with esbuild | **S9** | LOW |
+| 51 | ✅ `allowJs: true` with no .js files | **S9** | LOW |
 | 52 | 16 `as any` casts across 7 files — add justification comments | **S12** | LOW |
 | 53 | ✅ 5 files exceed 300-line guideline | **S3** | LOW |
 | 54 | Hover state inconsistency in CSS | **S11** | LOW |
 | 55 | Empty input in PathSuggest returns all folders | **S12** | LOW |
-| 56 | Hardcoded esbuild deploy path | **S9** | LOW |
+| 56 | ✅ Hardcoded esbuild deploy path | **S9** | LOW |
 | A1 | ✅ `snoozedCalls` timers not cleared in `WireService.stop()` | **S6** | HIGH |
 | A2 | `registerLineCommands()` accumulates commands without deregistration | **S10** | MEDIUM |
 | A3 | ✅ `AudioService` constructor calls `loadAudioFile()` before settings load | **S3** | MEDIUM |
 | A4 | ✅ `parseTaskTime` returns dates without `isNaN` check | **S6** | HIGH |
-| A5 | No `versions.json` for BRAT version tracking | **S9** | HIGH |
+| A5 | ✅ No `versions.json` for BRAT version tracking | **S9** | HIGH |
 | A6 | ✅ `DashboardView.ts:169` uses UTC date for schedule display (same bug as #26) | **S8** | MEDIUM |
 | A7 | `SwitchboardSettingTab.ts:295,315` uses `innerHTML` for emoji strings | — | WON'T FIX (hardcoded emoji literals, no user input, no XSS vector) |
 | A8 | ✅ No corrupted `data.json` recovery — bad data permanently breaks plugin | **S8** | HIGH |
@@ -709,7 +709,7 @@ This prevents the plugin from becoming permanently broken if `data.json` is corr
 
 ---
 
-## Session 9: Build & Manifest Hardening
+## Session 9: Build & Manifest Hardening ✅
 
 **Effort:** ~45 min | **Risk:** Low | **Audit items:** #5, #17, #18, #19, #29, #49, #50, #51, #56, A5
 

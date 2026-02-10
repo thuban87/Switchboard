@@ -29,3 +29,14 @@ switchboard.code-workspace
 
 # Vitest
 .vitest/
+
+# Internal development docs
+docs/development/
+docs/launch-considerations/
+CLAUDE.md
+
+# AI assistant configs
+.claude/
+.agent/
+.gemini/
+.cursor/

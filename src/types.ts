@@ -122,7 +122,7 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     schemaVersion: 1,
     lines: [],
     activeLine: null,
-    chronosIntegrationEnabled: true,
+    chronosIntegrationEnabled: false,
     defaultSnoozeMinutes: 5,
     autoDisconnect: false,
     sessionHistory: [],

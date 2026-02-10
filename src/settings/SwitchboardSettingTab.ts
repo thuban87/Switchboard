@@ -15,7 +15,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
-    /** Renders the settings tab with Line management, audio, break, and Chronos options */
+    /** Renders the settings tab with Line management, schedule, audio, and logging options */
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
@@ -26,94 +26,46 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             cls: "setting-item-description",
         });
 
-        // Chronos Integration Section
-        containerEl.createEl("h2", { text: "Chronos Google Calendar Sync Integration" });
+        // --- Section 1: Lines (main feature) ---
+        containerEl.createEl("h2", { text: "Lines" });
 
-        const chronosDesc = containerEl.createEl("p", {
-            cls: "setting-item-description",
-        });
-        chronosDesc.createSpan({ text: "Integrates with the Chronos plugin for task-to-calendar sync. " });
-        chronosDesc.createEl("a", {
-            text: "GitHub",
-            href: "https://github.com/thuban87/Chronos",
-        });
-
+        // Add new line button
         new Setting(containerEl)
-            .setName("Enable Incoming Calls")
-            .setDesc(
-                "When enabled, Switchboard will show an \"Incoming Call\" modal when Chronos tasks with #switchboard tags start."
-            )
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.chronosIntegrationEnabled)
-                    .onChange(async (value) => {
-                        this.plugin.settings.chronosIntegrationEnabled = value;
-                        await this.plugin.saveSettings();
-                        // Restart wire service if toggled
-                        this.plugin.restartWireService();
+            .setName("Configure Lines")
+            .setDesc("Your focus contexts - each Line represents a different area of work.")
+            .addButton((btn) =>
+                btn
+                    .setButtonText("+ Add Line")
+                    .setCta()
+                    .onClick(() => {
+                        new LineEditorModal(this.app, null, (line) => {
+                            this.plugin.settings.lines.push(line);
+                            this.plugin.saveSettings();
+                            this.plugin.restartWireService();
+                            this.display();
+                        }, this.plugin.settings.lines).open();
                     })
             );
 
-        new Setting(containerEl)
-            .setName("Default Snooze Time")
-            .setDesc("Default duration for the \"Hold\" action on incoming calls.")
-            .addDropdown((dropdown) =>
-                dropdown
-                    .addOption("5", "5 minutes")
-                    .addOption("10", "10 minutes")
-                    .addOption("15", "15 minutes")
-                    .addOption("30", "30 minutes")
-                    .setValue(this.plugin.settings.defaultSnoozeMinutes.toString())
-                    .onChange(async (value) => {
-                        this.plugin.settings.defaultSnoozeMinutes = parseInt(value);
-                        await this.plugin.saveSettings();
-                    })
-            );
+        // Lines list
+        const linesContainer = containerEl.createDiv("switchboard-lines-list");
 
-        new Setting(containerEl)
-            .setName("Auto-disconnect")
-            .setDesc(
-                "Automatically disconnect when a scheduled block ends."
-            )
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.autoDisconnect)
-                    .onChange(async (value) => {
-                        this.plugin.settings.autoDisconnect = value;
-                        await this.plugin.saveSettings();
-                    })
-            );
+        if (this.plugin.settings.lines.length === 0) {
+            linesContainer.createEl("p", {
+                text: "No lines configured yet. Click '+ Add Line' to create your first context.",
+                cls: "switchboard-empty-state",
+            });
+        }
 
-        // Sound Settings
-        containerEl.createEl("h3", { text: "Sound Effects" });
+        for (const line of this.plugin.settings.lines) {
+            this.renderLineItem(linesContainer, line);
+        }
 
-        new Setting(containerEl)
-            .setName("Mute sounds")
-            .setDesc("Disable all audio feedback.")
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.muteSounds)
-                    .onChange(async (value) => {
-                        this.plugin.settings.muteSounds = value;
-                        await this.plugin.saveSettings();
-                    })
-            );
+        // --- Section 2: Schedule Overview ---
+        containerEl.createEl("h2", { text: "Schedule Overview" });
+        this.renderScheduleOverview(containerEl);
 
-        new Setting(containerEl)
-            .setName("Sound type")
-            .setDesc("Choose between synthesized beeps or realistic cable sounds.")
-            .addDropdown((dropdown) =>
-                dropdown
-                    .addOption("synthesized", "Synthesized (Web Audio)")
-                    .addOption("realistic", "Realistic (Sample)")
-                    .setValue(this.plugin.settings.soundType)
-                    .onChange(async (value) => {
-                        this.plugin.settings.soundType = value as "synthesized" | "realistic";
-                        await this.plugin.saveSettings();
-                    })
-            );
-
-        // Session Goals Section
+        // --- Section 3: Session Goals ---
         containerEl.createEl("h3", { text: "Session Goals" });
 
         new Setting(containerEl)
@@ -233,46 +185,36 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                 );
         }
 
-        // Schedule Overview Section
-        containerEl.createEl("h2", { text: "Schedule Overview" });
-        this.renderScheduleOverview(containerEl);
+        // --- Section 5: Sound Effects ---
+        containerEl.createEl("h3", { text: "Sound Effects" });
 
-        // Lines Section
-        containerEl.createEl("h2", { text: "Lines" });
-
-        // Add new line button
         new Setting(containerEl)
-            .setName("Configure Lines")
-            .setDesc("Your focus contexts - each Line represents a different area of work.")
-            .addButton((btn) =>
-                btn
-                    .setButtonText("+ Add Line")
-                    .setCta()
-                    .onClick(() => {
-                        new LineEditorModal(this.app, null, (line) => {
-                            this.plugin.settings.lines.push(line);
-                            this.plugin.saveSettings();
-                            this.plugin.restartWireService();
-                            this.display();
-                        }, this.plugin.settings.lines).open();
+            .setName("Mute sounds")
+            .setDesc("Disable all audio feedback.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.muteSounds)
+                    .onChange(async (value) => {
+                        this.plugin.settings.muteSounds = value;
+                        await this.plugin.saveSettings();
                     })
             );
 
-        // Lines list
-        const linesContainer = containerEl.createDiv("switchboard-lines-list");
+        new Setting(containerEl)
+            .setName("Sound type")
+            .setDesc("Choose between synthesized beeps or realistic cable sounds.")
+            .addDropdown((dropdown) =>
+                dropdown
+                    .addOption("synthesized", "Synthesized (Web Audio)")
+                    .addOption("realistic", "Realistic (Sample)")
+                    .setValue(this.plugin.settings.soundType)
+                    .onChange(async (value) => {
+                        this.plugin.settings.soundType = value as "synthesized" | "realistic";
+                        await this.plugin.saveSettings();
+                    })
+            );
 
-        if (this.plugin.settings.lines.length === 0) {
-            linesContainer.createEl("p", {
-                text: "No lines configured yet. Click '+ Add Line' to create your first context.",
-                cls: "switchboard-empty-state",
-            });
-        }
-
-        for (const line of this.plugin.settings.lines) {
-            this.renderLineItem(linesContainer, line);
-        }
-
-        // Advanced Section
+        // --- Section 6: Advanced ---
         containerEl.createEl("h2", { text: "Advanced" });
 
         new Setting(containerEl)
@@ -361,11 +303,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             nativeBlocks += line.scheduledBlocks?.length || 0;
         }
 
-        // Get Chronos tasks with #switchboard tags
-        const chronosTasks = this.getChronosSwitchboardTasks();
-        const chronosCount = chronosTasks.length;
-
-        summaryEl.textContent = `📅 View All Scheduled Blocks (${nativeBlocks} native, ${chronosCount} Chronos)`;
+        summaryEl.textContent = `📅 View All Scheduled Blocks (${nativeBlocks} scheduled)`;
 
         const contentEl = detailsEl.createDiv("schedule-overview-content");
 
@@ -406,43 +344,9 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             }
         }
 
-        // Chronos tasks
-        if (chronosCount > 0) {
-            contentEl.createEl("h4", { text: "Chronos Tasks", cls: "schedule-overview-section-title" });
-
-            for (const task of chronosTasks) {
-                const taskEl = contentEl.createDiv("schedule-overview-block schedule-overview-chronos-task schedule-overview-clickable");
-                // Show 🔁 for recurring tasks, 📆 for one-time
-                const icon = task.isRecurring ? "🔁" : "📆";
-                taskEl.createSpan({ text: icon, cls: "schedule-overview-type" });
-
-                // Format task info
-                const dateStr = task.date ? new Date(task.date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
-                const timeStr = task.time ? formatTime12h(task.time) : "All day";
-                const desc = `${dateStr} ${timeStr} - ${task.title}`;
-
-                taskEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
-
-                // Show which line it targets
-                if (task.targetLine) {
-                    taskEl.createSpan({ text: task.targetLine, cls: "schedule-overview-line-tag" });
-                }
-
-                // Make clickable to open the source note
-                if (task.filePath) {
-                    taskEl.addEventListener("click", () => {
-                        const file = this.app.vault.getAbstractFileByPath(task.filePath);
-                        if (file) {
-                            this.app.workspace.openLinkText(task.filePath, "", false);
-                        }
-                    });
-                }
-            }
-        }
-
-        if (nativeBlocks === 0 && chronosCount === 0) {
+        if (nativeBlocks === 0) {
             contentEl.createEl("p", {
-                text: "No scheduled blocks configured. Add them in Line settings or use Chronos tasks with #switchboard tags.",
+                text: "No scheduled blocks configured. Add them when editing a Line.",
                 cls: "schedule-overview-empty",
             });
         }

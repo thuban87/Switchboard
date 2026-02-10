@@ -603,6 +603,68 @@
 
 ---
 
-## Session 13
+## Session 13: Service Integration Tests ✅
 
-**Status:** Not started — see [[Master Pre-Launch Plan]] for full specs
+**Date:** 2026-02-10
+**Duration:** ~1.5 hours
+**Audit Items:** Extends S4 testing to high-risk service logic (CircuitManager, SessionLogger, WireService)
+
+### Work Done
+
+1. **Infrastructure Setup:**
+   - Installed `happy-dom` for DOM testing
+   - Expanded `test/__mocks__/obsidian.ts` — `Vault` and `Workspace` with `vi.fn()` stubs for all methods used by services
+   - Created `test/__mocks__/plugin.ts` — `createMockPlugin()` factory with default settings, `saveSettings`, `missedCalls`, etc.
+   - Updated `vitest.config.ts` — added `environment: "happy-dom"` for DOM API availability
+   - Added Obsidian DOM extension polyfills (`addClass`, `removeClass`, `hasClass` on `HTMLElement.prototype`)
+
+2. **CircuitManager Tests** (`test/circuit-manager.test.ts` — 8 tests):
+   - `activate()` injects `<style>` element with correct ID
+   - `activate()` adds `switchboard-active` + `switchboard-active-{lineId}` body classes
+   - `activate()` handles empty line ID gracefully (no crash)
+   - CSS contains accent color override (`--interactive-accent`)
+   - CSS contains safe path opacity rules (`data-path` selectors)
+   - `deactivate()` removes style element and body classes
+   - Activate→deactivate round-trip restores DOM to initial state
+   - `focusFolders()` fails silently when file explorer unavailable (S2 try-catch)
+
+3. **SessionLogger Tests** (`test/session-logger.test.ts` — 11 tests):
+   - `endSession()` returns null when no session active
+   - `endSession()` returns null for sessions under 5 minutes
+   - `logSession()` inserts entry after heading (newest first)
+   - `logSession()` appends section at end when heading not found
+   - Heading regex matches exact heading, not substring — S8 #24
+   - Concurrent `logSession()` calls write sequentially via `writeQueue` — S8 #25
+   - `saveToHistory()` prunes at 1000 entries — S8 #8
+   - `saveToHistory()` uses local date, not UTC — S8 #26
+   - `logToDailyNote()` creates new file when daily note not found
+   - `logToDailyNote()` appends to existing bullet list under heading
+   - `getOrCreateLogFile()` rejects `..` traversal paths — S5 #3
+
+4. **WireService Tests** (`test/wire-service.test.ts` — 10 tests):
+   - `stop()` clears all scheduledCalls, snoozedCalls, and declinedCalls — S6 A1
+   - Snooze then decline clears snoozed and cancels timer — S6 #7
+   - Decline prevents re-scheduling on next refresh
+   - `triggerIncomingCall()` suppressed when already on same Line
+   - `triggerIncomingCall()` shows busy Notice + tracks missed call on different Line
+   - `findMatchingLine()` matches by tag ID
+   - `findMatchingLine()` matches by name slug fallback
+   - `findMatchingLine()` returns null for unknown tag
+   - `parseTaskTime()` returns null for invalid date strings — S6 A4
+   - `parseTaskTime()` parses valid datetime correctly
+
+### Testing Results
+- ✅ `npx vitest run` — **93 tests pass, 0 fail** (29 new + 64 existing)
+- ✅ `npm run build` — clean
+- ✅ No source code modified (tests only + mock expansion + vitest config)
+
+### Notes
+- `happy-dom` installs into `node_modules/` (already gitignored) — no `.gitignore` changes needed
+- Obsidian monkey-patches `addClass`/`removeClass`/`hasClass` onto `HTMLElement.prototype` — needed polyfills in test setup
+- `CSS.escape()` used by `generateSafePathSelectors()` is available in happy-dom ✅
+
+---
+
+## 🎉 Master Pre-Launch Plan Complete!
+
+All 13 sessions finished. 61 audit items + A6-A8 addressed. 93 tests passing. Ready for BRAT launch.

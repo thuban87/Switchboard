@@ -154,6 +154,7 @@ tags:
 | — | **Code Deduplication & Refactoring** | Canonical `formatDuration()` + `formatTime12h()` in types.ts, removed from 8 files, OperatorModal logic extraction, command registration guard, 12h time input in schedule editor | ✅ |
 | — | **UX Polish & Documentation** | PathSuggest TTL cache, DashboardView contentEl guard, Cmd+Enter Mac support, input maxlength + character counters, JSDoc on 19 `as any` casts + 28 public methods, statistics export generalization | ✅ |
 | — | **CSS & Accessibility Polish** | `!important` reduced 16→2, `:focus-visible` on 26 elements, dead CSS removed, CircuitManager specificity fix, `CLAUDE.md` tooling workaround | ✅ |
+| — | **Service Integration Tests** | 29 integration tests for CircuitManager, SessionLogger, WireService with `happy-dom` + mock infrastructure. 93 total tests. | ✅ |
 
 ---
 

@@ -1169,8 +1169,8 @@ npx vitest run  # All tests green, including S4 tests
 | **S10:** Dedup & Refactor | 45 min | #21-22, #37, A2 | S3, S5 |
 | **S11:** CSS Polish | 30 min | #30, #45, #54 | None |
 | **S12:** UX & Docs Polish | 2 hr | #28, #33, #41-48, #52, #55 | S10 |
-| **S13:** Service Integration Tests | 2 hr | CircuitManager, SessionLogger, WireService tests | S4, S6, S8 |
-| **Total** | **~14 hrs** | **61/61 items + A6-A8** | |
+| **S13:** Service Integration Tests ✅ | 2 hr | CircuitManager, SessionLogger, WireService tests | S4, S6, S8 |
+| **Total** | **~14 hrs** | **61/61 items + A6-A8 ✅** | |
 
 > [!TIP]
 > **Recommended execution order:** S1 → S9 → S2 → S3 → S5 → S6 → S7 → S8 → S4 → S10 → S11 → S12 → S13. S9 and S11 are independent and can be slotted anywhere.

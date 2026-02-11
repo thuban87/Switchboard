@@ -2,6 +2,7 @@
  * Switchboard Types
  * Core interfaces for the plugin
  */
+import { normalizePath } from "obsidian";
 
 /**
  * Represents a scheduled time block for a Line
@@ -177,6 +178,27 @@ export function validatePath(path: string): boolean {
     if (/^[a-zA-Z]:/.test(normalized) || normalized.startsWith("/")) return false;
     if (normalized.startsWith(".")) return false;
     return true;
+}
+
+/**
+ * Normalize and validate a user-supplied vault path.
+ * Returns the normalized path, or null if the path is unsafe.
+ */
+export function sanitizePath(path: string): string | null {
+    if (!path) return null;
+    // Check for absolute paths and dot-prefix on original input
+    // (normalizePath strips leading slashes, so check before normalizing)
+    const raw = path.replace(/\\/g, "/");
+    if (/^[a-zA-Z]:/.test(raw) || raw.startsWith("/")) return null;
+    if (raw.startsWith(".")) return null;
+    const normalized = normalizePath(path);
+    if (normalized.includes("..")) return null;
+    return normalized;
+}
+
+/** Strip characters that are illegal in file/folder names across platforms. */
+export function sanitizeFileName(name: string): string {
+    return name.replace(/[\\/:*?"<>|]/g, "-").trim();
 }
 
 /** Validate hex color (#RRGGBB format) */

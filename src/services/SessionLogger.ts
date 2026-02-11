@@ -1,6 +1,6 @@
 import { App, TFile, TFolder, normalizePath } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine, validatePath, formatDuration } from "../types";
+import { SwitchboardLine, sanitizePath, sanitizeFileName, formatDuration } from "../types";
 import { Logger } from "./Logger";
 
 /**
@@ -58,8 +58,8 @@ export class SessionLogger {
 
         this.currentSession = null;
 
-        // Only return if session was 5+ minutes
-        if (durationMinutes < 5) return null;
+        // Only return if session was 1+ minutes (lowered from 5 for testing)
+        if (durationMinutes < 1) return null;
 
         return sessionInfo;
     }
@@ -197,11 +197,12 @@ export class SessionLogger {
         let logPath: string;
 
         // Use line's configured file if specified and safe
-        if (line.sessionLogFile && validatePath(line.sessionLogFile)) {
-            logPath = line.sessionLogFile;
+        const sanitized = sanitizePath(line.sessionLogFile);
+        if (line.sessionLogFile && sanitized) {
+            logPath = sanitized;
             Logger.debug("Session", "Using configured log file path:", logPath);
         } else {
-            if (line.sessionLogFile && !validatePath(line.sessionLogFile)) {
+            if (line.sessionLogFile && !sanitized) {
                 Logger.warn("Session", "Session log file path rejected (unsafe):", line.sessionLogFile);
             }
             // Default: create in same folder as landing page
@@ -212,9 +213,10 @@ export class SessionLogger {
                 folderPath = parts.join("/");
             }
 
+            const safeName = sanitizeFileName(line.name);
             logPath = folderPath
-                ? `${folderPath}/${line.name} - Session Log.md`
-                : `${line.name} - Session Log.md`;
+                ? `${folderPath}/${safeName} - Session Log.md`
+                : `${safeName} - Session Log.md`;
             Logger.debug("Session", "Using default log file path:", logPath);
         }
 
@@ -301,7 +303,7 @@ export class SessionLogger {
         const dateStr = `${year}-${month}-${day}`;
         const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
         const filename = `${dateStr}, ${dayName}.md`;
-        const filePath = `${settings.dailyNotesFolder}/${filename}`;
+        const filePath = normalizePath(`${settings.dailyNotesFolder}/${filename}`);
 
         // Format: LINE: DURATION - SUMMARY
         const durationStr = formatDuration(durationMinutes);

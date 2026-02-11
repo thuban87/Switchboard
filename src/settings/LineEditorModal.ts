@@ -1,5 +1,5 @@
 import { Modal, App, Setting, TextComponent, Notice } from "obsidian";
-import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId, isValidHexColor, isValidTime, isValidDate, formatTime12h, parseTime12h, isValidTime12h } from "../types";
+import { SwitchboardLine, ScheduledBlock, OperatorCommand, PRESET_COLORS, generateId, isValidHexColor, isValidTime, isValidDate, formatTime12h, parseTime12h, isValidTime12h, sanitizeFileName } from "../types";
 import { FolderSuggest, FileSuggest } from "./PathSuggest";
 
 /**
@@ -475,6 +475,9 @@ export class LineEditorModal extends Modal {
             new Notice("Switchboard: Line name cannot be empty");
             return false;
         }
+
+        // Sanitize Line name: strip characters illegal in file paths
+        this.line.name = sanitizeFileName(this.line.name);
 
         // Fix #14: Check for duplicate Line ID on creation
         if (this.isNew) {

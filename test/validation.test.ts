@@ -1,5 +1,16 @@
-import { describe, it, expect } from "vitest";
-import { validatePath, isValidHexColor, isValidTime, isValidDate, generateId } from "../src/types";
+import { describe, it, expect, vi } from "vitest";
+import { validatePath, isValidHexColor, isValidTime, isValidDate, generateId, sanitizePath, sanitizeFileName } from "../src/types";
+
+// Mock obsidian's normalizePath — mimics slash normalization and leading/trailing slash stripping
+vi.mock("obsidian", () => ({
+    normalizePath: (path: string) => {
+        return path
+            .replace(new RegExp("\\\\", "g"), "/")
+            .replace(/^\/+/, "")
+            .replace(/\/+$/, "")
+            .replace(/\/+/g, "/");
+    },
+}));
 
 describe("validatePath", () => {
     it("accepts a normal vault path", () => {
@@ -28,6 +39,70 @@ describe("validatePath", () => {
 
     it("rejects empty string", () => {
         expect(validatePath("")).toBe(false);
+    });
+});
+
+describe("sanitizePath", () => {
+    it("returns normalized path for valid input", () => {
+        expect(sanitizePath("Folder/Sub")).toBe("Folder/Sub");
+    });
+
+    it("normalizes backslashes to forward slashes", () => {
+        expect(sanitizePath("Folder\\Sub\\File.md")).toBe("Folder/Sub/File.md");
+    });
+
+    it("strips trailing slashes", () => {
+        expect(sanitizePath("Folder/Sub/")).toBe("Folder/Sub");
+    });
+
+    it("returns null for empty string", () => {
+        expect(sanitizePath("")).toBeNull();
+    });
+
+    it("returns null for traversal paths", () => {
+        expect(sanitizePath("../escape")).toBeNull();
+    });
+
+    it("returns null for Windows absolute paths", () => {
+        expect(sanitizePath("C:/Users/file")).toBeNull();
+    });
+
+    it("returns null for Unix absolute paths", () => {
+        expect(sanitizePath("/etc/passwd")).toBeNull();
+    });
+
+    it("returns null for dot-prefixed paths", () => {
+        expect(sanitizePath(".obsidian/plugins/data.json")).toBeNull();
+    });
+});
+
+describe("sanitizeFileName", () => {
+    it("passes through a clean name", () => {
+        expect(sanitizeFileName("Math 140")).toBe("Math 140");
+    });
+
+    it("replaces forward slash", () => {
+        expect(sanitizeFileName("Work/Project")).toBe("Work-Project");
+    });
+
+    it("replaces backslash", () => {
+        expect(sanitizeFileName("Work\\Project")).toBe("Work-Project");
+    });
+
+    it("replaces colon", () => {
+        expect(sanitizeFileName("Task: Important")).toBe("Task- Important");
+    });
+
+    it("replaces all illegal characters", () => {
+        expect(sanitizeFileName('a\\b/c:d*e?f"g<h>i|j')).toBe("a-b-c-d-e-f-g-h-i-j");
+    });
+
+    it("trims whitespace", () => {
+        expect(sanitizeFileName("  hello  ")).toBe("hello");
+    });
+
+    it("handles name with only illegal chars", () => {
+        expect(sanitizeFileName("///")).toBe("---");
     });
 });
 

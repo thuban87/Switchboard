@@ -71,6 +71,11 @@
 	background: var(--background-modifier-hover);
 }
 
+.switchboard-line-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
 .switchboard-empty-state {
 	color: var(--text-muted);
 	font-style: italic;

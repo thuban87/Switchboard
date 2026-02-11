@@ -1,4 +1,4 @@
-import { PluginSettingTab, App, Setting } from "obsidian";
+import { PluginSettingTab, App, Setting, setIcon } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
 import { SwitchboardLine, formatTime12h } from "../types";
@@ -246,7 +246,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         const editBtn = actionsEl.createEl("button", {
             cls: "switchboard-line-btn",
         });
-        editBtn.innerHTML = "✏️";
+        setIcon(editBtn, "pencil");
         editBtn.setAttribute("aria-label", "Edit");
         editBtn.addEventListener("click", () => {
             new LineEditorModal(this.app, { ...line }, (updatedLine) => {
@@ -266,7 +266,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         const deleteBtn = actionsEl.createEl("button", {
             cls: "switchboard-line-btn switchboard-line-btn-danger",
         });
-        deleteBtn.innerHTML = "🗑️";
+        setIcon(deleteBtn, "trash-2");
         deleteBtn.setAttribute("aria-label", "Delete");
         deleteBtn.addEventListener("click", () => {
             // Confirm before deleting

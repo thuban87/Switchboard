@@ -33,6 +33,7 @@ switchboard.code-workspace
 # Internal development docs
 docs/development/
 docs/launch-considerations/
+docs/archive/
 CLAUDE.md
 
 # AI assistant configs

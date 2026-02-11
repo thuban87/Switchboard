@@ -69,9 +69,14 @@ export class SessionLogger {
      * Fix #25: Chains through writeQueue to prevent concurrent write interleaving.
      */
     async logSession(session: SessionInfo, summary: string): Promise<void> {
-        this.writeQueue = this.writeQueue
-            .then(() => this._doLogSession(session, summary))
-            .catch(e => Logger.error("Session", "Failed to log session", e));
+        this.writeQueue = (async () => {
+            await this.writeQueue;
+            try {
+                await this._doLogSession(session, summary);
+            } catch (e) {
+                Logger.error("Session", "Failed to log session", e);
+            }
+        })();
         return this.writeQueue;
     }
 

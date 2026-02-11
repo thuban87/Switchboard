@@ -20,14 +20,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl("h1", { text: "Switchboard" });
-        containerEl.createEl("p", {
-            text: "Configure your Lines (focus contexts). Each Line represents a different area of work.",
-            cls: "setting-item-description",
-        });
-
         // --- Section 1: Lines (main feature) ---
-        containerEl.createEl("h2", { text: "Lines" });
 
         // Add new line button
         new Setting(containerEl)
@@ -62,11 +55,11 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         }
 
         // --- Section 2: Schedule Overview ---
-        containerEl.createEl("h2", { text: "Schedule Overview" });
+        new Setting(containerEl).setName("Schedule overview").setHeading();
         this.renderScheduleOverview(containerEl);
 
         // --- Section 3: Session Goals ---
-        containerEl.createEl("h3", { text: "Session Goals" });
+        new Setting(containerEl).setName("Session goals").setHeading();
 
         new Setting(containerEl)
             .setName("Enable goal prompt")
@@ -94,7 +87,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             );
 
         // Daily Note Logging Section
-        containerEl.createEl("h3", { text: "Daily Note Logging" });
+        new Setting(containerEl).setName("Daily note logging").setHeading();
 
         new Setting(containerEl)
             .setName("Log sessions to daily notes")
@@ -186,7 +179,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         }
 
         // --- Section 5: Sound Effects ---
-        containerEl.createEl("h3", { text: "Sound Effects" });
+        new Setting(containerEl).setName("Sound effects").setHeading();
 
         new Setting(containerEl)
             .setName("Mute sounds")
@@ -215,7 +208,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             );
 
         // --- Section 6: Advanced ---
-        containerEl.createEl("h2", { text: "Advanced" });
+        new Setting(containerEl).setName("Advanced").setHeading();
 
         new Setting(containerEl)
             .setName("Debug mode")
@@ -309,7 +302,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
         // Native blocks by Line
         if (nativeBlocks > 0) {
-            contentEl.createEl("h4", { text: "Native Blocks", cls: "schedule-overview-section-title" });
+            new Setting(contentEl).setName("Native blocks").setHeading();
 
             for (const line of this.plugin.settings.lines) {
                 if (!line.scheduledBlocks || line.scheduledBlocks.length === 0) continue;

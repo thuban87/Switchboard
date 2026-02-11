@@ -570,6 +570,25 @@
 /* operator-cmd-btn, operator-cmd-icon, operator-cmd-name defined in Operator Menu Modal section below */
 
 /* ========================================
+   Line Editor Modal — divider cleanup
+   ======================================== */
+
+/* Remove all setting-item dividers inside the modal */
+.modal-content.switchboard-line-editor .setting-item {
+	border-top: none !important;
+}
+
+/* Add dividers back only above section headings */
+.modal-content.switchboard-line-editor .setting-item-heading {
+	border-top: 1px solid var(--background-modifier-border) !important;
+}
+
+/* No divider above the first heading (top of modal) */
+.modal-content.switchboard-line-editor .setting-item-heading:first-child {
+	border-top: none !important;
+}
+
+/* ========================================
    Schedule Blocks (Line Editor)
    ======================================== */
 
@@ -764,6 +783,7 @@
 	padding: 16px;
 }
 
+/* Issue 2: Commented out — h4 replaced with setHeading(), class no longer used
 .schedule-overview-section-title {
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -777,6 +797,7 @@
 .schedule-overview-section-title:first-child {
 	margin-top: 0;
 }
+*/
 
 .schedule-overview-chronos-task {
 	border-left: 3px solid var(--interactive-accent);

@@ -54,9 +54,9 @@ export class LineEditorModal extends Modal {
         contentEl.empty();
         contentEl.addClass("switchboard-line-editor");
 
-        contentEl.createEl("h2", {
-            text: this.isNew ? "Add New Line" : "Edit Line",
-        });
+        new Setting(contentEl)
+            .setName(this.isNew ? "Add new line" : "Edit line")
+            .setHeading();
 
         // Name input
         new Setting(contentEl)
@@ -96,7 +96,7 @@ export class LineEditorModal extends Modal {
             });
 
         // Session logging section
-        contentEl.createEl("h3", { text: "Session Logging" });
+        new Setting(contentEl).setName("Session logging").setHeading();
 
         new Setting(contentEl)
             .setName("Log File")
@@ -267,7 +267,7 @@ export class LineEditorModal extends Modal {
      */
     private renderScheduleSection(containerEl: HTMLElement) {
         // Create section header
-        containerEl.createEl("h3", { text: "Schedule" });
+        new Setting(containerEl).setName("Schedule").setHeading();
         containerEl.createEl("p", {
             text: "Set times when this Line should trigger an \"Incoming Call\".",
             cls: "setting-item-description",
@@ -530,7 +530,7 @@ export class LineEditorModal extends Modal {
      * Render the custom commands section
      */
     private renderCustomCommandsSection(containerEl: HTMLElement) {
-        containerEl.createEl("h3", { text: "Operator Commands" });
+        new Setting(containerEl).setName("Operator commands").setHeading();
         containerEl.createEl("p", {
             text: "Quick actions shown in the Operator Menu (click status bar timer or use command palette). Insert text snippets, run Obsidian commands, or open specific files.",
             cls: "setting-item-description",

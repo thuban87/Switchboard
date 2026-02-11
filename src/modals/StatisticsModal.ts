@@ -20,14 +20,14 @@ export class StatisticsModal extends Modal {
         modalEl.addClass("switchboard-statistics-modal");
 
         // Header
-        contentEl.createEl("div", { cls: "stats-header" }).createEl("h2", { text: "Statistics" });
+        contentEl.createEl("div", { cls: "switchboard-stats-header" }).createEl("h2", { text: "Statistics" });
 
         const history = this.plugin.settings.sessionHistory || [];
 
         if (history.length === 0) {
             contentEl.createEl("p", {
                 text: "No sessions recorded yet. Complete a 5+ minute session to start tracking!",
-                cls: "stats-empty"
+                cls: "switchboard-stats-empty"
             });
             return;
         }
@@ -46,7 +46,7 @@ export class StatisticsModal extends Modal {
     }
 
     private renderSummaryCards(containerEl: HTMLElement, history: SessionRecord[]) {
-        const cardsEl = containerEl.createDiv("stats-cards");
+        const cardsEl = containerEl.createDiv("switchboard-stats-cards");
 
         // This week stats
         const weekAgo = new Date();
@@ -55,33 +55,33 @@ export class StatisticsModal extends Modal {
         const weekSessions = history.filter(s => s.date >= weekStr);
         const weekMinutes = weekSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
 
-        const weekCard = cardsEl.createDiv("stats-card");
+        const weekCard = cardsEl.createDiv("switchboard-stats-card");
         weekCard.createEl("h3", { text: "This Week" });
-        weekCard.createEl("div", { text: formatDuration(weekMinutes), cls: "stats-big-number" });
-        weekCard.createEl("div", { text: `${weekSessions.length} sessions`, cls: "stats-subtitle" });
+        weekCard.createEl("div", { text: formatDuration(weekMinutes), cls: "switchboard-stats-big-number" });
+        weekCard.createEl("div", { text: `${weekSessions.length} sessions`, cls: "switchboard-stats-subtitle" });
         if (weekSessions.length > 0) {
             weekCard.createEl("div", {
                 text: `~${formatDuration(Math.round(weekMinutes / weekSessions.length))} avg`,
-                cls: "stats-subtitle"
+                cls: "switchboard-stats-subtitle"
             });
         }
 
         // All time stats
         const totalMinutes = history.reduce((sum, s) => sum + s.durationMinutes, 0);
-        const allCard = cardsEl.createDiv("stats-card");
+        const allCard = cardsEl.createDiv("switchboard-stats-card");
         allCard.createEl("h3", { text: "All Time" });
-        allCard.createEl("div", { text: formatDuration(totalMinutes), cls: "stats-big-number" });
-        allCard.createEl("div", { text: `${history.length} sessions`, cls: "stats-subtitle" });
+        allCard.createEl("div", { text: formatDuration(totalMinutes), cls: "switchboard-stats-big-number" });
+        allCard.createEl("div", { text: `${history.length} sessions`, cls: "switchboard-stats-subtitle" });
         if (history.length > 0) {
             allCard.createEl("div", {
                 text: `~${formatDuration(Math.round(totalMinutes / history.length))} avg`,
-                cls: "stats-subtitle"
+                cls: "switchboard-stats-subtitle"
             });
         }
     }
 
     private renderLineBreakdown(containerEl: HTMLElement, history: SessionRecord[]) {
-        const sectionEl = containerEl.createDiv("stats-section");
+        const sectionEl = containerEl.createDiv("switchboard-stats-section");
         sectionEl.createEl("h3", { text: "By Line" });
 
         // Aggregate by line
@@ -102,55 +102,55 @@ export class StatisticsModal extends Modal {
         const sorted = Object.values(byLine).sort((a, b) => b.minutes - a.minutes);
         const maxMinutes = sorted[0]?.minutes || 1;
 
-        const barsEl = sectionEl.createDiv("stats-bars");
+        const barsEl = sectionEl.createDiv("switchboard-stats-bars");
         for (const line of sorted) {
-            const barRow = barsEl.createDiv("stats-bar-row");
+            const barRow = barsEl.createDiv("switchboard-stats-bar-row");
 
-            const labelEl = barRow.createDiv("stats-bar-label");
-            const dot = labelEl.createSpan("stats-bar-dot");
+            const labelEl = barRow.createDiv("switchboard-stats-bar-label");
+            const dot = labelEl.createSpan("switchboard-stats-bar-dot");
             labelEl.createSpan({ text: line.name });
 
-            const barContainer = barRow.createDiv("stats-bar-container");
-            const bar = barContainer.createDiv("stats-bar");
+            const barContainer = barRow.createDiv("switchboard-stats-bar-container");
+            const bar = barContainer.createDiv("switchboard-stats-bar");
             bar.style.width = `${(line.minutes / maxMinutes) * 100}%`;
 
             barRow.style.setProperty("--line-color", line.color);
 
-            barRow.createDiv({ text: formatDuration(line.minutes), cls: "stats-bar-value" });
+            barRow.createDiv({ text: formatDuration(line.minutes), cls: "switchboard-stats-bar-value" });
         }
     }
 
     private renderRecentSessions(containerEl: HTMLElement, history: SessionRecord[]) {
-        const sectionEl = containerEl.createDiv("stats-section");
+        const sectionEl = containerEl.createDiv("switchboard-stats-section");
         sectionEl.createEl("h3", { text: "Recent Sessions" });
 
-        const listEl = sectionEl.createDiv("stats-sessions-list");
+        const listEl = sectionEl.createDiv("switchboard-stats-sessions-list");
 
         // Show last 8 sessions, newest first
         const recent = [...history].reverse().slice(0, 8);
         for (const session of recent) {
-            const itemEl = listEl.createDiv("stats-session-item");
+            const itemEl = listEl.createDiv("switchboard-stats-session-item");
 
             const line = this.plugin.settings.lines.find(l => l.id === session.lineId);
-            const dot = itemEl.createSpan("stats-session-dot");
+            const dot = itemEl.createSpan("switchboard-stats-session-dot");
             if (line?.color) {
                 itemEl.style.setProperty("--line-color", line.color);
             }
 
-            const infoEl = itemEl.createDiv("stats-session-info");
-            infoEl.createEl("span", { text: session.lineName, cls: "stats-session-name" });
+            const infoEl = itemEl.createDiv("switchboard-stats-session-info");
+            infoEl.createEl("span", { text: session.lineName, cls: "switchboard-stats-session-name" });
             infoEl.createEl("span", {
                 text: ` • ${this.formatDate(session.date)} ${session.startTime}`,
-                cls: "stats-session-date"
+                cls: "switchboard-stats-session-date"
             });
 
-            itemEl.createDiv({ text: formatDuration(session.durationMinutes), cls: "stats-session-duration" });
+            itemEl.createDiv({ text: formatDuration(session.durationMinutes), cls: "switchboard-stats-session-duration" });
         }
     }
 
     private renderExportButton(containerEl: HTMLElement, history: SessionRecord[]) {
-        const buttonEl = containerEl.createDiv("stats-export");
-        const btn = buttonEl.createEl("button", { text: "📤 Export for AI Analysis", cls: "stats-export-btn" });
+        const buttonEl = containerEl.createDiv("switchboard-stats-export");
+        const btn = buttonEl.createEl("button", { text: "📤 Export for AI Analysis", cls: "switchboard-stats-export-btn" });
         btn.addEventListener("click", async () => {
             const markdown = this.generateExport(history);
             try {

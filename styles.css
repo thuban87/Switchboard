@@ -1092,33 +1092,33 @@
 	max-width: 500px;
 }
 
-.stats-header h2 {
+.switchboard-stats-header h2 {
 	margin: 0 0 20px 0;
 	font-size: 1.4rem;
 	font-weight: 600;
 }
 
-.stats-empty {
+.switchboard-stats-empty {
 	text-align: center;
 	color: var(--text-muted);
 	padding: 40px 20px;
 }
 
-.stats-cards {
+.switchboard-stats-cards {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 16px;
 	margin-bottom: 24px;
 }
 
-.stats-card {
+.switchboard-stats-card {
 	background: var(--background-secondary);
 	padding: 16px;
 	border-radius: 12px;
 	text-align: center;
 }
 
-.stats-card h3 {
+.switchboard-stats-card h3 {
 	margin: 0 0 8px 0;
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -1127,41 +1127,41 @@
 	letter-spacing: 0.5px;
 }
 
-.stats-big-number {
+.switchboard-stats-big-number {
 	font-size: 1.8rem;
 	font-weight: 700;
 	color: var(--interactive-accent);
 	margin-bottom: 4px;
 }
 
-.stats-subtitle {
+.switchboard-stats-subtitle {
 	font-size: 0.85rem;
 	color: var(--text-muted);
 }
 
-.stats-section {
+.switchboard-stats-section {
 	margin-bottom: 24px;
 }
 
-.stats-section h3 {
+.switchboard-stats-section h3 {
 	margin: 0 0 12px 0;
 	font-size: 0.95rem;
 	font-weight: 600;
 }
 
-.stats-bars {
+.switchboard-stats-bars {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 }
 
-.stats-bar-row {
+.switchboard-stats-bar-row {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 }
 
-.stats-bar-label {
+.switchboard-stats-bar-label {
 	width: 100px;
 	display: flex;
 	align-items: center;
@@ -1170,7 +1170,7 @@
 	flex-shrink: 0;
 }
 
-.stats-bar-dot {
+.switchboard-stats-bar-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -1178,7 +1178,7 @@
 	background-color: var(--line-color, var(--interactive-accent));
 }
 
-.stats-bar-container {
+.switchboard-stats-bar-container {
 	flex: 1;
 	height: 20px;
 	background: var(--background-secondary);
@@ -1186,14 +1186,14 @@
 	overflow: hidden;
 }
 
-.stats-bar {
+.switchboard-stats-bar {
 	height: 100%;
 	border-radius: 4px;
 	transition: width 0.3s ease;
 	background-color: var(--line-color, var(--interactive-accent));
 }
 
-.stats-bar-value {
+.switchboard-stats-bar-value {
 	width: 60px;
 	font-size: 0.85rem;
 	color: var(--text-muted);
@@ -1201,7 +1201,7 @@
 	flex-shrink: 0;
 }
 
-.stats-sessions-list {
+.switchboard-stats-sessions-list {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
@@ -1209,7 +1209,7 @@
 	overflow-y: auto;
 }
 
-.stats-session-item {
+.switchboard-stats-session-item {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1218,7 +1218,7 @@
 	border-radius: 8px;
 }
 
-.stats-session-dot {
+.switchboard-stats-session-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -1226,32 +1226,32 @@
 	background-color: var(--line-color, var(--interactive-accent));
 }
 
-.stats-session-info {
+.switchboard-stats-session-info {
 	flex: 1;
 	min-width: 0;
 }
 
-.stats-session-name {
+.switchboard-stats-session-name {
 	font-weight: 500;
 }
 
-.stats-session-date {
+.switchboard-stats-session-date {
 	color: var(--text-muted);
 	font-size: 0.85rem;
 }
 
-.stats-session-duration {
+.switchboard-stats-session-duration {
 	font-size: 0.9rem;
 	color: var(--text-muted);
 	flex-shrink: 0;
 }
 
-.stats-export {
+.switchboard-stats-export {
 	margin-top: 20px;
 	text-align: center;
 }
 
-.stats-export-btn {
+.switchboard-stats-export-btn {
 	padding: 10px 20px;
 	border: none;
 	border-radius: 8px;
@@ -1263,7 +1263,7 @@
 	transition: all 0.15s ease;
 }
 
-.stats-export-btn:hover {
+.switchboard-stats-export-btn:hover {
 	filter: brightness(1.1);
 	transform: translateY(-1px);
 }
@@ -1278,13 +1278,13 @@
 	max-width: 550px;
 }
 
-.session-editor-empty {
+.switchboard-session-editor-empty {
 	text-align: center;
 	color: var(--text-muted);
 	padding: 40px 20px;
 }
 
-.session-editor-list {
+.switchboard-session-editor-list {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
@@ -1292,13 +1292,13 @@
 	overflow-y: auto;
 }
 
-.session-editor-line {
+.switchboard-session-editor-line {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	overflow: hidden;
 }
 
-.session-editor-line-header {
+.switchboard-session-editor-line-header {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1307,11 +1307,11 @@
 	transition: background 0.15s ease;
 }
 
-.session-editor-line-header:hover {
+.switchboard-session-editor-line-header:hover {
 	background: var(--background-modifier-hover);
 }
 
-.session-editor-dot {
+.switchboard-session-editor-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
@@ -1319,13 +1319,13 @@
 	background-color: var(--line-color, var(--text-muted));
 }
 
-.session-editor-expand {
+.switchboard-session-editor-expand {
 	margin-left: auto;
 	color: var(--text-muted);
 	font-size: 0.8rem;
 }
 
-.session-editor-sessions {
+.switchboard-session-editor-sessions {
 	padding: 0 12px 12px;
 	display: flex;
 	flex-direction: column;
@@ -1334,7 +1334,7 @@
 	overflow-y: auto;
 }
 
-.session-editor-session {
+.switchboard-session-editor-session {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1343,22 +1343,22 @@
 	border-radius: 6px;
 }
 
-.session-editor-session-info {
+.switchboard-session-editor-session-info {
 	flex: 1;
 	min-width: 0;
 }
 
-.session-editor-session-date {
+.switchboard-session-editor-session-date {
 	font-size: 0.9rem;
 }
 
-.session-editor-session-duration {
+.switchboard-session-editor-session-duration {
 	color: var(--text-muted);
 	font-size: 0.85rem;
 	margin-left: 8px;
 }
 
-.session-editor-session-summary {
+.switchboard-session-editor-session-summary {
 	font-size: 0.85rem;
 	color: var(--text-muted);
 	margin-top: 4px;
@@ -1367,13 +1367,13 @@
 	white-space: nowrap;
 }
 
-.session-editor-session-actions {
+.switchboard-session-editor-session-actions {
 	display: flex;
 	gap: 4px;
 	flex-shrink: 0;
 }
 
-.session-editor-session-actions button {
+.switchboard-session-editor-session-actions button {
 	padding: 4px 8px;
 	border: none;
 	border-radius: 4px;
@@ -1382,16 +1382,16 @@
 	transition: background 0.15s ease;
 }
 
-.session-editor-session-actions button:hover {
+.switchboard-session-editor-session-actions button:hover {
 	background: var(--background-modifier-hover);
 }
 
-.session-btn-delete:hover {
+.switchboard-session-btn-delete:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
 
-.session-editor-buttons {
+.switchboard-session-editor-buttons {
 	display: flex;
 	justify-content: flex-end;
 	gap: 12px;
@@ -1966,7 +1966,7 @@
 .switchboard-call-log-btn-done:focus-visible,
 .switchboard-goal-prompt-btn-primary:focus-visible,
 .switchboard-timeup-extend:focus-visible,
-.stats-export-btn:focus-visible,
+.switchboard-stats-export-btn:focus-visible,
 .dashboard-line-btn:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 2px;
@@ -1992,7 +1992,7 @@
 .switchboard-line-btn:focus-visible,
 .schedule-block-delete:focus-visible,
 .custom-command-delete:focus-visible,
-.session-editor-session-actions button:focus-visible {
+.switchboard-session-editor-session-actions button:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 1px;
 }

@@ -6,5 +6,5 @@
 	"description": "Context manager for the distracted brain. Patch into your focus.",
 	"author": "Brad Wales",
 	"authorUrl": "https://github.com/thuban87/Switchboard.git",
-	"isDesktopOnly": true
+	"isDesktopOnly": false
 }

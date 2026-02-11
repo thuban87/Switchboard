@@ -1224,7 +1224,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
-	background-color: var(--line-color);
+	background-color: var(--line-color, var(--interactive-accent));
 }
 
 .stats-bar-container {
@@ -1239,7 +1239,7 @@
 	height: 100%;
 	border-radius: 4px;
 	transition: width 0.3s ease;
-	background-color: var(--line-color);
+	background-color: var(--line-color, var(--interactive-accent));
 }
 
 .stats-bar-value {
@@ -1272,7 +1272,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
-	background-color: var(--line-color);
+	background-color: var(--line-color, var(--interactive-accent));
 }
 
 .stats-session-info {
@@ -1365,7 +1365,7 @@
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
-	background-color: var(--line-color);
+	background-color: var(--line-color, var(--text-muted));
 }
 
 .session-editor-expand {
@@ -1971,7 +1971,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
-	background-color: var(--line-color);
+	background-color: var(--line-color, var(--text-muted));
 }
 
 .dashboard-recent-name {

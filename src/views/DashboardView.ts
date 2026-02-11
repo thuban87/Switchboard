@@ -229,10 +229,10 @@ export class DashboardView extends ItemView {
 
             // Find the line for color (may not exist if deleted)
             const line = this.plugin.settings.lines.find(l => l.id === session.lineId);
-            const color = line?.color ?? "#666";
-
             const dot = sessionEl.createSpan("dashboard-recent-dot");
-            sessionEl.style.setProperty("--line-color", color);
+            if (line?.color) {
+                sessionEl.style.setProperty("--line-color", line.color);
+            }
 
             sessionEl.createSpan({ text: session.lineName, cls: "dashboard-recent-name" });
             sessionEl.createSpan({

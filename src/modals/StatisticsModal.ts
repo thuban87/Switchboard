@@ -92,7 +92,7 @@ export class StatisticsModal extends Modal {
                 byLine[session.lineId] = {
                     name: session.lineName,
                     minutes: 0,
-                    color: line?.color || "#3498db",
+                    color: line?.color || "",
                 };
             }
             byLine[session.lineId].minutes += session.durationMinutes;
@@ -133,7 +133,9 @@ export class StatisticsModal extends Modal {
 
             const line = this.plugin.settings.lines.find(l => l.id === session.lineId);
             const dot = itemEl.createSpan("stats-session-dot");
-            itemEl.style.setProperty("--line-color", line?.color || "#3498db");
+            if (line?.color) {
+                itemEl.style.setProperty("--line-color", line.color);
+            }
 
             const infoEl = itemEl.createDiv("stats-session-info");
             infoEl.createEl("span", { text: session.lineName, cls: "stats-session-name" });

@@ -66,7 +66,9 @@ export class SessionEditorModal extends Modal {
             // Line header (collapsible)
             const headerEl = lineEl.createDiv("session-editor-line-header");
             const dot = headerEl.createSpan("session-editor-dot");
-            lineEl.style.setProperty("--line-color", data.line?.color || "#888");
+            if (data.line?.color) {
+                lineEl.style.setProperty("--line-color", data.line.color);
+            }
 
             const lineName = data.line?.name || data.sessions[0].record.lineName;
             const totalMins = data.sessions.reduce((sum, s) => sum + s.record.durationMinutes, 0);

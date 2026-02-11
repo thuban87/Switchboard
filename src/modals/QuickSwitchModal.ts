@@ -34,32 +34,32 @@ export class QuickSwitchModal extends Modal {
         modalEl.addClass("switchboard-quick-switch-modal");
 
         // Header
-        const header = contentEl.createDiv("quick-switch-header");
-        header.createEl("span", { text: "📞", cls: "quick-switch-icon" });
-        header.createEl("span", { text: "Quick Switch", cls: "quick-switch-title" });
+        const header = contentEl.createDiv("switchboard-quick-switch-header");
+        header.createEl("span", { text: "📞", cls: "switchboard-quick-switch-icon" });
+        header.createEl("span", { text: "Quick Switch", cls: "switchboard-quick-switch-title" });
 
         // Show current session if active
         if (this.activeLine) {
             const activeLine = this.lines.find(l => l.id === this.activeLine);
             if (activeLine) {
-                const current = contentEl.createDiv("quick-switch-current");
-                const dot = current.createSpan("quick-switch-current-dot");
+                const current = contentEl.createDiv("switchboard-quick-switch-current");
+                const dot = current.createSpan("switchboard-quick-switch-current-dot");
                 current.style.setProperty("--line-color", activeLine.color);
-                current.createSpan({ text: activeLine.name, cls: "quick-switch-current-name" });
+                current.createSpan({ text: activeLine.name, cls: "switchboard-quick-switch-current-name" });
                 if (this.currentGoal) {
-                    current.createSpan({ text: `• ${this.currentGoal}`, cls: "quick-switch-current-goal" });
+                    current.createSpan({ text: `• ${this.currentGoal}`, cls: "switchboard-quick-switch-current-goal" });
                 }
             }
         }
 
         // Lines list
-        const linesContainer = contentEl.createDiv("quick-switch-lines");
+        const linesContainer = contentEl.createDiv("switchboard-quick-switch-lines");
         this.lineElements = [];
 
         if (this.lines.length === 0) {
             linesContainer.createEl("p", {
                 text: "No lines configured",
-                cls: "quick-switch-empty",
+                cls: "switchboard-quick-switch-empty",
             });
             return;
         }
@@ -68,7 +68,7 @@ export class QuickSwitchModal extends Modal {
             const line = this.lines[i];
             const isActive = line.id === this.activeLine;
 
-            const lineEl = linesContainer.createDiv("quick-switch-line");
+            const lineEl = linesContainer.createDiv("switchboard-quick-switch-line");
             if (isActive) {
                 lineEl.addClass("is-current");
             }
@@ -77,20 +77,20 @@ export class QuickSwitchModal extends Modal {
             }
 
             // Color indicator
-            const colorEl = lineEl.createDiv("quick-switch-line-color");
+            const colorEl = lineEl.createDiv("switchboard-quick-switch-line-color");
             lineEl.style.setProperty("--line-color", line.color);
 
             // Name
             lineEl.createEl("span", {
                 text: line.name,
-                cls: "quick-switch-line-name",
+                cls: "switchboard-quick-switch-line-name",
             });
 
             // Status for active line
             if (isActive) {
                 lineEl.createEl("span", {
                     text: "●",
-                    cls: "quick-switch-line-active",
+                    cls: "switchboard-quick-switch-line-active",
                 });
             }
 
@@ -114,7 +114,7 @@ export class QuickSwitchModal extends Modal {
         if (this.activeLine) {
             const disconnectBtn = contentEl.createEl("button", {
                 text: "🔌 Disconnect",
-                cls: "quick-switch-disconnect",
+                cls: "switchboard-quick-switch-disconnect",
             });
             disconnectBtn.addEventListener("click", () => {
                 this.onSelect(null);
@@ -123,7 +123,7 @@ export class QuickSwitchModal extends Modal {
         }
 
         // Keyboard navigation hint
-        const hint = contentEl.createDiv("quick-switch-hint");
+        const hint = contentEl.createDiv("switchboard-quick-switch-hint");
         hint.createEl("span", { text: "↑↓" });
         hint.createEl("span", { text: "navigate" });
         hint.createEl("span", { text: "↵" });

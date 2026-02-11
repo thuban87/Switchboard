@@ -66,27 +66,27 @@ export class OperatorModal extends Modal {
         modalEl.style.setProperty("--operator-color", this.line.color);
 
         // Header
-        const headerEl = contentEl.createDiv("operator-header");
-        headerEl.createEl("span", { text: "🎛️", cls: "operator-icon" });
+        const headerEl = contentEl.createDiv("switchboard-operator-header");
+        headerEl.createEl("span", { text: "🎛️", cls: "switchboard-operator-icon" });
         headerEl.createEl("h2", { text: "Operator Menu" });
 
         // Line indicator
-        const lineEl = headerEl.createDiv("operator-line");
-        const colorDot = lineEl.createSpan("operator-color-dot");
+        const lineEl = headerEl.createDiv("switchboard-operator-line");
+        const colorDot = lineEl.createSpan("switchboard-operator-color-dot");
         lineEl.createEl("span", { text: this.line.name });
 
         // Get commands for this line
         const commands = this.getCommandsForLine();
 
         // Command grid
-        const gridEl = contentEl.createDiv("operator-grid");
+        const gridEl = contentEl.createDiv("switchboard-operator-grid");
 
         for (const cmd of commands) {
             const btnEl = gridEl.createEl("button", {
-                cls: "operator-cmd-btn",
+                cls: "switchboard-operator-cmd-btn",
             });
-            btnEl.createEl("span", { text: cmd.icon, cls: "operator-cmd-icon" });
-            btnEl.createEl("span", { text: cmd.name, cls: "operator-cmd-name" });
+            btnEl.createEl("span", { text: cmd.icon, cls: "switchboard-operator-cmd-icon" });
+            btnEl.createEl("span", { text: cmd.name, cls: "switchboard-operator-cmd-name" });
 
             btnEl.addEventListener("click", () => {
                 this.executeCommand(cmd);

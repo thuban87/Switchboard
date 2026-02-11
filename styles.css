@@ -542,7 +542,7 @@
 }
 
 .switchboard-call-log-char-counter,
-.goal-prompt-char-counter {
+.switchboard-goal-prompt-char-counter {
 	text-align: right;
 	font-size: 0.8rem;
 	color: var(--text-muted);
@@ -550,55 +550,6 @@
 	padding-right: 2px;
 }
 
-/* ========================================
-   Operator Modal
-   ======================================== */
-
-.switchboard-operator-modal .modal-content {
-	padding: 1.5rem;
-}
-
-.operator-header {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 1.5rem;
-}
-
-.operator-icon {
-	font-size: 2rem;
-}
-
-.operator-header h2 {
-	margin: 0;
-	font-size: 1.5rem;
-}
-
-.operator-line {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 6px 12px;
-	background: var(--background-secondary);
-	border-radius: 20px;
-	font-size: 0.9rem;
-}
-
-.operator-color-dot {
-	width: 10px;
-	height: 10px;
-	border-radius: 50%;
-	background-color: var(--operator-color);
-}
-
-.operator-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 10px;
-}
-
-/* operator-cmd-btn, operator-cmd-icon, operator-cmd-name defined in Operator Menu Modal section below */
 
 /* ========================================
    Line Editor Modal — divider cleanup
@@ -891,24 +842,24 @@
 	min-width: 320px;
 }
 
-.operator-header {
+.switchboard-operator-header {
 	text-align: center;
 	margin-bottom: 20px;
 }
 
-.operator-header .operator-icon {
+.switchboard-operator-header .switchboard-operator-icon {
 	font-size: 28px;
 	display: block;
 	margin-bottom: 8px;
 }
 
-.operator-header h2 {
+.switchboard-operator-header h2 {
 	margin: 0 0 12px 0;
 	font-size: 1.4rem;
 	font-weight: 600;
 }
 
-.operator-line {
+.switchboard-operator-line {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
@@ -918,7 +869,7 @@
 	font-size: 0.9rem;
 }
 
-.operator-color-dot {
+.switchboard-operator-color-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
@@ -926,14 +877,14 @@
 	background-color: var(--operator-color);
 }
 
-.operator-grid {
+.switchboard-operator-grid {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	margin-top: 16px;
 }
 
-.operator-cmd-btn {
+.switchboard-operator-cmd-btn {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -950,23 +901,23 @@
 	text-align: left;
 }
 
-.operator-cmd-btn:hover {
+.switchboard-operator-cmd-btn:hover {
 	background: var(--background-modifier-hover);
 	transform: translateX(4px);
 }
 
-.operator-cmd-btn:active {
+.switchboard-operator-cmd-btn:active {
 	transform: translateX(2px);
 }
 
-.operator-cmd-icon {
+.switchboard-operator-cmd-icon {
 	font-size: 1.4rem;
 	line-height: 1;
 	flex-shrink: 0;
 	display: inline-block;
 }
 
-.operator-cmd-name {
+.switchboard-operator-cmd-name {
 	font-size: 1rem;
 	font-weight: 500;
 	color: var(--text-normal);
@@ -1505,21 +1456,21 @@
 	padding: 24px;
 }
 
-.goal-prompt-header h2 {
+.switchboard-goal-prompt-header h2 {
 	margin: 0 0 4px 0;
 	font-size: 1.3em;
 }
 
-.goal-prompt-subtitle {
+.switchboard-goal-prompt-subtitle {
 	margin: 0 0 20px 0;
 	color: var(--text-muted);
 }
 
-.goal-prompt-input-container .setting-item-control {
+.switchboard-goal-prompt-input-container .setting-item-control {
 	width: 100%;
 }
 
-.goal-prompt-input {
+.switchboard-goal-prompt-input {
 	width: 100%;
 	padding: 12px;
 	font-size: 1em;
@@ -1527,13 +1478,13 @@
 	border: 1px solid var(--background-modifier-border);
 }
 
-.goal-prompt-actions {
+.switchboard-goal-prompt-actions {
 	display: flex;
 	gap: 12px;
 	margin-top: 20px;
 }
 
-.goal-prompt-btn {
+.switchboard-goal-prompt-btn {
 	flex: 1;
 	display: flex;
 	align-items: center;
@@ -1548,20 +1499,20 @@
 	transition: transform 0.1s ease, filter 0.1s ease;
 }
 
-.goal-prompt-btn:hover {
+.switchboard-goal-prompt-btn:hover {
 	filter: brightness(1.1);
 	transform: translateY(-1px);
 }
 
-.goal-prompt-btn-primary {
-	color: white;
+.switchboard-goal-prompt-btn-primary {
+	color: var(--text-on-accent);
 }
 
-.switchboard-goal-prompt-modal .goal-prompt-btn-primary {
+.switchboard-goal-prompt-modal .switchboard-goal-prompt-btn-primary {
 	background-color: var(--goal-prompt-color);
 }
 
-.goal-prompt-btn-secondary {
+.switchboard-goal-prompt-btn-secondary {
 	background: var(--background-secondary);
 	color: var(--text-normal);
 	border: 1px solid var(--background-modifier-border);
@@ -1598,23 +1549,23 @@
 	padding: 16px;
 }
 
-.quick-switch-header {
+.switchboard-quick-switch-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 12px;
 }
 
-.quick-switch-icon {
+.switchboard-quick-switch-icon {
 	font-size: 1.25rem;
 }
 
-.quick-switch-title {
+.switchboard-quick-switch-title {
 	font-size: 1.1rem;
 	font-weight: 600;
 }
 
-.quick-switch-current {
+.switchboard-quick-switch-current {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1625,7 +1576,7 @@
 	font-size: 0.9rem;
 }
 
-.quick-switch-current-dot {
+.switchboard-quick-switch-current-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -1633,18 +1584,18 @@
 	background-color: var(--line-color);
 }
 
-.quick-switch-current-name {
+.switchboard-quick-switch-current-name {
 	font-weight: 500;
 }
 
-.quick-switch-current-goal {
+.switchboard-quick-switch-current-goal {
 	color: var(--text-muted);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.quick-switch-lines {
+.switchboard-quick-switch-lines {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -1652,7 +1603,7 @@
 	overflow-y: auto;
 }
 
-.quick-switch-line {
+.switchboard-quick-switch-line {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1664,24 +1615,24 @@
 	border: 2px solid transparent;
 }
 
-.quick-switch-line:hover,
-.quick-switch-line.is-selected {
+.switchboard-quick-switch-line:hover,
+.switchboard-quick-switch-line.is-selected {
 	background: var(--background-secondary-alt);
 	border-color: var(--interactive-accent);
 }
 
-.quick-switch-line.is-current {
+.switchboard-quick-switch-line.is-current {
 	opacity: 0.5;
 	cursor: default;
 }
 
-.quick-switch-line.is-current:hover,
-.quick-switch-line.is-current.is-selected {
+.switchboard-quick-switch-line.is-current:hover,
+.switchboard-quick-switch-line.is-current.is-selected {
 	background: var(--background-secondary);
 	border-color: transparent;
 }
 
-.quick-switch-line-color {
+.switchboard-quick-switch-line-color {
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
@@ -1689,17 +1640,17 @@
 	background-color: var(--line-color);
 }
 
-.quick-switch-line-name {
+.switchboard-quick-switch-line-name {
 	flex: 1;
 	font-weight: 500;
 }
 
-.quick-switch-line-active {
+.switchboard-quick-switch-line-active {
 	color: var(--interactive-accent);
 	font-size: 0.8rem;
 }
 
-.quick-switch-disconnect {
+.switchboard-quick-switch-disconnect {
 	width: 100%;
 	margin-top: 12px;
 	padding: 8px;
@@ -1712,11 +1663,11 @@
 	transition: opacity 0.1s ease;
 }
 
-.quick-switch-disconnect:hover {
+.switchboard-quick-switch-disconnect:hover {
 	opacity: 0.9;
 }
 
-.quick-switch-hint {
+.switchboard-quick-switch-hint {
 	display: flex;
 	justify-content: center;
 	gap: 12px;
@@ -1725,14 +1676,14 @@
 	color: var(--text-muted);
 }
 
-.quick-switch-hint span:nth-child(odd) {
+.switchboard-quick-switch-hint span:nth-child(odd) {
 	background: var(--background-modifier-border);
 	padding: 2px 6px;
 	border-radius: 3px;
 	font-family: var(--font-monospace);
 }
 
-.quick-switch-empty {
+.switchboard-quick-switch-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
@@ -2013,7 +1964,7 @@
 /* Primary action buttons */
 .switchboard-incoming-call-btn-connect:focus-visible,
 .switchboard-call-log-btn-done:focus-visible,
-.goal-prompt-btn-primary:focus-visible,
+.switchboard-goal-prompt-btn-primary:focus-visible,
 .switchboard-timeup-extend:focus-visible,
 .stats-export-btn:focus-visible,
 .dashboard-line-btn:focus-visible {
@@ -2022,14 +1973,14 @@
 }
 
 /* Secondary / neutral interactive elements */
-.operator-cmd-btn:focus-visible,
+.switchboard-operator-cmd-btn:focus-visible,
 .switchboard-patch-line:focus-visible,
 .switchboard-incoming-call-btn:focus-visible,
 .switchboard-call-log-btn-skip:focus-visible,
-.goal-prompt-btn-secondary:focus-visible,
+.switchboard-goal-prompt-btn-secondary:focus-visible,
 .switchboard-timeup-disconnect:focus-visible,
-.quick-switch-line:focus-visible,
-.quick-switch-disconnect:focus-visible,
+.switchboard-quick-switch-line:focus-visible,
+.switchboard-quick-switch-disconnect:focus-visible,
 .switchboard-disconnect-btn:focus-visible,
 .session-card-disconnect:focus-visible {
 	outline: 2px solid var(--interactive-accent);
@@ -2048,7 +1999,7 @@
 
 /* Text inputs — ring for keyboard nav, keep existing border-color change */
 .switchboard-call-log-textarea:focus-visible,
-.goal-prompt-input:focus-visible {
+.switchboard-goal-prompt-input:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: -1px;
 }

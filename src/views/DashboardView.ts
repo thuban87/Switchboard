@@ -58,7 +58,7 @@ export class DashboardView extends ItemView {
         const container = ((this as any).contentEl || this.containerEl.children[1]) as HTMLElement;
         if (!container) return;
         container.empty();
-        container.addClass("dashboard-container");
+        container.addClass("switchboard-dashboard-container");
 
         // Current Session Card
         this.renderCurrentSession(container);
@@ -74,23 +74,23 @@ export class DashboardView extends ItemView {
     }
 
     private renderCurrentSession(container: HTMLElement) {
-        const section = container.createDiv("dashboard-section");
-        section.createEl("h3", { text: "Current Session", cls: "dashboard-section-title" });
+        const section = container.createDiv("switchboard-dashboard-section");
+        section.createEl("h3", { text: "Current Session", cls: "switchboard-dashboard-section-title" });
 
-        const card = section.createDiv("dashboard-session-card");
+        const card = section.createDiv("switchboard-dashboard-session-card");
         const activeLine = this.plugin.getActiveLine();
 
         if (activeLine) {
             // Color stripe
-            const stripe = card.createDiv("session-card-stripe");
+            const stripe = card.createDiv("switchboard-session-card-stripe");
 
             // Content
-            const content = card.createDiv("session-card-content");
+            const content = card.createDiv("switchboard-session-card-content");
 
             // Line name
-            const nameRow = content.createDiv("session-card-name-row");
-            const dot = nameRow.createSpan("session-card-dot");
-            nameRow.createSpan({ text: activeLine.name, cls: "session-card-name" });
+            const nameRow = content.createDiv("switchboard-session-card-name-row");
+            const dot = nameRow.createSpan("switchboard-session-card-dot");
+            nameRow.createSpan({ text: activeLine.name, cls: "switchboard-session-card-name" });
 
             // Set --line-color on card so stripe + dot inherit it
             card.style.setProperty("--line-color", activeLine.color);
@@ -98,17 +98,17 @@ export class DashboardView extends ItemView {
             // Timer
             const duration = this.plugin.sessionLogger.getCurrentDuration();
             const durationStr = formatDuration(duration);
-            content.createDiv({ text: `⏱️ ${durationStr}`, cls: "session-card-timer" });
+            content.createDiv({ text: `⏱️ ${durationStr}`, cls: "switchboard-session-card-timer" });
 
             // Goal if set
             if (this.plugin.currentGoal) {
-                content.createDiv({ text: `🎯 ${this.plugin.currentGoal}`, cls: "session-card-goal" });
+                content.createDiv({ text: `🎯 ${this.plugin.currentGoal}`, cls: "switchboard-session-card-goal" });
             }
 
             // Disconnect button
             const disconnectBtn = content.createEl("button", {
                 text: "🔌 Disconnect",
-                cls: "session-card-disconnect",
+                cls: "switchboard-session-card-disconnect",
             });
             disconnectBtn.addEventListener("click", () => {
                 this.plugin.disconnect();
@@ -116,41 +116,41 @@ export class DashboardView extends ItemView {
 
             card.addClass("is-active");
         } else {
-            card.createDiv({ text: "Not connected", cls: "session-card-empty" });
+            card.createDiv({ text: "Not connected", cls: "switchboard-session-card-empty" });
             card.addClass("is-inactive");
         }
     }
 
     private renderLinesGrid(container: HTMLElement) {
-        const section = container.createDiv("dashboard-section");
-        section.createEl("h3", { text: "Lines", cls: "dashboard-section-title" });
+        const section = container.createDiv("switchboard-dashboard-section");
+        section.createEl("h3", { text: "Lines", cls: "switchboard-dashboard-section-title" });
 
-        const grid = section.createDiv("dashboard-lines-grid");
+        const grid = section.createDiv("switchboard-dashboard-lines-grid");
         const lines = this.plugin.settings.lines;
         const activeLine = this.plugin.settings.activeLine;
 
         if (lines.length === 0) {
-            grid.createDiv({ text: "No lines configured", cls: "dashboard-empty" });
+            grid.createDiv({ text: "No lines configured", cls: "switchboard-dashboard-empty" });
             return;
         }
 
         for (const line of lines) {
             const isActive = line.id === activeLine;
-            const lineEl = grid.createDiv("dashboard-line-item");
+            const lineEl = grid.createDiv("switchboard-dashboard-line-item");
             if (isActive) lineEl.addClass("is-active");
 
             // Color dot
-            const dot = lineEl.createDiv("dashboard-line-dot");
+            const dot = lineEl.createDiv("switchboard-dashboard-line-dot");
             lineEl.style.setProperty("--line-color", line.color);
 
             // Name
-            lineEl.createSpan({ text: line.name, cls: "dashboard-line-name" });
+            lineEl.createSpan({ text: line.name, cls: "switchboard-dashboard-line-name" });
 
             // Action button
             if (!isActive) {
                 const btn = lineEl.createEl("button", {
                     text: "→",
-                    cls: "dashboard-line-btn",
+                    cls: "switchboard-dashboard-line-btn",
                 });
                 btn.setAttribute("aria-label", `Patch into ${line.name}`);
                 btn.addEventListener("click", (e) => {
@@ -158,16 +158,16 @@ export class DashboardView extends ItemView {
                     this.plugin.patchInWithGoal(line);
                 });
             } else {
-                lineEl.createSpan({ text: "●", cls: "dashboard-line-active" });
+                lineEl.createSpan({ text: "●", cls: "switchboard-dashboard-line-active" });
             }
         }
     }
 
     private renderSchedule(container: HTMLElement) {
-        const section = container.createDiv("dashboard-section");
-        section.createEl("h3", { text: "Today's Schedule", cls: "dashboard-section-title" });
+        const section = container.createDiv("switchboard-dashboard-section");
+        section.createEl("h3", { text: "Today's Schedule", cls: "switchboard-dashboard-section-title" });
 
-        const scheduleContainer = section.createDiv("dashboard-schedule");
+        const scheduleContainer = section.createDiv("switchboard-dashboard-schedule");
         const today = new Date();
         const dayOfWeek = today.getDay();
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
@@ -191,33 +191,33 @@ export class DashboardView extends ItemView {
         todayBlocks.sort((a, b) => a.block.startTime.localeCompare(b.block.startTime));
 
         if (todayBlocks.length === 0) {
-            scheduleContainer.createDiv({ text: "No scheduled blocks today", cls: "dashboard-empty" });
+            scheduleContainer.createDiv({ text: "No scheduled blocks today", cls: "switchboard-dashboard-empty" });
             return;
         }
 
         for (const { line, block } of todayBlocks) {
-            const blockEl = scheduleContainer.createDiv("dashboard-schedule-block");
+            const blockEl = scheduleContainer.createDiv("switchboard-dashboard-schedule-block");
 
-            const dot = blockEl.createSpan("dashboard-schedule-dot");
+            const dot = blockEl.createSpan("switchboard-dashboard-schedule-dot");
             blockEl.style.setProperty("--line-color", line.color);
 
             blockEl.createSpan({
                 text: `${block.startTime} - ${block.endTime}`,
-                cls: "dashboard-schedule-time"
+                cls: "switchboard-dashboard-schedule-time"
             });
-            blockEl.createSpan({ text: line.name, cls: "dashboard-schedule-name" });
+            blockEl.createSpan({ text: line.name, cls: "switchboard-dashboard-schedule-name" });
         }
     }
 
     private renderRecentSessions(container: HTMLElement) {
-        const section = container.createDiv("dashboard-section");
-        section.createEl("h3", { text: "Recent Sessions", cls: "dashboard-section-title" });
+        const section = container.createDiv("switchboard-dashboard-section");
+        section.createEl("h3", { text: "Recent Sessions", cls: "switchboard-dashboard-section-title" });
 
-        const recentContainer = section.createDiv("dashboard-recent");
+        const recentContainer = section.createDiv("switchboard-dashboard-recent");
         const history = this.plugin.settings.sessionHistory;
 
         if (history.length === 0) {
-            recentContainer.createDiv({ text: "No sessions recorded", cls: "dashboard-empty" });
+            recentContainer.createDiv({ text: "No sessions recorded", cls: "switchboard-dashboard-empty" });
             return;
         }
 
@@ -225,19 +225,19 @@ export class DashboardView extends ItemView {
         const recentSessions = [...history].reverse().slice(0, 5);
 
         for (const session of recentSessions) {
-            const sessionEl = recentContainer.createDiv("dashboard-recent-item");
+            const sessionEl = recentContainer.createDiv("switchboard-dashboard-recent-item");
 
             // Find the line for color (may not exist if deleted)
             const line = this.plugin.settings.lines.find(l => l.id === session.lineId);
-            const dot = sessionEl.createSpan("dashboard-recent-dot");
+            const dot = sessionEl.createSpan("switchboard-dashboard-recent-dot");
             if (line?.color) {
                 sessionEl.style.setProperty("--line-color", line.color);
             }
 
-            sessionEl.createSpan({ text: session.lineName, cls: "dashboard-recent-name" });
+            sessionEl.createSpan({ text: session.lineName, cls: "switchboard-dashboard-recent-name" });
             sessionEl.createSpan({
                 text: `${session.date} • ${formatDuration(session.durationMinutes)}`,
-                cls: "dashboard-recent-info"
+                cls: "switchboard-dashboard-recent-info"
             });
         }
     }

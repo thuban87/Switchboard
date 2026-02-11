@@ -38,6 +38,5 @@ CLAUDE.md
 
 # AI assistant configs
 .claude/
-.agent/
 .gemini/
 .cursor/

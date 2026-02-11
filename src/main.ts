@@ -136,11 +136,6 @@ export default class SwitchboardPlugin extends Plugin {
             },
         });
 
-        // Add operator menu ribbon icon
-        this.addRibbonIcon("headphones", "Operator Menu", () => {
-            this.openOperatorModal();
-        });
-
         // Restore active line state on plugin load (don't refocus folders)
         const activeLine = this.getActiveLine();
         if (activeLine) {

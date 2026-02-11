@@ -1,6 +1,7 @@
 import { PluginSettingTab, App, Setting, setIcon, TFolder } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
+import { ConfirmModal } from "../modals/ConfirmModal";
 import { SwitchboardLine, formatTime12h } from "../types";
 import { Logger } from "../services/Logger";
 
@@ -269,16 +270,18 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         setIcon(deleteBtn, "trash-2");
         deleteBtn.setAttribute("aria-label", "Delete");
         deleteBtn.addEventListener("click", () => {
-            // Confirm before deleting
-            const confirmed = confirm(`Delete "${line.name}"? This cannot be undone.`);
-            if (!confirmed) return;
-
-            this.plugin.settings.lines = this.plugin.settings.lines.filter(
-                (l: SwitchboardLine) => l.id !== line.id
-            );
-            this.plugin.saveSettings();
-            this.plugin.restartWireService();
-            this.display();
+            new ConfirmModal(
+                this.app,
+                `Delete "${line.name}"? This cannot be undone.`,
+                () => {
+                    this.plugin.settings.lines = this.plugin.settings.lines.filter(
+                        (l: SwitchboardLine) => l.id !== line.id
+                    );
+                    this.plugin.saveSettings();
+                    this.plugin.restartWireService();
+                    this.display();
+                }
+            ).open();
         });
     }
 

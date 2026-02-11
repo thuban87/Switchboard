@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Setting } from "obsidian";
 import type SwitchboardPlugin from "../main";
+import { ConfirmModal } from "./ConfirmModal";
 import { SessionRecord, SwitchboardLine, formatDuration } from "../types";
 
 /**
@@ -214,14 +215,17 @@ export class SessionEditorModal extends Modal {
         record.durationMinutes = Math.max(0, Math.round(duration));
     }
 
-    private async deleteSession(index: number) {
-        const confirmed = confirm("Delete this session? This cannot be undone.");
-        if (!confirmed) return;
-
-        this.plugin.settings.sessionHistory.splice(index, 1);
-        await this.plugin.saveSettings();
-        new Notice("🗑️ Session deleted");
-        this.renderSessionList();
+    private deleteSession(index: number) {
+        new ConfirmModal(
+            this.app,
+            "Delete this session? This cannot be undone.",
+            async () => {
+                this.plugin.settings.sessionHistory.splice(index, 1);
+                await this.plugin.saveSettings();
+                new Notice("🗑️ Session deleted");
+                this.renderSessionList();
+            }
+        ).open();
     }
 
 

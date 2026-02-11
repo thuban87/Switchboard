@@ -1993,6 +1993,20 @@
 }
 
 /* ========================================
+   Confirm Modal
+   ======================================== */
+
+.switchboard-confirm-modal p {
+	margin-bottom: var(--size-4-4);
+}
+
+.switchboard-confirm-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
+}
+
+/* ========================================
    Accessibility: Focus Visible Outlines
    ======================================== */
 

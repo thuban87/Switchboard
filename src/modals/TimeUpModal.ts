@@ -24,29 +24,29 @@ export class TimeUpModal extends Modal {
         modalEl.addClass("switchboard-timeup-modal");
 
         // Header
-        const headerEl = contentEl.createDiv("timeup-header");
-        headerEl.createEl("span", { text: "⏰", cls: "timeup-icon" });
+        const headerEl = contentEl.createDiv("switchboard-timeup-header");
+        headerEl.createEl("span", { text: "⏰", cls: "switchboard-timeup-icon" });
         headerEl.createEl("h2", { text: "Time's Up!" });
 
         // Message
-        const messageEl = contentEl.createDiv("timeup-message");
+        const messageEl = contentEl.createDiv("switchboard-timeup-message");
         messageEl.createEl("p", {
             text: `Your scheduled time for ${this.line.name} has ended.`
         });
         messageEl.createEl("p", {
             text: "Would you like to extend your session or hang up?",
-            cls: "timeup-subtitle"
+            cls: "switchboard-timeup-subtitle"
         });
 
         // Buttons
-        const buttonsEl = contentEl.createDiv("timeup-buttons");
+        const buttonsEl = contentEl.createDiv("switchboard-timeup-buttons");
 
         // Extend options
-        const extendRow = buttonsEl.createDiv("timeup-extend-row");
+        const extendRow = buttonsEl.createDiv("switchboard-timeup-extend-row");
 
         const extend15Btn = extendRow.createEl("button", {
             text: "📞 +15 min",
-            cls: "timeup-btn timeup-extend",
+            cls: "switchboard-timeup-btn switchboard-timeup-extend",
         });
         extend15Btn.addEventListener("click", () => {
             this.extendSession(15);
@@ -54,7 +54,7 @@ export class TimeUpModal extends Modal {
 
         const extend30Btn = extendRow.createEl("button", {
             text: "📞 +30 min",
-            cls: "timeup-btn timeup-extend",
+            cls: "switchboard-timeup-btn switchboard-timeup-extend",
         });
         extend30Btn.addEventListener("click", () => {
             this.extendSession(30);
@@ -62,7 +62,7 @@ export class TimeUpModal extends Modal {
 
         const extend60Btn = extendRow.createEl("button", {
             text: "📞 +1 hour",
-            cls: "timeup-btn timeup-extend",
+            cls: "switchboard-timeup-btn switchboard-timeup-extend",
         });
         extend60Btn.addEventListener("click", () => {
             this.extendSession(60);
@@ -71,7 +71,7 @@ export class TimeUpModal extends Modal {
         // Disconnect button
         const disconnectBtn = buttonsEl.createEl("button", {
             text: "🔌 Hang Up",
-            cls: "timeup-btn timeup-disconnect",
+            cls: "switchboard-timeup-btn switchboard-timeup-disconnect",
         });
         disconnectBtn.addEventListener("click", () => {
             this.close();

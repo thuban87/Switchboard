@@ -277,7 +277,7 @@
 	text-align: center;
 }
 
-.incoming-call-header {
+.switchboard-incoming-call-header {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -285,15 +285,15 @@
 	margin-bottom: 1.5rem;
 }
 
-.incoming-call-icon {
+.switchboard-incoming-call-icon {
 	font-size: 2.5rem;
 }
 
-.incoming-call-icon.ringing {
-	animation: ring 0.5s ease-in-out infinite alternate;
+.switchboard-incoming-call-icon.switchboard-ringing {
+	animation: switchboard-ring 0.5s ease-in-out infinite alternate;
 }
 
-@keyframes ring {
+@keyframes switchboard-ring {
 	0% {
 		transform: rotate(-15deg);
 	}
@@ -303,13 +303,13 @@
 	}
 }
 
-.incoming-call-header h2 {
+.switchboard-incoming-call-header h2 {
 	margin: 0;
 	font-size: 1.5rem;
 	color: var(--text-normal);
 }
 
-.incoming-call-line {
+.switchboard-incoming-call-line {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -320,7 +320,7 @@
 	margin-bottom: 1rem;
 }
 
-.incoming-call-color-dot {
+.switchboard-incoming-call-color-dot {
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
@@ -328,13 +328,13 @@
 	background-color: var(--incoming-call-color);
 }
 
-.incoming-call-line-name {
+.switchboard-incoming-call-line-name {
 	font-size: 1.25rem;
 	font-weight: 700;
 	color: var(--text-normal);
 }
 
-.incoming-call-task {
+.switchboard-incoming-call-task {
 	text-align: left;
 	padding: 1rem;
 	background: var(--background-primary-alt);
@@ -342,26 +342,26 @@
 	margin-bottom: 1.5rem;
 }
 
-.incoming-call-task-title {
+.switchboard-incoming-call-task-title {
 	font-weight: 600;
 	margin: 0 0 0.5rem 0;
 	color: var(--text-normal);
 }
 
-.incoming-call-task-time,
-.incoming-call-task-file {
+.switchboard-incoming-call-task-time,
+.switchboard-incoming-call-task-file {
 	margin: 0.25rem 0;
 	font-size: 0.9em;
 	color: var(--text-muted);
 }
 
-.incoming-call-actions {
+.switchboard-incoming-call-actions {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 }
 
-.incoming-call-btn {
+.switchboard-incoming-call-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -375,35 +375,35 @@
 	transition: all 0.15s ease;
 }
 
-.incoming-call-btn-connect {
-	color: white;
+.switchboard-incoming-call-btn-connect {
+	color: var(--text-on-accent);
 }
 
-.switchboard-incoming-call-modal .incoming-call-btn-connect {
+.switchboard-incoming-call-modal .switchboard-incoming-call-btn-connect {
 	background-color: var(--incoming-call-color);
 }
 
-.incoming-call-btn-connect:hover {
+.switchboard-incoming-call-btn-connect:hover {
 	filter: brightness(1.1);
 	transform: scale(1.02);
 }
 
-.incoming-call-hold-container {
+.switchboard-incoming-call-hold-container {
 	display: flex;
 	gap: 8px;
 }
 
-.incoming-call-btn-hold {
+.switchboard-incoming-call-btn-hold {
 	flex: 1;
 	background: var(--background-secondary);
 	color: var(--text-normal);
 }
 
-.incoming-call-btn-hold:hover {
+.switchboard-incoming-call-btn-hold:hover {
 	background: var(--background-secondary-alt);
 }
 
-.incoming-call-snooze-select {
+.switchboard-incoming-call-snooze-select {
 	padding: 8px 12px;
 	border-radius: 8px;
 	border: 1px solid var(--background-modifier-border);
@@ -412,13 +412,13 @@
 	cursor: pointer;
 }
 
-.incoming-call-btn-decline {
+.switchboard-incoming-call-btn-decline {
 	background: transparent;
 	color: var(--text-muted);
 	border: 1px solid var(--background-modifier-border);
 }
 
-.incoming-call-btn-decline:hover {
+.switchboard-incoming-call-btn-decline:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 	border-color: transparent;
@@ -432,7 +432,7 @@
 	padding: 1.5rem;
 }
 
-.call-log-header {
+.switchboard-call-log-header {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -440,21 +440,21 @@
 	margin-bottom: 1rem;
 }
 
-.call-log-icon {
+.switchboard-call-log-icon {
 	font-size: 2rem;
 }
 
-.call-log-header h2 {
+.switchboard-call-log-header h2 {
 	margin: 0;
 	font-size: 1.5rem;
 }
 
-.call-log-info {
+.switchboard-call-log-info {
 	text-align: center;
 	margin-bottom: 1rem;
 }
 
-.call-log-line {
+.switchboard-call-log-line {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -464,24 +464,24 @@
 	margin-bottom: 0.5rem;
 }
 
-.call-log-color-dot {
+.switchboard-call-log-color-dot {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
 	background-color: var(--call-log-color);
 }
 
-.call-log-duration {
+.switchboard-call-log-duration {
 	color: var(--text-muted);
 	margin: 0;
 }
 
-.call-log-prompt {
+.switchboard-call-log-prompt {
 	font-weight: 500;
 	margin-bottom: 0.5rem;
 }
 
-.call-log-textarea {
+.switchboard-call-log-textarea {
 	width: 100%;
 	min-height: 80px;
 	padding: 10px;
@@ -494,18 +494,18 @@
 	resize: vertical;
 }
 
-.call-log-textarea:focus {
+.switchboard-call-log-textarea:focus {
 	outline: none;
 	border-color: var(--call-log-color, var(--interactive-accent));
 }
 
-.call-log-buttons {
+.switchboard-call-log-buttons {
 	display: flex;
 	gap: 10px;
 	margin-top: 1rem;
 }
 
-.call-log-btn {
+.switchboard-call-log-btn {
 	flex: 1;
 	display: flex;
 	align-items: center;
@@ -520,28 +520,28 @@
 	transition: all 0.15s ease;
 }
 
-.call-log-btn-done {
-	color: white;
+.switchboard-call-log-btn-done {
+	color: var(--text-on-accent);
 }
 
-.switchboard-call-log-modal .call-log-btn-done {
+.switchboard-call-log-modal .switchboard-call-log-btn-done {
 	background-color: var(--call-log-color);
 }
 
-.call-log-btn-done:hover {
+.switchboard-call-log-btn-done:hover {
 	filter: brightness(1.1);
 }
 
-.call-log-btn-skip {
+.switchboard-call-log-btn-skip {
 	background: var(--background-secondary);
 	color: var(--text-muted);
 }
 
-.call-log-btn-skip:hover {
+.switchboard-call-log-btn-skip:hover {
 	background: var(--background-secondary-alt);
 }
 
-.call-log-char-counter,
+.switchboard-call-log-char-counter,
 .goal-prompt-char-counter {
 	text-align: right;
 	font-size: 0.8rem;
@@ -1057,49 +1057,49 @@
 	min-width: 320px;
 }
 
-.timeup-header {
+.switchboard-timeup-header {
 	margin-bottom: 16px;
 }
 
-.timeup-header .timeup-icon {
+.switchboard-timeup-header .switchboard-timeup-icon {
 	font-size: 48px;
 	display: block;
 	margin-bottom: 8px;
 }
 
-.timeup-header h2 {
+.switchboard-timeup-header h2 {
 	margin: 0;
 	font-size: 1.5rem;
 	font-weight: 600;
 }
 
-.timeup-message {
+.switchboard-timeup-message {
 	margin-bottom: 24px;
 }
 
-.timeup-message p {
+.switchboard-timeup-message p {
 	margin: 8px 0;
 	color: var(--text-normal);
 }
 
-.timeup-message .timeup-subtitle {
+.switchboard-timeup-message .switchboard-timeup-subtitle {
 	color: var(--text-muted);
 	font-size: 0.9rem;
 }
 
-.timeup-buttons {
+.switchboard-timeup-buttons {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 }
 
-.timeup-extend-row {
+.switchboard-timeup-extend-row {
 	display: flex;
 	gap: 8px;
 	justify-content: center;
 }
 
-.timeup-btn {
+.switchboard-timeup-btn {
 	padding: 12px 20px;
 	border: none;
 	border-radius: 8px;
@@ -1109,24 +1109,24 @@
 	transition: all 0.15s ease;
 }
 
-.timeup-extend {
+.switchboard-timeup-extend {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
 	flex: 1;
 }
 
-.timeup-extend:hover {
+.switchboard-timeup-extend:hover {
 	filter: brightness(1.1);
 	transform: translateY(-1px);
 }
 
-.timeup-disconnect {
+.switchboard-timeup-disconnect {
 	background: var(--background-secondary);
 	color: var(--text-muted);
 	width: 100%;
 }
 
-.timeup-disconnect:hover {
+.switchboard-timeup-disconnect:hover {
 	background: var(--background-modifier-hover);
 	color: var(--text-normal);
 }
@@ -1451,7 +1451,7 @@
    Decline Options (Call Waiting / Reschedule)
    ========================================== */
 
-.incoming-call-decline-options {
+.switchboard-incoming-call-decline-options {
 	display: none;
 	flex-direction: column;
 	gap: 8px;
@@ -1460,11 +1460,11 @@
 	border-top: 1px solid var(--background-modifier-border);
 }
 
-.incoming-call-decline-options.is-visible {
+.switchboard-incoming-call-decline-options.is-visible {
 	display: flex;
 }
 
-.incoming-call-decline-options .incoming-call-btn-secondary {
+.switchboard-incoming-call-decline-options .switchboard-incoming-call-btn-secondary {
 	background: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
 	color: var(--text-normal);
@@ -1473,7 +1473,7 @@
 	justify-content: flex-start;
 }
 
-.incoming-call-decline-options .incoming-call-btn-secondary:hover {
+.switchboard-incoming-call-decline-options .switchboard-incoming-call-btn-secondary:hover {
 	background: var(--background-modifier-hover);
 }
 
@@ -1568,19 +1568,19 @@
 }
 
 /* Goal Reflection in CallLogModal */
-.call-log-goal-reflection {
+.switchboard-call-log-goal-reflection {
 	background: var(--background-secondary);
 	padding: 12px 16px;
 	border-radius: 8px;
 	margin-bottom: 16px;
 }
 
-.call-log-goal-text {
+.switchboard-call-log-goal-text {
 	margin: 0;
 	font-weight: 500;
 }
 
-.call-log-goal-question {
+.switchboard-call-log-goal-question {
 	margin: 8px 0 0 0;
 	color: var(--text-muted);
 	font-style: italic;
@@ -2011,10 +2011,10 @@
    ======================================== */
 
 /* Primary action buttons */
-.incoming-call-btn-connect:focus-visible,
-.call-log-btn-done:focus-visible,
+.switchboard-incoming-call-btn-connect:focus-visible,
+.switchboard-call-log-btn-done:focus-visible,
 .goal-prompt-btn-primary:focus-visible,
-.timeup-extend:focus-visible,
+.switchboard-timeup-extend:focus-visible,
 .stats-export-btn:focus-visible,
 .dashboard-line-btn:focus-visible {
 	outline: 2px solid var(--interactive-accent);
@@ -2024,10 +2024,10 @@
 /* Secondary / neutral interactive elements */
 .operator-cmd-btn:focus-visible,
 .switchboard-patch-line:focus-visible,
-.incoming-call-btn:focus-visible,
-.call-log-btn-skip:focus-visible,
+.switchboard-incoming-call-btn:focus-visible,
+.switchboard-call-log-btn-skip:focus-visible,
 .goal-prompt-btn-secondary:focus-visible,
-.timeup-disconnect:focus-visible,
+.switchboard-timeup-disconnect:focus-visible,
 .quick-switch-line:focus-visible,
 .quick-switch-disconnect:focus-visible,
 .switchboard-disconnect-btn:focus-visible,
@@ -2047,7 +2047,7 @@
 }
 
 /* Text inputs — ring for keyboard nav, keep existing border-color change */
-.call-log-textarea:focus-visible,
+.switchboard-call-log-textarea:focus-visible,
 .goal-prompt-input:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: -1px;

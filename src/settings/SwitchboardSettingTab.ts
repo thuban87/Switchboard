@@ -87,6 +87,18 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     })
             );
 
+        new Setting(containerEl)
+            .setName("Auto-disconnect on block end")
+            .setDesc("Show the Time's Up modal when a scheduled block ends, letting you extend or disconnect.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.autoDisconnect)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoDisconnect = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         // Daily Note Logging Section
         new Setting(containerEl).setName("Daily note logging").setHeading();
 

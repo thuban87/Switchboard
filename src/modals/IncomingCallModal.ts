@@ -51,33 +51,33 @@ export class IncomingCallModal extends Modal {
         modalEl.style.setProperty("--incoming-call-color", this.data.lineColor);
 
         // Header with ringing icon
-        const headerEl = contentEl.createDiv("incoming-call-header");
-        headerEl.createEl("span", { text: "📞", cls: "incoming-call-icon ringing" });
+        const headerEl = contentEl.createDiv("switchboard-incoming-call-header");
+        headerEl.createEl("span", { text: "📞", cls: "switchboard-incoming-call-icon switchboard-ringing" });
         headerEl.createEl("h2", { text: "Incoming Call" });
 
         // Line info
-        const lineEl = contentEl.createDiv("incoming-call-line");
-        const colorDot = lineEl.createSpan("incoming-call-color-dot");
-        lineEl.createEl("span", { text: this.data.lineName, cls: "incoming-call-line-name" });
+        const lineEl = contentEl.createDiv("switchboard-incoming-call-line");
+        const colorDot = lineEl.createSpan("switchboard-incoming-call-color-dot");
+        lineEl.createEl("span", { text: this.data.lineName, cls: "switchboard-incoming-call-line-name" });
 
         // Task details
-        const taskEl = contentEl.createDiv("incoming-call-task");
-        taskEl.createEl("p", { text: this.data.taskTitle, cls: "incoming-call-task-title" });
+        const taskEl = contentEl.createDiv("switchboard-incoming-call-task");
+        taskEl.createEl("p", { text: this.data.taskTitle, cls: "switchboard-incoming-call-task-title" });
 
         const timeStr = this.formatTime(this.data.taskTime);
-        taskEl.createEl("p", { text: `⏰ ${timeStr}`, cls: "incoming-call-task-time" });
+        taskEl.createEl("p", { text: `⏰ ${timeStr}`, cls: "switchboard-incoming-call-task-time" });
 
         if (this.data.filePath) {
             const fileName = this.data.filePath.split(/[\\/]/).pop() || this.data.filePath;
-            taskEl.createEl("p", { text: `📄 ${fileName}`, cls: "incoming-call-task-file" });
+            taskEl.createEl("p", { text: `📄 ${fileName}`, cls: "switchboard-incoming-call-task-file" });
         }
 
         // Action buttons container
-        const actionsEl = contentEl.createDiv("incoming-call-actions");
+        const actionsEl = contentEl.createDiv("switchboard-incoming-call-actions");
 
         // Connect button (primary)
         const connectBtn = actionsEl.createEl("button", {
-            cls: "incoming-call-btn incoming-call-btn-connect",
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-connect",
         });
         connectBtn.createEl("span", { text: "📞 Connect" });
         connectBtn.addEventListener("click", () => {
@@ -88,10 +88,10 @@ export class IncomingCallModal extends Modal {
         });
 
         // Hold button with dropdown
-        const holdContainer = actionsEl.createDiv("incoming-call-hold-container");
+        const holdContainer = actionsEl.createDiv("switchboard-incoming-call-hold-container");
 
         const holdBtn = holdContainer.createEl("button", {
-            cls: "incoming-call-btn incoming-call-btn-hold",
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-hold",
         });
         holdBtn.createEl("span", { text: `🕒 Hold (${this.defaultSnoozeMinutes}m)` });
         holdBtn.addEventListener("click", () => {
@@ -103,7 +103,7 @@ export class IncomingCallModal extends Modal {
 
         // Dropdown for snooze options
         const snoozeSelect = holdContainer.createEl("select", {
-            cls: "incoming-call-snooze-select",
+            cls: "switchboard-incoming-call-snooze-select",
         });
         snoozeSelect.createEl("option", { text: "5m", value: "5" });
         snoozeSelect.createEl("option", { text: "10m", value: "10" });
@@ -119,12 +119,12 @@ export class IncomingCallModal extends Modal {
 
         // Decline button - now toggles options
         const declineBtn = actionsEl.createEl("button", {
-            cls: "incoming-call-btn incoming-call-btn-decline",
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-decline",
         });
         declineBtn.createEl("span", { text: "❌ Decline" });
 
         // Decline options container (hidden initially via CSS)
-        const declineOptionsEl = contentEl.createDiv("incoming-call-decline-options");
+        const declineOptionsEl = contentEl.createDiv("switchboard-incoming-call-decline-options");
 
         declineBtn.addEventListener("click", () => {
             if (this.showingDeclineOptions) {
@@ -152,7 +152,7 @@ export class IncomingCallModal extends Modal {
     private createDeclineOptions(container: HTMLElement, snoozeSelect: HTMLSelectElement): void {
         // Call back in 30 minutes
         const thirtyMinBtn = container.createEl("button", {
-            cls: "incoming-call-btn incoming-call-btn-secondary",
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-secondary",
         });
         thirtyMinBtn.createEl("span", { text: "⏰ Call back in 30 minutes" });
         thirtyMinBtn.addEventListener("click", () => {
@@ -164,7 +164,7 @@ export class IncomingCallModal extends Modal {
 
         // Call back in 1 hour
         const oneHourBtn = container.createEl("button", {
-            cls: "incoming-call-btn incoming-call-btn-secondary",
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-secondary",
         });
         oneHourBtn.createEl("span", { text: "⏰ Call back in 1 hour" });
         oneHourBtn.addEventListener("click", () => {
@@ -176,7 +176,7 @@ export class IncomingCallModal extends Modal {
 
         // Call back tomorrow (9 AM)
         const tomorrowBtn = container.createEl("button", {
-            cls: "incoming-call-btn incoming-call-btn-secondary",
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-secondary",
         });
         tomorrowBtn.createEl("span", { text: "📅 Call back tomorrow" });
         tomorrowBtn.addEventListener("click", () => {

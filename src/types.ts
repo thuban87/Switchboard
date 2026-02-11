@@ -125,7 +125,7 @@ export const DEFAULT_SETTINGS: SwitchboardSettings = {
     activeLine: null,
     chronosIntegrationEnabled: false,
     defaultSnoozeMinutes: 5,
-    autoDisconnect: false,
+    autoDisconnect: true,
     sessionHistory: [],
     muteSounds: false,
     soundType: "synthesized",

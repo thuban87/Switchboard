@@ -20,7 +20,7 @@ export class StatisticsModal extends Modal {
         modalEl.addClass("switchboard-statistics-modal");
 
         // Header
-        contentEl.createEl("div", { cls: "stats-header" }).createEl("h2", { text: "📊 Statistics" });
+        contentEl.createEl("div", { cls: "stats-header" }).createEl("h2", { text: "Statistics" });
 
         const history = this.plugin.settings.sessionHistory || [];
 

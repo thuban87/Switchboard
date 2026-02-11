@@ -25,13 +25,6 @@ export class Logger {
         console.log(`[Switchboard:${prefix}]`, ...args);
     }
 
-    /**
-     * Info-level log — always visible.
-     * Use for significant lifecycle events (load, unload).
-     */
-    static info(prefix: string, ...args: unknown[]): void {
-        console.log(`[Switchboard:${prefix}]`, ...args);
-    }
 
     /**
      * Warning-level log — always visible.

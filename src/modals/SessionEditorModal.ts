@@ -28,7 +28,7 @@ export class SessionEditorModal extends Modal {
         contentEl.empty();
 
         // Header
-        contentEl.createEl("h2", { text: "📋 Session History" });
+        contentEl.createEl("h2", { text: "Session History" });
 
         const history = this.plugin.settings.sessionHistory || [];
 
@@ -135,7 +135,7 @@ export class SessionEditorModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
 
-        contentEl.createEl("h2", { text: "✏️ Edit Session" });
+        contentEl.createEl("h2", { text: "Edit Session" });
 
         // Line selector
         new Setting(contentEl)

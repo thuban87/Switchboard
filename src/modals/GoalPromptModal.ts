@@ -30,7 +30,7 @@ export class GoalPromptModal extends Modal {
 
         // Header
         const headerEl = contentEl.createDiv("goal-prompt-header");
-        headerEl.createEl("h2", { text: `📎 ${this.lineName}` });
+        headerEl.createEl("h2", { text: this.lineName });
         headerEl.createEl("p", {
             text: "What's your goal for this session?",
             cls: "goal-prompt-subtitle"

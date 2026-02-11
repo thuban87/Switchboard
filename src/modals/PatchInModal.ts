@@ -28,7 +28,7 @@ export class PatchInModal extends Modal {
         contentEl.empty();
         contentEl.addClass("switchboard-patch-modal");
 
-        contentEl.createEl("h2", { text: "📞 Switchboard" });
+        contentEl.createEl("h2", { text: "Switchboard" });
         contentEl.createEl("p", {
             text: "Select a line to patch in",
             cls: "switchboard-patch-subtitle",

@@ -13,6 +13,11 @@ export class App {
 export class Vault {
     read = vi.fn();
     modify = vi.fn();
+    process = vi.fn(async (file: any, fn: (content: string) => string) => {
+        const content = await this.read(file);
+        const newContent = fn(content);
+        await this.modify(file, newContent);
+    });
     create = vi.fn();
     createFolder = vi.fn();
     getAbstractFileByPath = vi.fn();

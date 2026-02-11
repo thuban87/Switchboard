@@ -90,34 +90,26 @@ export class SessionLogger {
             return;
         }
 
-        // Read existing content
-        let content = await this.app.vault.read(logFile);
-
-        // Find the heading and append after it
-        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+        // Atomic read-modify-write via vault.process() (Obsidian guidelines compliance)
         const heading = session.line.sessionLogHeading || "## Session Log";
-        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
-        const headingMatch = content.match(headingRegex);
-        const headingIndex = headingMatch ? headingMatch.index! : -1;
+        await this.app.vault.process(logFile, (content) => {
+            // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+            const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+            const headingMatch = content.match(headingRegex);
+            const headingIndex = headingMatch ? headingMatch.index! : -1;
 
-        if (headingIndex !== -1) {
-            // Find end of the heading line
-            let insertPoint = content.indexOf("\n", headingIndex);
-            if (insertPoint === -1) {
-                // No newline after heading, append at end
-                insertPoint = content.length;
+            if (headingIndex !== -1) {
+                let insertPoint = content.indexOf("\n", headingIndex);
+                if (insertPoint === -1) {
+                    insertPoint = content.length;
+                } else {
+                    insertPoint += 1;
+                }
+                return content.slice(0, insertPoint) + "\n" + logEntry + "\n" + content.slice(insertPoint);
             } else {
-                insertPoint += 1; // Move past the newline
+                return content + "\n\n" + heading + "\n\n" + logEntry + "\n";
             }
-
-            // Insert the new entry after the heading (newest first)
-            content = content.slice(0, insertPoint) + "\n" + logEntry + "\n" + content.slice(insertPoint);
-        } else {
-            // Heading not found, append at end with heading
-            content += "\n\n" + heading + "\n\n" + logEntry + "\n";
-        }
-
-        await this.app.vault.modify(logFile, content);
+        });
         Logger.debug("Session", "Appended log entry to", logFile.path);
     }
 
@@ -331,51 +323,42 @@ export class SessionLogger {
             return;
         }
 
-        // Read existing content
-        let content = await this.app.vault.read(file);
         const heading = settings.dailyNoteHeading || "### Switchboard Logs";
 
-        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
-        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
-        const headingMatch = content.match(headingRegex);
-        const headingIndex = headingMatch ? headingMatch.index! : -1;
+        // Atomic read-modify-write via vault.process() (Obsidian guidelines compliance)
+        await this.app.vault.process(file, (content) => {
+            // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+            const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+            const headingMatch = content.match(headingRegex);
+            const headingIndex = headingMatch ? headingMatch.index! : -1;
 
-        if (headingIndex !== -1) {
-            // Find the end of the heading line
-            let insertPoint = content.indexOf("\n", headingIndex);
-            if (insertPoint === -1) {
-                insertPoint = content.length;
+            if (headingIndex !== -1) {
+                let insertPoint = content.indexOf("\n", headingIndex);
+                if (insertPoint === -1) {
+                    insertPoint = content.length;
+                } else {
+                    insertPoint += 1;
+                }
+
+                const restContent = content.slice(insertPoint);
+                const nextHeadingMatch = restContent.match(/^#+\s/m);
+                const listEndIndex = nextHeadingMatch
+                    ? insertPoint + (nextHeadingMatch.index ?? restContent.length)
+                    : content.length;
+
+                const sectionContent = content.slice(insertPoint, listEndIndex);
+                const trimmedSection = sectionContent.trimEnd();
+
+                if (trimmedSection.length > 0) {
+                    const actualInsertPoint = insertPoint + trimmedSection.length;
+                    return content.slice(0, actualInsertPoint) + "\n" + bulletEntry + content.slice(actualInsertPoint);
+                } else {
+                    return content.slice(0, insertPoint) + bulletEntry + "\n" + content.slice(insertPoint);
+                }
             } else {
-                insertPoint += 1; // Move past the newline
+                return content.trimEnd() + "\n\n" + heading + "\n" + bulletEntry + "\n";
             }
-
-            // Find existing bullet list - we want to append to end of list
-            // Look for next heading or end of file
-            const restContent = content.slice(insertPoint);
-            const nextHeadingMatch = restContent.match(/^#+\s/m);
-            const listEndIndex = nextHeadingMatch
-                ? insertPoint + (nextHeadingMatch.index ?? restContent.length)
-                : content.length;
-
-            // Insert before the next heading or at end
-            // Find the last bullet in the section to append after it
-            const sectionContent = content.slice(insertPoint, listEndIndex);
-            const trimmedSection = sectionContent.trimEnd();
-
-            if (trimmedSection.length > 0) {
-                // There's content under the heading, append after it
-                const actualInsertPoint = insertPoint + trimmedSection.length;
-                content = content.slice(0, actualInsertPoint) + "\n" + bulletEntry + content.slice(actualInsertPoint);
-            } else {
-                // No content under heading, insert right after heading
-                content = content.slice(0, insertPoint) + bulletEntry + "\n" + content.slice(insertPoint);
-            }
-        } else {
-            // Heading not found, append at end of file
-            content = content.trimEnd() + "\n\n" + heading + "\n" + bulletEntry + "\n";
-        }
-
-        await this.app.vault.modify(file, content);
+        });
         Logger.debug("Session", "Appended to daily note:", bulletEntry);
     }
 }

@@ -70,6 +70,7 @@ describe("SessionLogger", () => {
 
             await logger.logSession(session, "Studied integration techniques");
 
+            expect(plugin.app.vault.process).toHaveBeenCalled();
             expect(plugin.app.vault.modify).toHaveBeenCalled();
             const modifiedContent = plugin.app.vault.modify.mock.calls[0][1] as string;
             // Entry should be inserted after the heading, before the old entry
@@ -223,6 +224,7 @@ describe("SessionLogger", () => {
 
             await logger.logToDailyNote("Math 140", 90, "Studied calculus");
 
+            expect(plugin.app.vault.process).toHaveBeenCalled();
             expect(plugin.app.vault.modify).toHaveBeenCalled();
             const modifiedContent = plugin.app.vault.modify.mock.calls[0][1] as string;
             expect(modifiedContent).toContain("**Math 140**");

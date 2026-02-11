@@ -1,4 +1,4 @@
-import { PluginSettingTab, App, Setting, setIcon } from "obsidian";
+import { PluginSettingTab, App, Setting, setIcon, TFolder } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
 import { SwitchboardLine, formatTime12h } from "../types";
@@ -121,7 +121,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     inputEl.addEventListener("input", () => {
                         const value = inputEl.value;
                         const folders = this.app.vault.getAllLoadedFiles()
-                            .filter((f) => (f as any).children !== undefined)
+                            .filter((f) => f instanceof TFolder)
                             .map((f) => f.path)
                             .filter((p) => p.toLowerCase().includes(value.toLowerCase()))
                             .slice(0, 10);

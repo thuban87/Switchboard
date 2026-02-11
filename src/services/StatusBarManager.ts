@@ -12,7 +12,7 @@ import { Logger } from "./Logger";
 export class StatusBarManager {
     private plugin: SwitchboardPlugin;
     private statusBarItem: HTMLElement | null = null;
-    private timerInterval: ReturnType<typeof setInterval> | null = null;
+    private timerInterval: number | null = null;
 
     constructor(plugin: SwitchboardPlugin) {
         this.plugin = plugin;
@@ -80,9 +80,9 @@ export class StatusBarManager {
         this.stopTimerUpdates();
         this.update();
         // Update every 30 seconds
-        this.timerInterval = setInterval(() => {
+        this.timerInterval = this.plugin.registerInterval(window.setInterval(() => {
             this.update();
-        }, 30000);
+        }, 30000));
     }
 
     /**

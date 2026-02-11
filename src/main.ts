@@ -1,4 +1,4 @@
-import { Plugin, Notice, Menu } from "obsidian";
+import { Plugin, Notice, Menu, TFile } from "obsidian";
 import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine, OperatorCommand } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
@@ -255,10 +255,11 @@ export default class SwitchboardPlugin extends Plugin {
                 file = this.app.vault.getAbstractFileByPath(filePath);
             }
 
-            if (file) {
-                const leaf = this.app.workspace.getLeaf();
-                // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
-                await leaf.openFile(file as any);
+            if (file instanceof TFile) {
+                const leaf = this.app.workspace.getLeaf('tab');
+                await leaf.openFile(file);
+            } else if (file) {
+                Logger.warn("Plugin", "Expected file but got folder:", filePath);
             }
         } catch (e) {
             Logger.error("Plugin", "Error opening Call Waiting:", e);
@@ -354,10 +355,11 @@ export default class SwitchboardPlugin extends Plugin {
             // Open landing page if specified
             if (line.landingPage) {
                 const file = this.app.vault.getAbstractFileByPath(line.landingPage);
-                if (file) {
-                    const leaf = this.app.workspace.getLeaf();
-                    // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
-                    await leaf.openFile(file as any);
+                if (file instanceof TFile) {
+                    const leaf = this.app.workspace.getLeaf('tab');
+                    await leaf.openFile(file);
+                } else if (file) {
+                    Logger.warn("Plugin", "Expected file but got folder:", line.landingPage);
                 } else {
                     new Notice(`Landing page not found: ${line.landingPage}`);
                 }
@@ -574,9 +576,11 @@ export default class SwitchboardPlugin extends Plugin {
                         break;
                     }
                     const file = this.app.vault.getAbstractFileByPath(cmd.value);
-                    if (file) {
-                        // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
-                        this.app.workspace.getLeaf().openFile(file as any);
+                    if (file instanceof TFile) {
+                        this.app.workspace.getLeaf('tab').openFile(file);
+                    } else if (file) {
+                        Logger.warn("Operator", "Expected file but got folder:", cmd.value);
+                        new Notice(`Cannot open folder: ${cmd.value}`);
                     } else {
                         new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
                     }

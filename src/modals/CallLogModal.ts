@@ -43,7 +43,6 @@ export class CallLogModal extends Modal {
 
         const lineEl = infoEl.createDiv("call-log-line");
         const colorDot = lineEl.createSpan("call-log-color-dot");
-        colorDot.style.backgroundColor = this.session.line.color;
         lineEl.createEl("span", { text: this.session.line.name });
 
         const durationStr = formatDuration(this.session.durationMinutes);
@@ -98,7 +97,6 @@ export class CallLogModal extends Modal {
         const doneBtn = buttonsEl.createEl("button", {
             cls: "call-log-btn call-log-btn-done",
         });
-        doneBtn.style.backgroundColor = this.session.line.color;
         doneBtn.createEl("span", { text: "✓ Done" });
         doneBtn.addEventListener("click", () => {
             const summary = this.textArea.value.trim();

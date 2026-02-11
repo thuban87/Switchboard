@@ -54,7 +54,7 @@ export class PatchInModal extends Modal {
 
             // Color indicator
             const colorEl = lineEl.createDiv("switchboard-patch-line-color");
-            colorEl.style.backgroundColor = line.color;
+            lineEl.style.setProperty("--line-color", line.color);
 
             // Name
             lineEl.createEl("span", {

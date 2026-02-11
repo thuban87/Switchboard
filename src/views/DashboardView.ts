@@ -83,7 +83,6 @@ export class DashboardView extends ItemView {
         if (activeLine) {
             // Color stripe
             const stripe = card.createDiv("session-card-stripe");
-            stripe.style.backgroundColor = activeLine.color;
 
             // Content
             const content = card.createDiv("session-card-content");
@@ -91,8 +90,10 @@ export class DashboardView extends ItemView {
             // Line name
             const nameRow = content.createDiv("session-card-name-row");
             const dot = nameRow.createSpan("session-card-dot");
-            dot.style.backgroundColor = activeLine.color;
             nameRow.createSpan({ text: activeLine.name, cls: "session-card-name" });
+
+            // Set --line-color on card so stripe + dot inherit it
+            card.style.setProperty("--line-color", activeLine.color);
 
             // Timer
             const duration = this.plugin.sessionLogger.getCurrentDuration();
@@ -140,7 +141,7 @@ export class DashboardView extends ItemView {
 
             // Color dot
             const dot = lineEl.createDiv("dashboard-line-dot");
-            dot.style.backgroundColor = line.color;
+            lineEl.style.setProperty("--line-color", line.color);
 
             // Name
             lineEl.createSpan({ text: line.name, cls: "dashboard-line-name" });
@@ -198,7 +199,7 @@ export class DashboardView extends ItemView {
             const blockEl = scheduleContainer.createDiv("dashboard-schedule-block");
 
             const dot = blockEl.createSpan("dashboard-schedule-dot");
-            dot.style.backgroundColor = line.color;
+            blockEl.style.setProperty("--line-color", line.color);
 
             blockEl.createSpan({
                 text: `${block.startTime} - ${block.endTime}`,
@@ -231,7 +232,7 @@ export class DashboardView extends ItemView {
             const color = line?.color ?? "#666";
 
             const dot = sessionEl.createSpan("dashboard-recent-dot");
-            dot.style.backgroundColor = color;
+            sessionEl.style.setProperty("--line-color", color);
 
             sessionEl.createSpan({ text: session.lineName, cls: "dashboard-recent-name" });
             sessionEl.createSpan({

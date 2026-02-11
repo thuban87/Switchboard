@@ -58,7 +58,6 @@ export class IncomingCallModal extends Modal {
         // Line info
         const lineEl = contentEl.createDiv("incoming-call-line");
         const colorDot = lineEl.createSpan("incoming-call-color-dot");
-        colorDot.style.backgroundColor = this.data.lineColor;
         lineEl.createEl("span", { text: this.data.lineName, cls: "incoming-call-line-name" });
 
         // Task details
@@ -80,7 +79,6 @@ export class IncomingCallModal extends Modal {
         const connectBtn = actionsEl.createEl("button", {
             cls: "incoming-call-btn incoming-call-btn-connect",
         });
-        connectBtn.style.backgroundColor = this.data.lineColor;
         connectBtn.createEl("span", { text: "📞 Connect" });
         connectBtn.addEventListener("click", () => {
             if (this.actionTaken) return;
@@ -125,9 +123,8 @@ export class IncomingCallModal extends Modal {
         });
         declineBtn.createEl("span", { text: "❌ Decline" });
 
-        // Decline options container (hidden initially)
+        // Decline options container (hidden initially via CSS)
         const declineOptionsEl = contentEl.createDiv("incoming-call-decline-options");
-        declineOptionsEl.style.display = "none";
 
         declineBtn.addEventListener("click", () => {
             if (this.showingDeclineOptions) {
@@ -139,7 +136,7 @@ export class IncomingCallModal extends Modal {
             } else {
                 // Show decline options
                 this.showingDeclineOptions = true;
-                declineOptionsEl.style.display = "flex";
+                declineOptionsEl.addClass("is-visible");
                 declineBtn.empty();
                 declineBtn.createEl("span", { text: "❌ Just Dismiss" });
             }

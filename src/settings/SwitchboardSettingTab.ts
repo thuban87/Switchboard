@@ -229,7 +229,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
         // Color indicator
         const colorIndicator = lineEl.createDiv("switchboard-line-color");
-        colorIndicator.style.backgroundColor = line.color;
+        lineEl.style.setProperty("--line-color", line.color);
 
         // Line info
         const infoEl = lineEl.createDiv("switchboard-line-info");
@@ -311,7 +311,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                 const lineHeader = lineSection.createDiv("schedule-overview-line-header");
 
                 const colorDot = lineHeader.createSpan("schedule-overview-color-dot");
-                colorDot.style.backgroundColor = line.color;
+                lineSection.style.setProperty("--line-color", line.color);
                 lineHeader.createSpan({ text: line.name });
 
                 for (const block of line.scheduledBlocks) {

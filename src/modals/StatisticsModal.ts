@@ -108,13 +108,13 @@ export class StatisticsModal extends Modal {
 
             const labelEl = barRow.createDiv("stats-bar-label");
             const dot = labelEl.createSpan("stats-bar-dot");
-            dot.style.backgroundColor = line.color;
             labelEl.createSpan({ text: line.name });
 
             const barContainer = barRow.createDiv("stats-bar-container");
             const bar = barContainer.createDiv("stats-bar");
             bar.style.width = `${(line.minutes / maxMinutes) * 100}%`;
-            bar.style.backgroundColor = line.color;
+
+            barRow.style.setProperty("--line-color", line.color);
 
             barRow.createDiv({ text: formatDuration(line.minutes), cls: "stats-bar-value" });
         }
@@ -133,7 +133,7 @@ export class StatisticsModal extends Modal {
 
             const line = this.plugin.settings.lines.find(l => l.id === session.lineId);
             const dot = itemEl.createSpan("stats-session-dot");
-            dot.style.backgroundColor = line?.color || "#3498db";
+            itemEl.style.setProperty("--line-color", line?.color || "#3498db");
 
             const infoEl = itemEl.createDiv("stats-session-info");
             infoEl.createEl("span", { text: session.lineName, cls: "stats-session-name" });

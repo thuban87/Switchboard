@@ -44,7 +44,7 @@ export class QuickSwitchModal extends Modal {
             if (activeLine) {
                 const current = contentEl.createDiv("quick-switch-current");
                 const dot = current.createSpan("quick-switch-current-dot");
-                dot.style.backgroundColor = activeLine.color;
+                current.style.setProperty("--line-color", activeLine.color);
                 current.createSpan({ text: activeLine.name, cls: "quick-switch-current-name" });
                 if (this.currentGoal) {
                     current.createSpan({ text: `• ${this.currentGoal}`, cls: "quick-switch-current-goal" });
@@ -78,7 +78,7 @@ export class QuickSwitchModal extends Modal {
 
             // Color indicator
             const colorEl = lineEl.createDiv("quick-switch-line-color");
-            colorEl.style.backgroundColor = line.color;
+            lineEl.style.setProperty("--line-color", line.color);
 
             // Name
             lineEl.createEl("span", {

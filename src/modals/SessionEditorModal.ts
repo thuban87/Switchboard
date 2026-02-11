@@ -66,7 +66,7 @@ export class SessionEditorModal extends Modal {
             // Line header (collapsible)
             const headerEl = lineEl.createDiv("session-editor-line-header");
             const dot = headerEl.createSpan("session-editor-dot");
-            dot.style.backgroundColor = data.line?.color || "#888";
+            lineEl.style.setProperty("--line-color", data.line?.color || "#888");
 
             const lineName = data.line?.name || data.sessions[0].record.lineName;
             const totalMins = data.sessions.reduce((sum, s) => sum + s.record.durationMinutes, 0);
@@ -76,11 +76,15 @@ export class SessionEditorModal extends Modal {
 
             // Sessions container (hidden by default)
             const sessionsEl = lineEl.createDiv("session-editor-sessions");
-            sessionsEl.style.display = "none";
+            sessionsEl.addClass("switchboard-hidden");
 
             headerEl.addEventListener("click", () => {
-                const isHidden = sessionsEl.style.display === "none";
-                sessionsEl.style.display = isHidden ? "block" : "none";
+                const isHidden = sessionsEl.hasClass("switchboard-hidden");
+                if (isHidden) {
+                    sessionsEl.removeClass("switchboard-hidden");
+                } else {
+                    sessionsEl.addClass("switchboard-hidden");
+                }
                 expandIcon.textContent = isHidden ? "▼" : "▶";
             });
 

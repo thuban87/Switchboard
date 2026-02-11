@@ -75,7 +75,6 @@ export class GoalPromptModal extends Modal {
         const startBtn = actionsEl.createEl("button", {
             cls: "goal-prompt-btn goal-prompt-btn-primary",
         });
-        startBtn.style.backgroundColor = this.lineColor;
         startBtn.createEl("span", { text: "🎯 Start Session" });
         startBtn.addEventListener("click", () => {
             this.close();

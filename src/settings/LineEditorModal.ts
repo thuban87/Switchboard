@@ -159,7 +159,8 @@ export class LineEditorModal extends Modal {
 
         for (const color of PRESET_COLORS) {
             const swatch = swatchContainer.createDiv("switchboard-color-swatch");
-            swatch.style.backgroundColor = color;
+            swatch.style.setProperty("--swatch-color", color);
+            swatch.dataset.color = color;
 
             if (color === this.line.color) {
                 swatch.addClass("is-selected");
@@ -194,8 +195,7 @@ export class LineEditorModal extends Modal {
                             .querySelectorAll(".switchboard-color-swatch")
                             .forEach((el) => {
                                 if (
-                                    (el as HTMLElement).style.backgroundColor ===
-                                    this.hexToRgb(value)
+                                    (el as HTMLElement).dataset.color === value
                                 ) {
                                     el.addClass("is-selected");
                                 } else {
@@ -207,12 +207,6 @@ export class LineEditorModal extends Modal {
         );
     }
 
-    private hexToRgb(hex: string): string {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return `rgb(${r}, ${g}, ${b})`;
-    }
 
     private renderSafePaths(containerEl: HTMLElement) {
         const pathsContainer = containerEl.createDiv("switchboard-paths-container");
@@ -394,9 +388,9 @@ export class LineEditorModal extends Modal {
                             .onChange((value) => {
                                 block.date = value;
                                 if (value && !isValidDate(value)) {
-                                    text.inputEl.style.borderColor = "var(--text-error)";
+                                    text.inputEl.addClass("switchboard-input-error");
                                 } else {
-                                    text.inputEl.style.borderColor = "";
+                                    text.inputEl.removeClass("switchboard-input-error");
                                 }
                             })
                     );
@@ -415,9 +409,9 @@ export class LineEditorModal extends Modal {
                             const parsed = parseTime12h(value);
                             if (parsed) {
                                 block.startTime = parsed;
-                                text.inputEl.style.borderColor = "";
+                                text.inputEl.removeClass("switchboard-input-error");
                             } else {
-                                text.inputEl.style.borderColor = "var(--text-error)";
+                                text.inputEl.addClass("switchboard-input-error");
                             }
                         });
                     text.inputEl.setAttribute("data-block-id", block.id);
@@ -434,9 +428,9 @@ export class LineEditorModal extends Modal {
                             const parsed = parseTime12h(value);
                             if (parsed) {
                                 block.endTime = parsed;
-                                text.inputEl.style.borderColor = "";
+                                text.inputEl.removeClass("switchboard-input-error");
                             } else {
-                                text.inputEl.style.borderColor = "var(--text-error)";
+                                text.inputEl.addClass("switchboard-input-error");
                             }
                         });
                     text.inputEl.setAttribute("data-block-id", block.id);

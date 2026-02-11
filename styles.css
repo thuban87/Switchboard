@@ -4,6 +4,18 @@
  */
 
 /* ========================================
+   Shared Utilities
+   ======================================== */
+
+.switchboard-hidden {
+	display: none !important;
+}
+
+.switchboard-input-error {
+	border-color: var(--text-error) !important;
+}
+
+/* ========================================
    Settings Tab - Lines List
    ======================================== */
 
@@ -32,6 +44,7 @@
 	border-radius: 50%;
 	flex-shrink: 0;
 	box-shadow: 0 0 0 2px var(--background-modifier-border);
+	background-color: var(--line-color);
 }
 
 .switchboard-line-info {
@@ -119,6 +132,7 @@
 	cursor: pointer;
 	border: 2px solid transparent;
 	transition: all 0.15s ease;
+	background-color: var(--swatch-color);
 }
 
 .switchboard-color-swatch:hover {
@@ -199,6 +213,7 @@
 	height: 20px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .switchboard-patch-line-name {
@@ -310,6 +325,7 @@
 	height: 16px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--incoming-call-color);
 }
 
 .incoming-call-line-name {
@@ -361,6 +377,10 @@
 
 .incoming-call-btn-connect {
 	color: white;
+}
+
+.switchboard-incoming-call-modal .incoming-call-btn-connect {
+	background-color: var(--incoming-call-color);
 }
 
 .incoming-call-btn-connect:hover {
@@ -448,6 +468,7 @@
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
+	background-color: var(--call-log-color);
 }
 
 .call-log-duration {
@@ -501,6 +522,10 @@
 
 .call-log-btn-done {
 	color: white;
+}
+
+.switchboard-call-log-modal .call-log-btn-done {
+	background-color: var(--call-log-color);
 }
 
 .call-log-btn-done:hover {
@@ -564,6 +589,7 @@
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
+	background-color: var(--operator-color);
 }
 
 .operator-grid {
@@ -751,6 +777,7 @@
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
+	background-color: var(--line-color);
 }
 
 .schedule-overview-block {
@@ -848,6 +875,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 /* ============================================
@@ -895,6 +923,7 @@
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--operator-color);
 }
 
 .operator-grid {
@@ -1195,6 +1224,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .stats-bar-container {
@@ -1209,6 +1239,7 @@
 	height: 100%;
 	border-radius: 4px;
 	transition: width 0.3s ease;
+	background-color: var(--line-color);
 }
 
 .stats-bar-value {
@@ -1241,6 +1272,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .stats-session-info {
@@ -1305,7 +1337,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	max-height: 400px;
+	max-height: 60vh;
 	overflow-y: auto;
 }
 
@@ -1333,6 +1365,7 @@
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .session-editor-expand {
@@ -1346,6 +1379,8 @@
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 .session-editor-session {
@@ -1417,12 +1452,16 @@
    ========================================== */
 
 .incoming-call-decline-options {
-	display: flex;
+	display: none;
 	flex-direction: column;
 	gap: 8px;
 	margin-top: 12px;
 	padding-top: 12px;
 	border-top: 1px solid var(--background-modifier-border);
+}
+
+.incoming-call-decline-options.is-visible {
+	display: flex;
 }
 
 .incoming-call-decline-options .incoming-call-btn-secondary {
@@ -1518,6 +1557,10 @@
 	color: white;
 }
 
+.switchboard-goal-prompt-modal .goal-prompt-btn-primary {
+	background-color: var(--goal-prompt-color);
+}
+
 .goal-prompt-btn-secondary {
 	background: var(--background-secondary);
 	color: var(--text-normal);
@@ -1587,6 +1630,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .quick-switch-current-name {
@@ -1642,6 +1686,7 @@
 	height: 12px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .quick-switch-line-name {
@@ -1743,6 +1788,7 @@
 .session-card-stripe {
 	width: 4px;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .session-card-content {
@@ -1764,6 +1810,7 @@
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .session-card-name {
@@ -1837,6 +1884,7 @@
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .dashboard-line-name {
@@ -1888,6 +1936,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .dashboard-schedule-time {
@@ -1922,6 +1971,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .dashboard-recent-name {

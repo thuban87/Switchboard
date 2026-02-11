@@ -73,7 +73,6 @@ export class OperatorModal extends Modal {
         // Line indicator
         const lineEl = headerEl.createDiv("operator-line");
         const colorDot = lineEl.createSpan("operator-color-dot");
-        colorDot.style.backgroundColor = this.line.color;
         lineEl.createEl("span", { text: this.line.name });
 
         // Get commands for this line

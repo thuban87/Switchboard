@@ -1,4 +1,4 @@
-import { App, TFile, TFolder } from "obsidian";
+import { App, TFile, TFolder, normalizePath } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, validatePath, formatDuration } from "../types";
 import { Logger } from "./Logger";
@@ -213,16 +213,19 @@ export class SessionLogger {
             Logger.debug("Session", "Using default log file path:", logPath);
         }
 
-        // Try exact path match first
-        let file = this.app.vault.getAbstractFileByPath(logPath);
-        if (file instanceof TFile) {
+        // Normalize slashes/whitespace before lookup
+        const normalizedPath = normalizePath(logPath);
+        const existing = this.app.vault.getAbstractFileByPath(normalizedPath);
+        if (existing instanceof TFile) {
             Logger.debug("Session", "Found file at exact path");
-            return file;
+            return existing;
         }
 
-        // Try case-insensitive lookup
+        // Fallback: case-insensitive search for vaults with case-mismatched paths.
+        // This iterates all files which is not ideal, but only runs when the
+        // direct lookup fails (rare edge case).
         const allFiles = this.app.vault.getFiles();
-        const lowerLogPath = logPath.toLowerCase();
+        const lowerLogPath = normalizedPath.toLowerCase();
         const matchingFile = allFiles.find(f => f.path.toLowerCase() === lowerLogPath);
         if (matchingFile) {
             Logger.debug("Session", "Found file via case-insensitive match:", matchingFile.path);
@@ -230,10 +233,10 @@ export class SessionLogger {
         }
 
         // File doesn't exist - try to create it
-        Logger.debug("Session", "File not found, attempting to create:", logPath);
+        Logger.debug("Session", "File not found, attempting to create:", normalizedPath);
         try {
             // Ensure parent folders exist
-            const parts = logPath.split("/");
+            const parts = normalizedPath.split("/");
             parts.pop(); // Remove filename
             const folderPath = parts.join("/");
             if (folderPath) {
@@ -244,7 +247,7 @@ export class SessionLogger {
                 }
             }
 
-            return await this.app.vault.create(logPath, this.getDefaultLogContent(line));
+            return await this.app.vault.create(normalizedPath, this.getDefaultLogContent(line));
         } catch (e) {
             Logger.error("Session", "Failed to create log file:", e);
             return null;

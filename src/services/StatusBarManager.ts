@@ -12,7 +12,7 @@ import { Logger } from "./Logger";
 export class StatusBarManager {
     private plugin: SwitchboardPlugin;
     private statusBarItem: HTMLElement | null = null;
-    private timerInterval: ReturnType<typeof setInterval> | null = null;
+    private timerInterval: number | null = null;
 
     constructor(plugin: SwitchboardPlugin) {
         this.plugin = plugin;
@@ -40,16 +40,16 @@ export class StatusBarManager {
         const activeLine = this.plugin.getActiveLine();
         if (!activeLine) {
             this.statusBarItem.empty();
-            this.statusBarItem.style.display = "none";
+            this.statusBarItem.addClass("switchboard-hidden");
             return;
         }
 
-        this.statusBarItem.style.display = "flex";
+        this.statusBarItem.removeClass("switchboard-hidden");
         this.statusBarItem.empty();
 
         // Color dot
         const dot = this.statusBarItem.createSpan("switchboard-status-dot");
-        dot.style.backgroundColor = activeLine.color;
+        this.statusBarItem.style.setProperty("--line-color", activeLine.color);
 
         // Line name, timer, and optional goal
         const duration = this.plugin.sessionLogger.getCurrentDuration();
@@ -80,9 +80,9 @@ export class StatusBarManager {
         this.stopTimerUpdates();
         this.update();
         // Update every 30 seconds
-        this.timerInterval = setInterval(() => {
+        this.timerInterval = this.plugin.registerInterval(window.setInterval(() => {
             this.update();
-        }, 30000);
+        }, 30000));
     }
 
     /**

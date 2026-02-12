@@ -119,17 +119,19 @@ export class AudioService {
     /**
      * Play realistic click from embedded audio data
      */
-    private playRealisticClick(): void {
+    private async playRealisticClick(): Promise<void> {
         try {
             if (!this.audioElement) {
                 this.audioElement = new Audio(CLICK_AUDIO_DATA);
             }
             this.audioElement.currentTime = 0;
             this.audioElement.volume = 0.5;
-            this.audioElement.play().catch(() => {
+            try {
+                await this.audioElement.play();
+            } catch {
                 Logger.warn("Audio", "Failed to play, using synthesized");
                 this.playSynthesizedClick();
-            });
+            }
         } catch (e) {
             Logger.warn("Audio", "Error playing realistic click", e);
             this.playSynthesizedClick();

@@ -88,7 +88,7 @@ When you're done, click the **plug icon** again or run `Switchboard: Disconnect`
 
 ### 4. Explore
 
-- **Operator Menu** (🎧 ribbon icon or `Switchboard: Operator Menu`) — Your context-specific command panel
+- **Operator Menu** (`Switchboard: Operator Menu`) — Your context-specific command panel
 - **Quick Switch** (`Switchboard: Quick Switch`) — Jump between Lines instantly
 - **Dashboard** (`Switchboard: Open Dashboard`) — See everything at a glance
 - **Statistics** (`Switchboard: Statistics`) — Review your session history
@@ -114,8 +114,7 @@ All settings are under **Settings → Switchboard**:
 
 ## Requirements
 
-- **Obsidian** desktop app, version **1.10.0** or later
-- Desktop only (mobile is not currently supported)
+- **Obsidian** version **1.10.0** or later
 
 ---
 

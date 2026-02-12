@@ -34,45 +34,44 @@ export class CallLogModal extends Modal {
         modalEl.style.setProperty("--call-log-color", this.session.line.color);
 
         // Header
-        const headerEl = contentEl.createDiv("call-log-header");
-        headerEl.createEl("span", { text: "📝", cls: "call-log-icon" });
+        const headerEl = contentEl.createDiv("switchboard-call-log-header");
+        headerEl.createEl("span", { text: "📝", cls: "switchboard-call-log-icon" });
         headerEl.createEl("h2", { text: "Call Ended" });
 
         // Session info
-        const infoEl = contentEl.createDiv("call-log-info");
+        const infoEl = contentEl.createDiv("switchboard-call-log-info");
 
-        const lineEl = infoEl.createDiv("call-log-line");
-        const colorDot = lineEl.createSpan("call-log-color-dot");
-        colorDot.style.backgroundColor = this.session.line.color;
+        const lineEl = infoEl.createDiv("switchboard-call-log-line");
+        const colorDot = lineEl.createSpan("switchboard-call-log-color-dot");
         lineEl.createEl("span", { text: this.session.line.name });
 
         const durationStr = formatDuration(this.session.durationMinutes);
         const timeRange = `${this.formatTime(this.session.startTime)} - ${this.formatTime(this.session.endTime)}`;
-        infoEl.createEl("p", { text: `⏱️ ${durationStr} (${timeRange})`, cls: "call-log-duration" });
+        infoEl.createEl("p", { text: `⏱️ ${durationStr} (${timeRange})`, cls: "switchboard-call-log-duration" });
 
         // Goal reflection if a goal was set
         if (this.goal) {
-            const goalEl = contentEl.createDiv("call-log-goal-reflection");
+            const goalEl = contentEl.createDiv("switchboard-call-log-goal-reflection");
             goalEl.createEl("p", {
                 text: `🎯 Your goal: "${this.goal}"`,
-                cls: "call-log-goal-text"
+                cls: "switchboard-call-log-goal-text"
             });
             goalEl.createEl("p", {
                 text: "Did you accomplish it?",
-                cls: "call-log-goal-question"
+                cls: "switchboard-call-log-goal-question"
             });
         }
 
         // Summary prompt
         contentEl.createEl("p", {
             text: "What did you accomplish?",
-            cls: "call-log-prompt"
+            cls: "switchboard-call-log-prompt"
         });
 
         // Text area
         // Fix #47: Character limit prevents excessively long summaries
         this.textArea = contentEl.createEl("textarea", {
-            cls: "call-log-textarea",
+            cls: "switchboard-call-log-textarea",
             attr: {
                 placeholder: "Brief summary of your session...",
                 rows: "3",
@@ -82,7 +81,7 @@ export class CallLogModal extends Modal {
 
         // Character counter
         const counterEl = contentEl.createEl("div", {
-            cls: "call-log-char-counter",
+            cls: "switchboard-call-log-char-counter",
             text: "0 / 2,000"
         });
         this.textArea.addEventListener("input", () => {
@@ -93,12 +92,11 @@ export class CallLogModal extends Modal {
         setTimeout(() => this.textArea.focus(), 50);
 
         // Buttons
-        const buttonsEl = contentEl.createDiv("call-log-buttons");
+        const buttonsEl = contentEl.createDiv("switchboard-call-log-buttons");
 
         const doneBtn = buttonsEl.createEl("button", {
-            cls: "call-log-btn call-log-btn-done",
+            cls: "switchboard-call-log-btn switchboard-call-log-btn-done",
         });
-        doneBtn.style.backgroundColor = this.session.line.color;
         doneBtn.createEl("span", { text: "✓ Done" });
         doneBtn.addEventListener("click", () => {
             const summary = this.textArea.value.trim();
@@ -107,7 +105,7 @@ export class CallLogModal extends Modal {
         });
 
         const skipBtn = buttonsEl.createEl("button", {
-            cls: "call-log-btn call-log-btn-skip",
+            cls: "switchboard-call-log-btn switchboard-call-log-btn-skip",
         });
         skipBtn.createEl("span", { text: "Skip" });
         skipBtn.addEventListener("click", () => {

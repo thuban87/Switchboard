@@ -1,4 +1,4 @@
-import { App, Notice } from "obsidian";
+import { App, Notice, TFile } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, ScheduledBlock, generateId } from "../types";
 import { IncomingCallModal, IncomingCallAction } from "../modals/IncomingCallModal";
@@ -362,10 +362,11 @@ export class WireService {
         try {
             const file = this.app.vault.getAbstractFileByPath(filePath);
 
-            if (file) {
-                // as any: vault.read/modify expect TFile but we have TAbstractFile from getAbstractFileByPath
-                const content = await this.app.vault.read(file as any);
-                await this.app.vault.modify(file as any, content + "\n" + entry);
+            if (file instanceof TFile) {
+                // Atomic read-modify-write via vault.process() (Obsidian guidelines compliance)
+                await this.app.vault.process(file, (content) => {
+                    return content + "\n" + entry;
+                });
             } else {
                 // Create new file with header
                 const content = `# Call Waiting

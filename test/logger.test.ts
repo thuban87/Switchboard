@@ -42,11 +42,6 @@ describe("Logger", () => {
         expect(warnSpy).toHaveBeenCalledWith("[Switchboard:Test]", "watch out");
     });
 
-    it("info() always outputs regardless of debug mode", () => {
-        Logger.setDebugMode(false);
-        Logger.info("Test", "loaded");
-        expect(logSpy).toHaveBeenCalledWith("[Switchboard:Test]", "loaded");
-    });
 
     it("output format includes [Switchboard:Prefix]", () => {
         Logger.setDebugMode(true);

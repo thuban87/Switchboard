@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Setting } from "obsidian";
 import type SwitchboardPlugin from "../main";
+import { ConfirmModal } from "./ConfirmModal";
 import { SessionRecord, SwitchboardLine, formatDuration } from "../types";
 
 /**
@@ -28,14 +29,14 @@ export class SessionEditorModal extends Modal {
         contentEl.empty();
 
         // Header
-        contentEl.createEl("h2", { text: "📋 Session History" });
+        contentEl.createEl("h2", { text: "Session History" });
 
         const history = this.plugin.settings.sessionHistory || [];
 
         if (history.length === 0) {
             contentEl.createEl("p", {
                 text: "No sessions recorded yet.",
-                cls: "session-editor-empty"
+                cls: "switchboard-session-editor-empty"
             });
             return;
         }
@@ -58,64 +59,70 @@ export class SessionEditorModal extends Modal {
             return bLatest.localeCompare(aLatest);
         });
 
-        const listEl = contentEl.createDiv("session-editor-list");
+        const listEl = contentEl.createDiv("switchboard-session-editor-list");
 
         for (const [lineId, data] of sortedLines) {
-            const lineEl = listEl.createDiv("session-editor-line");
+            const lineEl = listEl.createDiv("switchboard-session-editor-line");
 
             // Line header (collapsible)
-            const headerEl = lineEl.createDiv("session-editor-line-header");
-            const dot = headerEl.createSpan("session-editor-dot");
-            dot.style.backgroundColor = data.line?.color || "#888";
+            const headerEl = lineEl.createDiv("switchboard-session-editor-line-header");
+            const dot = headerEl.createSpan("switchboard-session-editor-dot");
+            if (data.line?.color) {
+                lineEl.style.setProperty("--line-color", data.line.color);
+            }
 
             const lineName = data.line?.name || data.sessions[0].record.lineName;
             const totalMins = data.sessions.reduce((sum, s) => sum + s.record.durationMinutes, 0);
             headerEl.createSpan({ text: `${lineName} (${data.sessions.length} sessions, ${formatDuration(totalMins)})` });
 
-            const expandIcon = headerEl.createSpan({ text: "▶", cls: "session-editor-expand" });
+            const expandIcon = headerEl.createSpan({ text: "▶", cls: "switchboard-session-editor-expand" });
 
             // Sessions container (hidden by default)
-            const sessionsEl = lineEl.createDiv("session-editor-sessions");
-            sessionsEl.style.display = "none";
+            const sessionsEl = lineEl.createDiv("switchboard-session-editor-sessions");
+            sessionsEl.addClass("switchboard-hidden");
 
             headerEl.addEventListener("click", () => {
-                const isHidden = sessionsEl.style.display === "none";
-                sessionsEl.style.display = isHidden ? "block" : "none";
+                const isHidden = sessionsEl.hasClass("switchboard-hidden");
+                if (isHidden) {
+                    sessionsEl.removeClass("switchboard-hidden");
+                } else {
+                    sessionsEl.addClass("switchboard-hidden");
+                }
                 expandIcon.textContent = isHidden ? "▼" : "▶";
             });
 
             // Render sessions (newest first)
             const sortedSessions = [...data.sessions].reverse();
             for (const { record, index } of sortedSessions) {
-                const sessionEl = sessionsEl.createDiv("session-editor-session");
+                const sessionEl = sessionsEl.createDiv("switchboard-session-editor-session");
 
-                const infoEl = sessionEl.createDiv("session-editor-session-info");
+                const infoEl = sessionEl.createDiv("switchboard-session-editor-session-info");
                 infoEl.createEl("span", {
                     text: `${record.date} • ${record.startTime} - ${record.endTime}`,
-                    cls: "session-editor-session-date"
+                    cls: "switchboard-session-editor-session-date"
                 });
                 infoEl.createEl("span", {
                     text: formatDuration(record.durationMinutes),
-                    cls: "session-editor-session-duration"
+                    cls: "switchboard-session-editor-session-duration"
                 });
 
                 if (record.summary) {
                     infoEl.createEl("div", {
                         text: record.summary,
-                        cls: "session-editor-session-summary"
+                        cls: "switchboard-session-editor-session-summary"
                     });
                 }
 
-                const actionsEl = sessionEl.createDiv("session-editor-session-actions");
+                const actionsEl = sessionEl.createDiv("switchboard-session-editor-session-actions");
 
-                const editBtn = actionsEl.createEl("button", { text: "✏️", cls: "session-btn-edit" });
+                const editBtn = actionsEl.createEl("button", { text: "✏️", cls: "switchboard-session-btn-edit" });
                 editBtn.title = "Edit session";
                 editBtn.addEventListener("click", (e) => {
                     e.stopPropagation();
                     this.showEditForm(record, index);
                 });
 
-                const deleteBtn = actionsEl.createEl("button", { text: "🗑️", cls: "session-btn-delete" });
+                const deleteBtn = actionsEl.createEl("button", { text: "🗑️", cls: "switchboard-session-btn-delete" });
                 deleteBtn.title = "Delete session";
                 deleteBtn.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -129,7 +136,7 @@ export class SessionEditorModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
 
-        contentEl.createEl("h2", { text: "✏️ Edit Session" });
+        contentEl.createEl("h2", { text: "Edit Session" });
 
         // Line selector
         new Setting(contentEl)
@@ -182,7 +189,7 @@ export class SessionEditorModal extends Modal {
             });
 
         // Buttons
-        const buttonEl = contentEl.createDiv("session-editor-buttons");
+        const buttonEl = contentEl.createDiv("switchboard-session-editor-buttons");
 
         const cancelBtn = buttonEl.createEl("button", { text: "Cancel" });
         cancelBtn.addEventListener("click", () => {
@@ -208,14 +215,17 @@ export class SessionEditorModal extends Modal {
         record.durationMinutes = Math.max(0, Math.round(duration));
     }
 
-    private async deleteSession(index: number) {
-        const confirmed = confirm("Delete this session? This cannot be undone.");
-        if (!confirmed) return;
-
-        this.plugin.settings.sessionHistory.splice(index, 1);
-        await this.plugin.saveSettings();
-        new Notice("🗑️ Session deleted");
-        this.renderSessionList();
+    private deleteSession(index: number) {
+        new ConfirmModal(
+            this.app,
+            "Delete this session? This cannot be undone.",
+            async () => {
+                this.plugin.settings.sessionHistory.splice(index, 1);
+                await this.plugin.saveSettings();
+                new Notice("🗑️ Session deleted");
+                this.renderSessionList();
+            }
+        ).open();
     }
 
 

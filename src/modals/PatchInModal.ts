@@ -28,7 +28,7 @@ export class PatchInModal extends Modal {
         contentEl.empty();
         contentEl.addClass("switchboard-patch-modal");
 
-        contentEl.createEl("h2", { text: "📞 Switchboard" });
+        contentEl.createEl("h2", { text: "Switchboard" });
         contentEl.createEl("p", {
             text: "Select a line to patch in",
             cls: "switchboard-patch-subtitle",
@@ -54,7 +54,7 @@ export class PatchInModal extends Modal {
 
             // Color indicator
             const colorEl = lineEl.createDiv("switchboard-patch-line-color");
-            colorEl.style.backgroundColor = line.color;
+            lineEl.style.setProperty("--line-color", line.color);
 
             // Name
             lineEl.createEl("span", {

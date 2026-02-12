@@ -1,6 +1,6 @@
-import { App, TFile, TFolder } from "obsidian";
+import { App, TFile, TFolder, normalizePath } from "obsidian";
 import type SwitchboardPlugin from "../main";
-import { SwitchboardLine, validatePath, formatDuration } from "../types";
+import { SwitchboardLine, sanitizePath, sanitizeFileName, formatDuration } from "../types";
 import { Logger } from "./Logger";
 
 /**
@@ -69,9 +69,14 @@ export class SessionLogger {
      * Fix #25: Chains through writeQueue to prevent concurrent write interleaving.
      */
     async logSession(session: SessionInfo, summary: string): Promise<void> {
-        this.writeQueue = this.writeQueue
-            .then(() => this._doLogSession(session, summary))
-            .catch(e => Logger.error("Session", "Failed to log session", e));
+        this.writeQueue = (async () => {
+            await this.writeQueue;
+            try {
+                await this._doLogSession(session, summary);
+            } catch (e) {
+                Logger.error("Session", "Failed to log session", e);
+            }
+        })();
         return this.writeQueue;
     }
 
@@ -90,34 +95,26 @@ export class SessionLogger {
             return;
         }
 
-        // Read existing content
-        let content = await this.app.vault.read(logFile);
-
-        // Find the heading and append after it
-        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+        // Atomic read-modify-write via vault.process() (Obsidian guidelines compliance)
         const heading = session.line.sessionLogHeading || "## Session Log";
-        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
-        const headingMatch = content.match(headingRegex);
-        const headingIndex = headingMatch ? headingMatch.index! : -1;
+        await this.app.vault.process(logFile, (content) => {
+            // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+            const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+            const headingMatch = content.match(headingRegex);
+            const headingIndex = headingMatch ? headingMatch.index! : -1;
 
-        if (headingIndex !== -1) {
-            // Find end of the heading line
-            let insertPoint = content.indexOf("\n", headingIndex);
-            if (insertPoint === -1) {
-                // No newline after heading, append at end
-                insertPoint = content.length;
+            if (headingIndex !== -1) {
+                let insertPoint = content.indexOf("\n", headingIndex);
+                if (insertPoint === -1) {
+                    insertPoint = content.length;
+                } else {
+                    insertPoint += 1;
+                }
+                return content.slice(0, insertPoint) + "\n" + logEntry + "\n" + content.slice(insertPoint);
             } else {
-                insertPoint += 1; // Move past the newline
+                return content + "\n\n" + heading + "\n\n" + logEntry + "\n";
             }
-
-            // Insert the new entry after the heading (newest first)
-            content = content.slice(0, insertPoint) + "\n" + logEntry + "\n" + content.slice(insertPoint);
-        } else {
-            // Heading not found, append at end with heading
-            content += "\n\n" + heading + "\n\n" + logEntry + "\n";
-        }
-
-        await this.app.vault.modify(logFile, content);
+        });
         Logger.debug("Session", "Appended log entry to", logFile.path);
     }
 
@@ -200,11 +197,12 @@ export class SessionLogger {
         let logPath: string;
 
         // Use line's configured file if specified and safe
-        if (line.sessionLogFile && validatePath(line.sessionLogFile)) {
-            logPath = line.sessionLogFile;
+        const sanitized = sanitizePath(line.sessionLogFile);
+        if (line.sessionLogFile && sanitized) {
+            logPath = sanitized;
             Logger.debug("Session", "Using configured log file path:", logPath);
         } else {
-            if (line.sessionLogFile && !validatePath(line.sessionLogFile)) {
+            if (line.sessionLogFile && !sanitized) {
                 Logger.warn("Session", "Session log file path rejected (unsafe):", line.sessionLogFile);
             }
             // Default: create in same folder as landing page
@@ -215,22 +213,26 @@ export class SessionLogger {
                 folderPath = parts.join("/");
             }
 
+            const safeName = sanitizeFileName(line.name);
             logPath = folderPath
-                ? `${folderPath}/${line.name} - Session Log.md`
-                : `${line.name} - Session Log.md`;
+                ? `${folderPath}/${safeName} - Session Log.md`
+                : `${safeName} - Session Log.md`;
             Logger.debug("Session", "Using default log file path:", logPath);
         }
 
-        // Try exact path match first
-        let file = this.app.vault.getAbstractFileByPath(logPath);
-        if (file instanceof TFile) {
+        // Normalize slashes/whitespace before lookup
+        const normalizedPath = normalizePath(logPath);
+        const existing = this.app.vault.getAbstractFileByPath(normalizedPath);
+        if (existing instanceof TFile) {
             Logger.debug("Session", "Found file at exact path");
-            return file;
+            return existing;
         }
 
-        // Try case-insensitive lookup
+        // Fallback: case-insensitive search for vaults with case-mismatched paths.
+        // This iterates all files which is not ideal, but only runs when the
+        // direct lookup fails (rare edge case).
         const allFiles = this.app.vault.getFiles();
-        const lowerLogPath = logPath.toLowerCase();
+        const lowerLogPath = normalizedPath.toLowerCase();
         const matchingFile = allFiles.find(f => f.path.toLowerCase() === lowerLogPath);
         if (matchingFile) {
             Logger.debug("Session", "Found file via case-insensitive match:", matchingFile.path);
@@ -238,10 +240,10 @@ export class SessionLogger {
         }
 
         // File doesn't exist - try to create it
-        Logger.debug("Session", "File not found, attempting to create:", logPath);
+        Logger.debug("Session", "File not found, attempting to create:", normalizedPath);
         try {
             // Ensure parent folders exist
-            const parts = logPath.split("/");
+            const parts = normalizedPath.split("/");
             parts.pop(); // Remove filename
             const folderPath = parts.join("/");
             if (folderPath) {
@@ -252,7 +254,7 @@ export class SessionLogger {
                 }
             }
 
-            return await this.app.vault.create(logPath, this.getDefaultLogContent(line));
+            return await this.app.vault.create(normalizedPath, this.getDefaultLogContent(line));
         } catch (e) {
             Logger.error("Session", "Failed to create log file:", e);
             return null;
@@ -301,7 +303,7 @@ export class SessionLogger {
         const dateStr = `${year}-${month}-${day}`;
         const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
         const filename = `${dateStr}, ${dayName}.md`;
-        const filePath = `${settings.dailyNotesFolder}/${filename}`;
+        const filePath = normalizePath(`${settings.dailyNotesFolder}/${filename}`);
 
         // Format: LINE: DURATION - SUMMARY
         const durationStr = formatDuration(durationMinutes);
@@ -331,51 +333,42 @@ export class SessionLogger {
             return;
         }
 
-        // Read existing content
-        let content = await this.app.vault.read(file);
         const heading = settings.dailyNoteHeading || "### Switchboard Logs";
 
-        // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
-        const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
-        const headingMatch = content.match(headingRegex);
-        const headingIndex = headingMatch ? headingMatch.index! : -1;
+        // Atomic read-modify-write via vault.process() (Obsidian guidelines compliance)
+        await this.app.vault.process(file, (content) => {
+            // Fix #24: Use line-aware regex instead of indexOf to avoid substring matches
+            const headingRegex = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm');
+            const headingMatch = content.match(headingRegex);
+            const headingIndex = headingMatch ? headingMatch.index! : -1;
 
-        if (headingIndex !== -1) {
-            // Find the end of the heading line
-            let insertPoint = content.indexOf("\n", headingIndex);
-            if (insertPoint === -1) {
-                insertPoint = content.length;
+            if (headingIndex !== -1) {
+                let insertPoint = content.indexOf("\n", headingIndex);
+                if (insertPoint === -1) {
+                    insertPoint = content.length;
+                } else {
+                    insertPoint += 1;
+                }
+
+                const restContent = content.slice(insertPoint);
+                const nextHeadingMatch = restContent.match(/^#+\s/m);
+                const listEndIndex = nextHeadingMatch
+                    ? insertPoint + (nextHeadingMatch.index ?? restContent.length)
+                    : content.length;
+
+                const sectionContent = content.slice(insertPoint, listEndIndex);
+                const trimmedSection = sectionContent.trimEnd();
+
+                if (trimmedSection.length > 0) {
+                    const actualInsertPoint = insertPoint + trimmedSection.length;
+                    return content.slice(0, actualInsertPoint) + "\n" + bulletEntry + content.slice(actualInsertPoint);
+                } else {
+                    return content.slice(0, insertPoint) + bulletEntry + "\n" + content.slice(insertPoint);
+                }
             } else {
-                insertPoint += 1; // Move past the newline
+                return content.trimEnd() + "\n\n" + heading + "\n" + bulletEntry + "\n";
             }
-
-            // Find existing bullet list - we want to append to end of list
-            // Look for next heading or end of file
-            const restContent = content.slice(insertPoint);
-            const nextHeadingMatch = restContent.match(/^#+\s/m);
-            const listEndIndex = nextHeadingMatch
-                ? insertPoint + (nextHeadingMatch.index ?? restContent.length)
-                : content.length;
-
-            // Insert before the next heading or at end
-            // Find the last bullet in the section to append after it
-            const sectionContent = content.slice(insertPoint, listEndIndex);
-            const trimmedSection = sectionContent.trimEnd();
-
-            if (trimmedSection.length > 0) {
-                // There's content under the heading, append after it
-                const actualInsertPoint = insertPoint + trimmedSection.length;
-                content = content.slice(0, actualInsertPoint) + "\n" + bulletEntry + content.slice(actualInsertPoint);
-            } else {
-                // No content under heading, insert right after heading
-                content = content.slice(0, insertPoint) + bulletEntry + "\n" + content.slice(insertPoint);
-            }
-        } else {
-            // Heading not found, append at end of file
-            content = content.trimEnd() + "\n\n" + heading + "\n" + bulletEntry + "\n";
-        }
-
-        await this.app.vault.modify(file, content);
+        });
         Logger.debug("Session", "Appended to daily note:", bulletEntry);
     }
 }

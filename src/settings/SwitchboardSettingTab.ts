@@ -1,6 +1,7 @@
-import { PluginSettingTab, App, Setting } from "obsidian";
+import { PluginSettingTab, App, Setting, setIcon, TFolder } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { LineEditorModal } from "./LineEditorModal";
+import { ConfirmModal } from "../modals/ConfirmModal";
 import { SwitchboardLine, formatTime12h } from "../types";
 import { Logger } from "../services/Logger";
 
@@ -20,14 +21,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl("h1", { text: "Switchboard" });
-        containerEl.createEl("p", {
-            text: "Configure your Lines (focus contexts). Each Line represents a different area of work.",
-            cls: "setting-item-description",
-        });
-
         // --- Section 1: Lines (main feature) ---
-        containerEl.createEl("h2", { text: "Lines" });
 
         // Add new line button
         new Setting(containerEl)
@@ -62,11 +56,11 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         }
 
         // --- Section 2: Schedule Overview ---
-        containerEl.createEl("h2", { text: "Schedule Overview" });
+        new Setting(containerEl).setName("Schedule overview").setHeading();
         this.renderScheduleOverview(containerEl);
 
         // --- Section 3: Session Goals ---
-        containerEl.createEl("h3", { text: "Session Goals" });
+        new Setting(containerEl).setName("Session goals").setHeading();
 
         new Setting(containerEl)
             .setName("Enable goal prompt")
@@ -93,8 +87,20 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     })
             );
 
+        new Setting(containerEl)
+            .setName("Auto-disconnect on block end")
+            .setDesc("Show the Time's Up modal when a scheduled block ends, letting you extend or disconnect.")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.autoDisconnect)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoDisconnect = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         // Daily Note Logging Section
-        containerEl.createEl("h3", { text: "Daily Note Logging" });
+        new Setting(containerEl).setName("Daily note logging").setHeading();
 
         new Setting(containerEl)
             .setName("Log sessions to daily notes")
@@ -128,17 +134,17 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     inputEl.addEventListener("input", () => {
                         const value = inputEl.value;
                         const folders = this.app.vault.getAllLoadedFiles()
-                            .filter((f) => (f as any).children !== undefined)
+                            .filter((f) => f instanceof TFolder)
                             .map((f) => f.path)
                             .filter((p) => p.toLowerCase().includes(value.toLowerCase()))
                             .slice(0, 10);
 
                         // Clear existing suggestions
-                        const existingPopover = containerEl.querySelector(".daily-note-folder-suggestions");
+                        const existingPopover = containerEl.querySelector(".switchboard-daily-note-folder-suggestions");
                         if (existingPopover) existingPopover.remove();
 
                         if (folders.length > 0 && value.length > 0) {
-                            const popover = containerEl.createDiv("daily-note-folder-suggestions suggestion-container");
+                            const popover = containerEl.createDiv("switchboard-daily-note-folder-suggestions suggestion-container");
                             popover.style.position = "fixed";
                             popover.style.zIndex = "1000";
 
@@ -165,7 +171,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     inputEl.addEventListener("blur", () => {
                         setTimeout(() => {
                             if (!inputEl.isConnected) return;
-                            const popover = containerEl.querySelector(".daily-note-folder-suggestions");
+                            const popover = containerEl.querySelector(".switchboard-daily-note-folder-suggestions");
                             if (popover) popover.remove();
                         }, 200);
                     });
@@ -186,7 +192,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         }
 
         // --- Section 5: Sound Effects ---
-        containerEl.createEl("h3", { text: "Sound Effects" });
+        new Setting(containerEl).setName("Sound effects").setHeading();
 
         new Setting(containerEl)
             .setName("Mute sounds")
@@ -215,7 +221,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             );
 
         // --- Section 6: Advanced ---
-        containerEl.createEl("h2", { text: "Advanced" });
+        new Setting(containerEl).setName("Advanced").setHeading();
 
         new Setting(containerEl)
             .setName("Debug mode")
@@ -236,7 +242,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
         // Color indicator
         const colorIndicator = lineEl.createDiv("switchboard-line-color");
-        colorIndicator.style.backgroundColor = line.color;
+        lineEl.style.setProperty("--line-color", line.color);
 
         // Line info
         const infoEl = lineEl.createDiv("switchboard-line-info");
@@ -253,7 +259,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         const editBtn = actionsEl.createEl("button", {
             cls: "switchboard-line-btn",
         });
-        editBtn.innerHTML = "✏️";
+        setIcon(editBtn, "pencil");
         editBtn.setAttribute("aria-label", "Edit");
         editBtn.addEventListener("click", () => {
             new LineEditorModal(this.app, { ...line }, (updatedLine) => {
@@ -273,29 +279,31 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         const deleteBtn = actionsEl.createEl("button", {
             cls: "switchboard-line-btn switchboard-line-btn-danger",
         });
-        deleteBtn.innerHTML = "🗑️";
+        setIcon(deleteBtn, "trash-2");
         deleteBtn.setAttribute("aria-label", "Delete");
         deleteBtn.addEventListener("click", () => {
-            // Confirm before deleting
-            const confirmed = confirm(`Delete "${line.name}"? This cannot be undone.`);
-            if (!confirmed) return;
-
-            this.plugin.settings.lines = this.plugin.settings.lines.filter(
-                (l: SwitchboardLine) => l.id !== line.id
-            );
-            this.plugin.saveSettings();
-            this.plugin.restartWireService();
-            this.display();
+            new ConfirmModal(
+                this.app,
+                `Delete "${line.name}"? This cannot be undone.`,
+                () => {
+                    this.plugin.settings.lines = this.plugin.settings.lines.filter(
+                        (l: SwitchboardLine) => l.id !== line.id
+                    );
+                    this.plugin.saveSettings();
+                    this.plugin.restartWireService();
+                    this.display();
+                }
+            ).open();
         });
     }
 
     private renderScheduleOverview(containerEl: HTMLElement) {
         const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const overviewEl = containerEl.createDiv("schedule-overview");
+        const overviewEl = containerEl.createDiv("switchboard-schedule-overview");
 
         // Create collapsible container
-        const detailsEl = overviewEl.createEl("details", { cls: "schedule-overview-details" });
-        const summaryEl = detailsEl.createEl("summary", { cls: "schedule-overview-summary" });
+        const detailsEl = overviewEl.createEl("details", { cls: "switchboard-schedule-overview-details" });
+        const summaryEl = detailsEl.createEl("summary", { cls: "switchboard-schedule-overview-summary" });
 
         // Count total native blocks
         let nativeBlocks = 0;
@@ -305,27 +313,27 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
         summaryEl.textContent = `📅 View All Scheduled Blocks (${nativeBlocks} scheduled)`;
 
-        const contentEl = detailsEl.createDiv("schedule-overview-content");
+        const contentEl = detailsEl.createDiv("switchboard-schedule-overview-content");
 
         // Native blocks by Line
         if (nativeBlocks > 0) {
-            contentEl.createEl("h4", { text: "Native Blocks", cls: "schedule-overview-section-title" });
+            new Setting(contentEl).setName("Native blocks").setHeading();
 
             for (const line of this.plugin.settings.lines) {
                 if (!line.scheduledBlocks || line.scheduledBlocks.length === 0) continue;
 
-                const lineSection = contentEl.createDiv("schedule-overview-line");
-                const lineHeader = lineSection.createDiv("schedule-overview-line-header");
+                const lineSection = contentEl.createDiv("switchboard-schedule-overview-line");
+                const lineHeader = lineSection.createDiv("switchboard-schedule-overview-line-header");
 
-                const colorDot = lineHeader.createSpan("schedule-overview-color-dot");
-                colorDot.style.backgroundColor = line.color;
+                const colorDot = lineHeader.createSpan("switchboard-schedule-overview-color-dot");
+                lineSection.style.setProperty("--line-color", line.color);
                 lineHeader.createSpan({ text: line.name });
 
                 for (const block of line.scheduledBlocks) {
-                    const blockEl = lineSection.createDiv("schedule-overview-block");
+                    const blockEl = lineSection.createDiv("switchboard-schedule-overview-block");
 
                     const icon = block.recurring ? "🔁" : "📅";
-                    blockEl.createSpan({ text: icon, cls: "schedule-overview-type" });
+                    blockEl.createSpan({ text: icon, cls: "switchboard-schedule-overview-type" });
 
                     let desc = "";
                     if (block.recurring && block.days) {
@@ -339,7 +347,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     const timeEnd = formatTime12h(block.endTime);
                     desc += ` ${timeStart} - ${timeEnd}`;
 
-                    blockEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
+                    blockEl.createSpan({ text: desc, cls: "switchboard-schedule-overview-desc" });
                 }
             }
         }
@@ -347,7 +355,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         if (nativeBlocks === 0) {
             contentEl.createEl("p", {
                 text: "No scheduled blocks configured. Add them when editing a Line.",
-                cls: "schedule-overview-empty",
+                cls: "switchboard-schedule-overview-empty",
             });
         }
     }

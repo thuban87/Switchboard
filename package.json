@@ -1,6 +1,6 @@
 {
     "name": "switchboard",
-    "version": "1.5.0",
+    "version": "0.9.0",
     "description": "Context manager for the distracted brain. Patch into your focus.",
     "main": "main.js",
     "scripts": {

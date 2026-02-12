@@ -4,6 +4,18 @@
  */
 
 /* ========================================
+   Shared Utilities
+   ======================================== */
+
+.switchboard-hidden {
+	display: none !important;
+}
+
+.switchboard-input-error {
+	border-color: var(--text-error) !important;
+}
+
+/* ========================================
    Settings Tab - Lines List
    ======================================== */
 
@@ -32,6 +44,7 @@
 	border-radius: 50%;
 	flex-shrink: 0;
 	box-shadow: 0 0 0 2px var(--background-modifier-border);
+	background-color: var(--line-color);
 }
 
 .switchboard-line-info {
@@ -69,6 +82,11 @@
 .switchboard-line-btn:hover {
 	opacity: 1;
 	background: var(--background-modifier-hover);
+}
+
+.switchboard-line-btn svg {
+	width: 16px;
+	height: 16px;
 }
 
 .switchboard-empty-state {
@@ -114,6 +132,7 @@
 	cursor: pointer;
 	border: 2px solid transparent;
 	transition: all 0.15s ease;
+	background-color: var(--swatch-color);
 }
 
 .switchboard-color-swatch:hover {
@@ -194,6 +213,7 @@
 	height: 20px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 .switchboard-patch-line-name {
@@ -257,7 +277,7 @@
 	text-align: center;
 }
 
-.incoming-call-header {
+.switchboard-incoming-call-header {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -265,15 +285,15 @@
 	margin-bottom: 1.5rem;
 }
 
-.incoming-call-icon {
+.switchboard-incoming-call-icon {
 	font-size: 2.5rem;
 }
 
-.incoming-call-icon.ringing {
-	animation: ring 0.5s ease-in-out infinite alternate;
+.switchboard-incoming-call-icon.switchboard-ringing {
+	animation: switchboard-ring 0.5s ease-in-out infinite alternate;
 }
 
-@keyframes ring {
+@keyframes switchboard-ring {
 	0% {
 		transform: rotate(-15deg);
 	}
@@ -283,13 +303,13 @@
 	}
 }
 
-.incoming-call-header h2 {
+.switchboard-incoming-call-header h2 {
 	margin: 0;
 	font-size: 1.5rem;
 	color: var(--text-normal);
 }
 
-.incoming-call-line {
+.switchboard-incoming-call-line {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -300,20 +320,21 @@
 	margin-bottom: 1rem;
 }
 
-.incoming-call-color-dot {
+.switchboard-incoming-call-color-dot {
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--incoming-call-color);
 }
 
-.incoming-call-line-name {
+.switchboard-incoming-call-line-name {
 	font-size: 1.25rem;
 	font-weight: 700;
 	color: var(--text-normal);
 }
 
-.incoming-call-task {
+.switchboard-incoming-call-task {
 	text-align: left;
 	padding: 1rem;
 	background: var(--background-primary-alt);
@@ -321,26 +342,26 @@
 	margin-bottom: 1.5rem;
 }
 
-.incoming-call-task-title {
+.switchboard-incoming-call-task-title {
 	font-weight: 600;
 	margin: 0 0 0.5rem 0;
 	color: var(--text-normal);
 }
 
-.incoming-call-task-time,
-.incoming-call-task-file {
+.switchboard-incoming-call-task-time,
+.switchboard-incoming-call-task-file {
 	margin: 0.25rem 0;
 	font-size: 0.9em;
 	color: var(--text-muted);
 }
 
-.incoming-call-actions {
+.switchboard-incoming-call-actions {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 }
 
-.incoming-call-btn {
+.switchboard-incoming-call-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -354,31 +375,35 @@
 	transition: all 0.15s ease;
 }
 
-.incoming-call-btn-connect {
-	color: white;
+.switchboard-incoming-call-btn-connect {
+	color: var(--text-on-accent);
 }
 
-.incoming-call-btn-connect:hover {
+.switchboard-incoming-call-modal .switchboard-incoming-call-btn-connect {
+	background-color: var(--incoming-call-color);
+}
+
+.switchboard-incoming-call-btn-connect:hover {
 	filter: brightness(1.1);
 	transform: scale(1.02);
 }
 
-.incoming-call-hold-container {
+.switchboard-incoming-call-hold-container {
 	display: flex;
 	gap: 8px;
 }
 
-.incoming-call-btn-hold {
+.switchboard-incoming-call-btn-hold {
 	flex: 1;
 	background: var(--background-secondary);
 	color: var(--text-normal);
 }
 
-.incoming-call-btn-hold:hover {
+.switchboard-incoming-call-btn-hold:hover {
 	background: var(--background-secondary-alt);
 }
 
-.incoming-call-snooze-select {
+.switchboard-incoming-call-snooze-select {
 	padding: 8px 12px;
 	border-radius: 8px;
 	border: 1px solid var(--background-modifier-border);
@@ -387,13 +412,13 @@
 	cursor: pointer;
 }
 
-.incoming-call-btn-decline {
+.switchboard-incoming-call-btn-decline {
 	background: transparent;
 	color: var(--text-muted);
 	border: 1px solid var(--background-modifier-border);
 }
 
-.incoming-call-btn-decline:hover {
+.switchboard-incoming-call-btn-decline:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 	border-color: transparent;
@@ -407,7 +432,7 @@
 	padding: 1.5rem;
 }
 
-.call-log-header {
+.switchboard-call-log-header {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -415,21 +440,21 @@
 	margin-bottom: 1rem;
 }
 
-.call-log-icon {
+.switchboard-call-log-icon {
 	font-size: 2rem;
 }
 
-.call-log-header h2 {
+.switchboard-call-log-header h2 {
 	margin: 0;
 	font-size: 1.5rem;
 }
 
-.call-log-info {
+.switchboard-call-log-info {
 	text-align: center;
 	margin-bottom: 1rem;
 }
 
-.call-log-line {
+.switchboard-call-log-line {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -439,23 +464,24 @@
 	margin-bottom: 0.5rem;
 }
 
-.call-log-color-dot {
+.switchboard-call-log-color-dot {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
+	background-color: var(--call-log-color);
 }
 
-.call-log-duration {
+.switchboard-call-log-duration {
 	color: var(--text-muted);
 	margin: 0;
 }
 
-.call-log-prompt {
+.switchboard-call-log-prompt {
 	font-weight: 500;
 	margin-bottom: 0.5rem;
 }
 
-.call-log-textarea {
+.switchboard-call-log-textarea {
 	width: 100%;
 	min-height: 80px;
 	padding: 10px;
@@ -468,18 +494,18 @@
 	resize: vertical;
 }
 
-.call-log-textarea:focus {
+.switchboard-call-log-textarea:focus {
 	outline: none;
 	border-color: var(--call-log-color, var(--interactive-accent));
 }
 
-.call-log-buttons {
+.switchboard-call-log-buttons {
 	display: flex;
 	gap: 10px;
 	margin-top: 1rem;
 }
 
-.call-log-btn {
+.switchboard-call-log-btn {
 	flex: 1;
 	display: flex;
 	align-items: center;
@@ -494,25 +520,29 @@
 	transition: all 0.15s ease;
 }
 
-.call-log-btn-done {
-	color: white;
+.switchboard-call-log-btn-done {
+	color: var(--text-on-accent);
 }
 
-.call-log-btn-done:hover {
+.switchboard-call-log-modal .switchboard-call-log-btn-done {
+	background-color: var(--call-log-color);
+}
+
+.switchboard-call-log-btn-done:hover {
 	filter: brightness(1.1);
 }
 
-.call-log-btn-skip {
+.switchboard-call-log-btn-skip {
 	background: var(--background-secondary);
 	color: var(--text-muted);
 }
 
-.call-log-btn-skip:hover {
+.switchboard-call-log-btn-skip:hover {
 	background: var(--background-secondary-alt);
 }
 
-.call-log-char-counter,
-.goal-prompt-char-counter {
+.switchboard-call-log-char-counter,
+.switchboard-goal-prompt-char-counter {
 	text-align: right;
 	font-size: 0.8rem;
 	color: var(--text-muted);
@@ -520,90 +550,61 @@
 	padding-right: 2px;
 }
 
+
 /* ========================================
-   Operator Modal
+   Line Editor Modal — divider cleanup
    ======================================== */
 
-.switchboard-operator-modal .modal-content {
-	padding: 1.5rem;
+/* Remove all setting-item dividers inside the modal */
+.modal-content.switchboard-line-editor .setting-item {
+	border-top: none !important;
 }
 
-.operator-header {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 1.5rem;
+/* Add dividers back only above section headings */
+.modal-content.switchboard-line-editor .setting-item-heading {
+	border-top: 1px solid var(--background-modifier-border) !important;
 }
 
-.operator-icon {
-	font-size: 2rem;
+/* No divider above the first heading (top of modal) */
+.modal-content.switchboard-line-editor .setting-item-heading:first-child {
+	border-top: none !important;
 }
-
-.operator-header h2 {
-	margin: 0;
-	font-size: 1.5rem;
-}
-
-.operator-line {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 6px 12px;
-	background: var(--background-secondary);
-	border-radius: 20px;
-	font-size: 0.9rem;
-}
-
-.operator-color-dot {
-	width: 10px;
-	height: 10px;
-	border-radius: 50%;
-}
-
-.operator-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 10px;
-}
-
-/* operator-cmd-btn, operator-cmd-icon, operator-cmd-name defined in Operator Menu Modal section below */
 
 /* ========================================
    Schedule Blocks (Line Editor)
    ======================================== */
 
-.schedule-blocks-container {
+.switchboard-schedule-blocks-container {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 	margin-bottom: 12px;
 }
 
-.schedule-block {
+.switchboard-schedule-block {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	padding: 12px;
 	border: 1px solid var(--background-modifier-border);
 }
 
-.schedule-block-header {
+.switchboard-schedule-block-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 10px;
 }
 
-.schedule-block-icon {
+.switchboard-schedule-block-icon {
 	font-size: 1.2rem;
 }
 
-.schedule-block-summary {
+.switchboard-schedule-block-summary {
 	flex: 1;
 	font-weight: 500;
 }
 
-.schedule-block-delete {
+.switchboard-schedule-block-delete {
 	background: transparent;
 	border: none;
 	color: var(--text-muted);
@@ -613,40 +614,40 @@
 	border-radius: 4px;
 }
 
-.schedule-block-delete:hover {
+.switchboard-schedule-block-delete:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
 
-.schedule-block-fields {
+.switchboard-schedule-block-fields {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.schedule-block-fields .setting-item {
+.switchboard-schedule-block-fields .setting-item {
 	border-top: none;
 	padding-top: 0;
 }
 
-.schedule-days {
+.switchboard-schedule-days {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	padding: 8px 0;
 }
 
-.schedule-days-label {
+.switchboard-schedule-days-label {
 	font-weight: 500;
 	color: var(--text-muted);
 }
 
-.schedule-days-checkboxes {
+.switchboard-schedule-days-checkboxes {
 	display: flex;
 	gap: 4px;
 }
 
-.schedule-day-label {
+.switchboard-schedule-day-label {
 	display: flex;
 	align-items: center;
 	gap: 2px;
@@ -657,25 +658,25 @@
 	font-size: 0.85rem;
 }
 
-.schedule-day-label:has(input:checked) {
+.switchboard-schedule-day-label:has(input:checked) {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
 }
 
-.schedule-day-label input {
+.switchboard-schedule-day-label input {
 	display: none;
 }
 
-.schedule-times {
+.switchboard-schedule-times {
 	display: flex;
 	gap: 12px;
 }
 
-.schedule-times .setting-item {
+.switchboard-schedule-times .setting-item {
 	flex: 1;
 }
 
-.schedule-empty-message {
+.switchboard-schedule-empty-message {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
@@ -686,36 +687,36 @@
    Schedule Overview (Settings)
    ======================================== */
 
-.schedule-overview {
+.switchboard-schedule-overview {
 	margin-bottom: 16px;
 }
 
-.schedule-overview-details {
+.switchboard-schedule-overview-details {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	border: 1px solid var(--background-modifier-border);
 }
 
-.schedule-overview-summary {
+.switchboard-schedule-overview-summary {
 	padding: 12px 16px;
 	cursor: pointer;
 	font-weight: 500;
 	user-select: none;
 }
 
-.schedule-overview-summary:hover {
+.switchboard-schedule-overview-summary:hover {
 	background: var(--background-secondary-alt);
 }
 
-.schedule-overview-content {
+.switchboard-schedule-overview-content {
 	padding: 0 16px 16px;
 }
 
-.schedule-overview-line {
+.switchboard-schedule-overview-line {
 	margin-bottom: 12px;
 }
 
-.schedule-overview-line-header {
+.switchboard-schedule-overview-line-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -723,13 +724,14 @@
 	margin-bottom: 8px;
 }
 
-.schedule-overview-color-dot {
+.switchboard-schedule-overview-color-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
+	background-color: var(--line-color);
 }
 
-.schedule-overview-block {
+.switchboard-schedule-overview-block {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -740,15 +742,15 @@
 	font-size: 0.9rem;
 }
 
-.schedule-overview-type {
+.switchboard-schedule-overview-type {
 	font-size: 0.9rem;
 }
 
-.schedule-overview-desc {
+.switchboard-schedule-overview-desc {
 	color: var(--text-muted);
 }
 
-.schedule-overview-chronos-note {
+.switchboard-schedule-overview-chronos-note {
 	margin-top: 12px;
 	padding: 10px;
 	background: var(--background-primary);
@@ -757,32 +759,19 @@
 	color: var(--text-muted);
 }
 
-.schedule-overview-empty {
+.switchboard-schedule-overview-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
 	padding: 16px;
 }
 
-.schedule-overview-section-title {
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: var(--text-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin: 12px 0 8px 0;
-	padding: 0;
-}
 
-.schedule-overview-section-title:first-child {
-	margin-top: 0;
-}
-
-.schedule-overview-chronos-task {
+.switchboard-schedule-overview-chronos-task {
 	border-left: 3px solid var(--interactive-accent);
 }
 
-.schedule-overview-line-tag {
+.switchboard-schedule-overview-line-tag {
 	background: var(--background-secondary-alt);
 	padding: 2px 8px;
 	border-radius: 12px;
@@ -791,12 +780,12 @@
 	margin-left: auto;
 }
 
-.schedule-overview-clickable {
+.switchboard-schedule-overview-clickable {
 	cursor: pointer;
 	transition: background 0.15s ease;
 }
 
-.schedule-overview-clickable:hover {
+.switchboard-schedule-overview-clickable:hover {
 	background: var(--background-modifier-hover);
 }
 
@@ -822,6 +811,7 @@
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
 /* ============================================
@@ -837,24 +827,24 @@
 	min-width: 320px;
 }
 
-.operator-header {
+.switchboard-operator-header {
 	text-align: center;
 	margin-bottom: 20px;
 }
 
-.operator-header .operator-icon {
+.switchboard-operator-header .switchboard-operator-icon {
 	font-size: 28px;
 	display: block;
 	margin-bottom: 8px;
 }
 
-.operator-header h2 {
+.switchboard-operator-header h2 {
 	margin: 0 0 12px 0;
 	font-size: 1.4rem;
 	font-weight: 600;
 }
 
-.operator-line {
+.switchboard-operator-line {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
@@ -864,21 +854,22 @@
 	font-size: 0.9rem;
 }
 
-.operator-color-dot {
+.switchboard-operator-color-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--operator-color);
 }
 
-.operator-grid {
+.switchboard-operator-grid {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	margin-top: 16px;
 }
 
-.operator-cmd-btn {
+.switchboard-operator-cmd-btn {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -895,23 +886,23 @@
 	text-align: left;
 }
 
-.operator-cmd-btn:hover {
+.switchboard-operator-cmd-btn:hover {
 	background: var(--background-modifier-hover);
 	transform: translateX(4px);
 }
 
-.operator-cmd-btn:active {
+.switchboard-operator-cmd-btn:active {
 	transform: translateX(2px);
 }
 
-.operator-cmd-icon {
+.switchboard-operator-cmd-icon {
 	font-size: 1.4rem;
 	line-height: 1;
 	flex-shrink: 0;
 	display: inline-block;
 }
 
-.operator-cmd-name {
+.switchboard-operator-cmd-name {
 	font-size: 1rem;
 	font-weight: 500;
 	color: var(--text-normal);
@@ -922,14 +913,14 @@
    Custom Commands Editor
    ============================================ */
 
-.custom-commands-container {
+.switchboard-custom-commands-container {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 	margin-bottom: 12px;
 }
 
-.custom-command-item {
+.switchboard-custom-command-item {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -938,7 +929,7 @@
 	border-radius: 8px;
 }
 
-.custom-command-icon {
+.switchboard-custom-command-icon {
 	width: 40px;
 	text-align: center;
 	font-size: 1.2rem;
@@ -948,7 +939,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-name {
+.switchboard-custom-command-name {
 	flex: 1;
 	min-width: 100px;
 	padding: 6px 10px;
@@ -957,7 +948,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-action {
+.switchboard-custom-command-action {
 	width: 110px;
 	padding: 6px 8px;
 	border: 1px solid var(--background-modifier-border);
@@ -965,7 +956,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-value {
+.switchboard-custom-command-value {
 	flex: 2;
 	min-width: 120px;
 	padding: 6px 10px;
@@ -974,7 +965,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-delete {
+.switchboard-custom-command-delete {
 	width: 28px;
 	height: 28px;
 	padding: 0;
@@ -987,7 +978,7 @@
 	transition: all 0.15s ease;
 }
 
-.custom-command-delete:hover {
+.switchboard-custom-command-delete:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
@@ -1002,49 +993,49 @@
 	min-width: 320px;
 }
 
-.timeup-header {
+.switchboard-timeup-header {
 	margin-bottom: 16px;
 }
 
-.timeup-header .timeup-icon {
+.switchboard-timeup-header .switchboard-timeup-icon {
 	font-size: 48px;
 	display: block;
 	margin-bottom: 8px;
 }
 
-.timeup-header h2 {
+.switchboard-timeup-header h2 {
 	margin: 0;
 	font-size: 1.5rem;
 	font-weight: 600;
 }
 
-.timeup-message {
+.switchboard-timeup-message {
 	margin-bottom: 24px;
 }
 
-.timeup-message p {
+.switchboard-timeup-message p {
 	margin: 8px 0;
 	color: var(--text-normal);
 }
 
-.timeup-message .timeup-subtitle {
+.switchboard-timeup-message .switchboard-timeup-subtitle {
 	color: var(--text-muted);
 	font-size: 0.9rem;
 }
 
-.timeup-buttons {
+.switchboard-timeup-buttons {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 }
 
-.timeup-extend-row {
+.switchboard-timeup-extend-row {
 	display: flex;
 	gap: 8px;
 	justify-content: center;
 }
 
-.timeup-btn {
+.switchboard-timeup-btn {
 	padding: 12px 20px;
 	border: none;
 	border-radius: 8px;
@@ -1054,24 +1045,24 @@
 	transition: all 0.15s ease;
 }
 
-.timeup-extend {
+.switchboard-timeup-extend {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
 	flex: 1;
 }
 
-.timeup-extend:hover {
+.switchboard-timeup-extend:hover {
 	filter: brightness(1.1);
 	transform: translateY(-1px);
 }
 
-.timeup-disconnect {
+.switchboard-timeup-disconnect {
 	background: var(--background-secondary);
 	color: var(--text-muted);
 	width: 100%;
 }
 
-.timeup-disconnect:hover {
+.switchboard-timeup-disconnect:hover {
 	background: var(--background-modifier-hover);
 	color: var(--text-normal);
 }
@@ -1086,33 +1077,33 @@
 	max-width: 500px;
 }
 
-.stats-header h2 {
+.switchboard-stats-header h2 {
 	margin: 0 0 20px 0;
 	font-size: 1.4rem;
 	font-weight: 600;
 }
 
-.stats-empty {
+.switchboard-stats-empty {
 	text-align: center;
 	color: var(--text-muted);
 	padding: 40px 20px;
 }
 
-.stats-cards {
+.switchboard-stats-cards {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 16px;
 	margin-bottom: 24px;
 }
 
-.stats-card {
+.switchboard-stats-card {
 	background: var(--background-secondary);
 	padding: 16px;
 	border-radius: 12px;
 	text-align: center;
 }
 
-.stats-card h3 {
+.switchboard-stats-card h3 {
 	margin: 0 0 8px 0;
 	font-size: 0.85rem;
 	font-weight: 600;
@@ -1121,41 +1112,41 @@
 	letter-spacing: 0.5px;
 }
 
-.stats-big-number {
+.switchboard-stats-big-number {
 	font-size: 1.8rem;
 	font-weight: 700;
 	color: var(--interactive-accent);
 	margin-bottom: 4px;
 }
 
-.stats-subtitle {
+.switchboard-stats-subtitle {
 	font-size: 0.85rem;
 	color: var(--text-muted);
 }
 
-.stats-section {
+.switchboard-stats-section {
 	margin-bottom: 24px;
 }
 
-.stats-section h3 {
+.switchboard-stats-section h3 {
 	margin: 0 0 12px 0;
 	font-size: 0.95rem;
 	font-weight: 600;
 }
 
-.stats-bars {
+.switchboard-stats-bars {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 }
 
-.stats-bar-row {
+.switchboard-stats-bar-row {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 }
 
-.stats-bar-label {
+.switchboard-stats-bar-label {
 	width: 100px;
 	display: flex;
 	align-items: center;
@@ -1164,14 +1155,15 @@
 	flex-shrink: 0;
 }
 
-.stats-bar-dot {
+.switchboard-stats-bar-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color, var(--interactive-accent));
 }
 
-.stats-bar-container {
+.switchboard-stats-bar-container {
 	flex: 1;
 	height: 20px;
 	background: var(--background-secondary);
@@ -1179,13 +1171,14 @@
 	overflow: hidden;
 }
 
-.stats-bar {
+.switchboard-stats-bar {
 	height: 100%;
 	border-radius: 4px;
 	transition: width 0.3s ease;
+	background-color: var(--line-color, var(--interactive-accent));
 }
 
-.stats-bar-value {
+.switchboard-stats-bar-value {
 	width: 60px;
 	font-size: 0.85rem;
 	color: var(--text-muted);
@@ -1193,7 +1186,7 @@
 	flex-shrink: 0;
 }
 
-.stats-sessions-list {
+.switchboard-stats-sessions-list {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
@@ -1201,7 +1194,7 @@
 	overflow-y: auto;
 }
 
-.stats-session-item {
+.switchboard-stats-session-item {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1210,39 +1203,40 @@
 	border-radius: 8px;
 }
 
-.stats-session-dot {
+.switchboard-stats-session-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color, var(--interactive-accent));
 }
 
-.stats-session-info {
+.switchboard-stats-session-info {
 	flex: 1;
 	min-width: 0;
 }
 
-.stats-session-name {
+.switchboard-stats-session-name {
 	font-weight: 500;
 }
 
-.stats-session-date {
+.switchboard-stats-session-date {
 	color: var(--text-muted);
 	font-size: 0.85rem;
 }
 
-.stats-session-duration {
+.switchboard-stats-session-duration {
 	font-size: 0.9rem;
 	color: var(--text-muted);
 	flex-shrink: 0;
 }
 
-.stats-export {
+.switchboard-stats-export {
 	margin-top: 20px;
 	text-align: center;
 }
 
-.stats-export-btn {
+.switchboard-stats-export-btn {
 	padding: 10px 20px;
 	border: none;
 	border-radius: 8px;
@@ -1254,7 +1248,7 @@
 	transition: all 0.15s ease;
 }
 
-.stats-export-btn:hover {
+.switchboard-stats-export-btn:hover {
 	filter: brightness(1.1);
 	transform: translateY(-1px);
 }
@@ -1269,27 +1263,27 @@
 	max-width: 550px;
 }
 
-.session-editor-empty {
+.switchboard-session-editor-empty {
 	text-align: center;
 	color: var(--text-muted);
 	padding: 40px 20px;
 }
 
-.session-editor-list {
+.switchboard-session-editor-list {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	max-height: 400px;
+	max-height: 60vh;
 	overflow-y: auto;
 }
 
-.session-editor-line {
+.switchboard-session-editor-line {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	overflow: hidden;
 }
 
-.session-editor-line-header {
+.switchboard-session-editor-line-header {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1298,31 +1292,34 @@
 	transition: background 0.15s ease;
 }
 
-.session-editor-line-header:hover {
+.switchboard-session-editor-line-header:hover {
 	background: var(--background-modifier-hover);
 }
 
-.session-editor-dot {
+.switchboard-session-editor-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color, var(--text-muted));
 }
 
-.session-editor-expand {
+.switchboard-session-editor-expand {
 	margin-left: auto;
 	color: var(--text-muted);
 	font-size: 0.8rem;
 }
 
-.session-editor-sessions {
+.switchboard-session-editor-sessions {
 	padding: 0 12px 12px;
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
-.session-editor-session {
+.switchboard-session-editor-session {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1331,22 +1328,22 @@
 	border-radius: 6px;
 }
 
-.session-editor-session-info {
+.switchboard-session-editor-session-info {
 	flex: 1;
 	min-width: 0;
 }
 
-.session-editor-session-date {
+.switchboard-session-editor-session-date {
 	font-size: 0.9rem;
 }
 
-.session-editor-session-duration {
+.switchboard-session-editor-session-duration {
 	color: var(--text-muted);
 	font-size: 0.85rem;
 	margin-left: 8px;
 }
 
-.session-editor-session-summary {
+.switchboard-session-editor-session-summary {
 	font-size: 0.85rem;
 	color: var(--text-muted);
 	margin-top: 4px;
@@ -1355,13 +1352,13 @@
 	white-space: nowrap;
 }
 
-.session-editor-session-actions {
+.switchboard-session-editor-session-actions {
 	display: flex;
 	gap: 4px;
 	flex-shrink: 0;
 }
 
-.session-editor-session-actions button {
+.switchboard-session-editor-session-actions button {
 	padding: 4px 8px;
 	border: none;
 	border-radius: 4px;
@@ -1370,16 +1367,16 @@
 	transition: background 0.15s ease;
 }
 
-.session-editor-session-actions button:hover {
+.switchboard-session-editor-session-actions button:hover {
 	background: var(--background-modifier-hover);
 }
 
-.session-btn-delete:hover {
+.switchboard-session-btn-delete:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
 
-.session-editor-buttons {
+.switchboard-session-editor-buttons {
 	display: flex;
 	justify-content: flex-end;
 	gap: 12px;
@@ -1390,8 +1387,8 @@
    Decline Options (Call Waiting / Reschedule)
    ========================================== */
 
-.incoming-call-decline-options {
-	display: flex;
+.switchboard-incoming-call-decline-options {
+	display: none;
 	flex-direction: column;
 	gap: 8px;
 	margin-top: 12px;
@@ -1399,7 +1396,11 @@
 	border-top: 1px solid var(--background-modifier-border);
 }
 
-.incoming-call-decline-options .incoming-call-btn-secondary {
+.switchboard-incoming-call-decline-options.is-visible {
+	display: flex;
+}
+
+.switchboard-incoming-call-decline-options .switchboard-incoming-call-btn-secondary {
 	background: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
 	color: var(--text-normal);
@@ -1408,7 +1409,7 @@
 	justify-content: flex-start;
 }
 
-.incoming-call-decline-options .incoming-call-btn-secondary:hover {
+.switchboard-incoming-call-decline-options .switchboard-incoming-call-btn-secondary:hover {
 	background: var(--background-modifier-hover);
 }
 
@@ -1440,21 +1441,21 @@
 	padding: 24px;
 }
 
-.goal-prompt-header h2 {
+.switchboard-goal-prompt-header h2 {
 	margin: 0 0 4px 0;
 	font-size: 1.3em;
 }
 
-.goal-prompt-subtitle {
+.switchboard-goal-prompt-subtitle {
 	margin: 0 0 20px 0;
 	color: var(--text-muted);
 }
 
-.goal-prompt-input-container .setting-item-control {
+.switchboard-goal-prompt-input-container .setting-item-control {
 	width: 100%;
 }
 
-.goal-prompt-input {
+.switchboard-goal-prompt-input {
 	width: 100%;
 	padding: 12px;
 	font-size: 1em;
@@ -1462,13 +1463,13 @@
 	border: 1px solid var(--background-modifier-border);
 }
 
-.goal-prompt-actions {
+.switchboard-goal-prompt-actions {
 	display: flex;
 	gap: 12px;
 	margin-top: 20px;
 }
 
-.goal-prompt-btn {
+.switchboard-goal-prompt-btn {
 	flex: 1;
 	display: flex;
 	align-items: center;
@@ -1483,35 +1484,39 @@
 	transition: transform 0.1s ease, filter 0.1s ease;
 }
 
-.goal-prompt-btn:hover {
+.switchboard-goal-prompt-btn:hover {
 	filter: brightness(1.1);
 	transform: translateY(-1px);
 }
 
-.goal-prompt-btn-primary {
-	color: white;
+.switchboard-goal-prompt-btn-primary {
+	color: var(--text-on-accent);
 }
 
-.goal-prompt-btn-secondary {
+.switchboard-goal-prompt-modal .switchboard-goal-prompt-btn-primary {
+	background-color: var(--goal-prompt-color);
+}
+
+.switchboard-goal-prompt-btn-secondary {
 	background: var(--background-secondary);
 	color: var(--text-normal);
 	border: 1px solid var(--background-modifier-border);
 }
 
 /* Goal Reflection in CallLogModal */
-.call-log-goal-reflection {
+.switchboard-call-log-goal-reflection {
 	background: var(--background-secondary);
 	padding: 12px 16px;
 	border-radius: 8px;
 	margin-bottom: 16px;
 }
 
-.call-log-goal-text {
+.switchboard-call-log-goal-text {
 	margin: 0;
 	font-weight: 500;
 }
 
-.call-log-goal-question {
+.switchboard-call-log-goal-question {
 	margin: 8px 0 0 0;
 	color: var(--text-muted);
 	font-style: italic;
@@ -1529,23 +1534,23 @@
 	padding: 16px;
 }
 
-.quick-switch-header {
+.switchboard-quick-switch-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 12px;
 }
 
-.quick-switch-icon {
+.switchboard-quick-switch-icon {
 	font-size: 1.25rem;
 }
 
-.quick-switch-title {
+.switchboard-quick-switch-title {
 	font-size: 1.1rem;
 	font-weight: 600;
 }
 
-.quick-switch-current {
+.switchboard-quick-switch-current {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1556,25 +1561,26 @@
 	font-size: 0.9rem;
 }
 
-.quick-switch-current-dot {
+.switchboard-quick-switch-current-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
-.quick-switch-current-name {
+.switchboard-quick-switch-current-name {
 	font-weight: 500;
 }
 
-.quick-switch-current-goal {
+.switchboard-quick-switch-current-goal {
 	color: var(--text-muted);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.quick-switch-lines {
+.switchboard-quick-switch-lines {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -1582,7 +1588,7 @@
 	overflow-y: auto;
 }
 
-.quick-switch-line {
+.switchboard-quick-switch-line {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1594,41 +1600,42 @@
 	border: 2px solid transparent;
 }
 
-.quick-switch-line:hover,
-.quick-switch-line.is-selected {
+.switchboard-quick-switch-line:hover,
+.switchboard-quick-switch-line.is-selected {
 	background: var(--background-secondary-alt);
 	border-color: var(--interactive-accent);
 }
 
-.quick-switch-line.is-current {
+.switchboard-quick-switch-line.is-current {
 	opacity: 0.5;
 	cursor: default;
 }
 
-.quick-switch-line.is-current:hover,
-.quick-switch-line.is-current.is-selected {
+.switchboard-quick-switch-line.is-current:hover,
+.switchboard-quick-switch-line.is-current.is-selected {
 	background: var(--background-secondary);
 	border-color: transparent;
 }
 
-.quick-switch-line-color {
+.switchboard-quick-switch-line-color {
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
-.quick-switch-line-name {
+.switchboard-quick-switch-line-name {
 	flex: 1;
 	font-weight: 500;
 }
 
-.quick-switch-line-active {
+.switchboard-quick-switch-line-active {
 	color: var(--interactive-accent);
 	font-size: 0.8rem;
 }
 
-.quick-switch-disconnect {
+.switchboard-quick-switch-disconnect {
 	width: 100%;
 	margin-top: 12px;
 	padding: 8px;
@@ -1641,11 +1648,11 @@
 	transition: opacity 0.1s ease;
 }
 
-.quick-switch-disconnect:hover {
+.switchboard-quick-switch-disconnect:hover {
 	opacity: 0.9;
 }
 
-.quick-switch-hint {
+.switchboard-quick-switch-hint {
 	display: flex;
 	justify-content: center;
 	gap: 12px;
@@ -1654,14 +1661,14 @@
 	color: var(--text-muted);
 }
 
-.quick-switch-hint span:nth-child(odd) {
+.switchboard-quick-switch-hint span:nth-child(odd) {
 	background: var(--background-modifier-border);
 	padding: 2px 6px;
 	border-radius: 3px;
 	font-family: var(--font-monospace);
 }
 
-.quick-switch-empty {
+.switchboard-quick-switch-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
@@ -1676,20 +1683,20 @@
 	overflow-y: auto;
 }
 
-.dashboard-container {
+.switchboard-dashboard-container {
 	padding: 12px;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
 }
 
-.dashboard-section {
+.switchboard-dashboard-section {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.dashboard-section-title {
+.switchboard-dashboard-section-title {
 	margin: 0 0 4px 0;
 	font-size: 1.1rem;
 	font-weight: 600;
@@ -1699,27 +1706,28 @@
 }
 
 /* Session Card */
-.dashboard-session-card {
+.switchboard-dashboard-session-card {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	overflow: hidden;
 }
 
-.dashboard-session-card.is-active {
+.switchboard-dashboard-session-card.is-active {
 	display: flex;
 }
 
-.dashboard-session-card.is-inactive {
+.switchboard-dashboard-session-card.is-inactive {
 	padding: 16px;
 	text-align: center;
 }
 
-.session-card-stripe {
+.switchboard-session-card-stripe {
 	width: 4px;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
-.session-card-content {
+.switchboard-session-card-content {
 	padding: 12px;
 	flex: 1;
 	display: flex;
@@ -1727,30 +1735,31 @@
 	gap: 8px;
 }
 
-.session-card-name-row {
+.switchboard-session-card-name-row {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 }
 
-.session-card-dot {
+.switchboard-session-card-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
-.session-card-name {
+.switchboard-session-card-name {
 	font-weight: 600;
 	font-size: 1rem;
 }
 
-.session-card-timer {
+.switchboard-session-card-timer {
 	font-size: 0.9rem;
 	color: var(--text-normal);
 }
 
-.session-card-goal {
+.switchboard-session-card-goal {
 	font-size: 0.85rem;
 	color: var(--text-muted);
 	overflow: hidden;
@@ -1758,11 +1767,9 @@
 	white-space: nowrap;
 }
 
-.session-card-disconnect {
+.switchboard-session-card-disconnect {
 	margin-top: 4px;
 	padding: 6px 12px;
-	background: var(--background-modifier-error);
-	color: var(--text-on-accent);
 	border: none;
 	border-radius: 6px;
 	cursor: pointer;
@@ -1771,23 +1778,28 @@
 	transition: opacity 0.1s ease;
 }
 
-.session-card-disconnect:hover {
+.switchboard-dashboard-session-card .switchboard-session-card-disconnect {
+	background: var(--background-modifier-error);
+	color: var(--text-on-accent);
+}
+
+.switchboard-session-card-disconnect:hover {
 	opacity: 0.9;
 }
 
-.session-card-empty {
+.switchboard-session-card-empty {
 	color: var(--text-muted);
 	font-style: italic;
 }
 
 /* Lines Grid */
-.dashboard-lines-grid {
+.switchboard-dashboard-lines-grid {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
 
-.dashboard-line-item {
+.switchboard-dashboard-line-item {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1797,29 +1809,30 @@
 	transition: background 0.1s ease;
 }
 
-.dashboard-line-item:hover {
+.switchboard-dashboard-line-item:hover {
 	background: var(--background-secondary-alt);
 }
 
-.dashboard-line-item.is-active {
+.switchboard-dashboard-line-item.is-active {
 	border-left: 3px solid var(--interactive-accent);
 	padding-left: 7px;
 }
 
-.dashboard-line-dot {
+.switchboard-dashboard-line-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
-.dashboard-line-name {
+.switchboard-dashboard-line-name {
 	flex: 1;
 	font-size: 0.9rem;
 	font-weight: 500;
 }
 
-.dashboard-line-btn {
+.switchboard-dashboard-line-btn {
 	padding: 4px 10px;
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
@@ -1831,23 +1844,23 @@
 	transition: filter 0.1s ease;
 }
 
-.dashboard-line-btn:hover {
+.switchboard-dashboard-line-btn:hover {
 	filter: brightness(1.1);
 }
 
-.dashboard-line-active {
+.switchboard-dashboard-line-active {
 	color: var(--interactive-accent);
 	font-size: 0.75rem;
 }
 
 /* Schedule */
-.dashboard-schedule {
+.switchboard-dashboard-schedule {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
 
-.dashboard-schedule-block {
+.switchboard-dashboard-schedule-block {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1857,31 +1870,32 @@
 	font-size: 0.85rem;
 }
 
-.dashboard-schedule-dot {
+.switchboard-dashboard-schedule-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color);
 }
 
-.dashboard-schedule-time {
+.switchboard-dashboard-schedule-time {
 	color: var(--text-muted);
 	font-family: var(--font-monospace);
 	font-size: 0.8rem;
 }
 
-.dashboard-schedule-name {
+.switchboard-dashboard-schedule-name {
 	font-weight: 500;
 }
 
 /* Recent Sessions */
-.dashboard-recent {
+.switchboard-dashboard-recent {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
 
-.dashboard-recent-item {
+.switchboard-dashboard-recent-item {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1891,25 +1905,26 @@
 	font-size: 0.85rem;
 }
 
-.dashboard-recent-dot {
+.switchboard-dashboard-recent-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
 	flex-shrink: 0;
+	background-color: var(--line-color, var(--text-muted));
 }
 
-.dashboard-recent-name {
+.switchboard-dashboard-recent-name {
 	flex: 1;
 	font-weight: 500;
 }
 
-.dashboard-recent-info {
+.switchboard-dashboard-recent-info {
 	color: var(--text-muted);
 	font-size: 0.8rem;
 }
 
 /* Empty State */
-.dashboard-empty {
+.switchboard-dashboard-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	font-size: 0.85rem;
@@ -1917,31 +1932,45 @@
 }
 
 /* ========================================
+   Confirm Modal
+   ======================================== */
+
+.switchboard-confirm-modal p {
+	margin-bottom: var(--size-4-4);
+}
+
+.switchboard-confirm-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
+}
+
+/* ========================================
    Accessibility: Focus Visible Outlines
    ======================================== */
 
 /* Primary action buttons */
-.incoming-call-btn-connect:focus-visible,
-.call-log-btn-done:focus-visible,
-.goal-prompt-btn-primary:focus-visible,
-.timeup-extend:focus-visible,
-.stats-export-btn:focus-visible,
-.dashboard-line-btn:focus-visible {
+.switchboard-incoming-call-btn-connect:focus-visible,
+.switchboard-call-log-btn-done:focus-visible,
+.switchboard-goal-prompt-btn-primary:focus-visible,
+.switchboard-timeup-extend:focus-visible,
+.switchboard-stats-export-btn:focus-visible,
+.switchboard-dashboard-line-btn:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 2px;
 }
 
 /* Secondary / neutral interactive elements */
-.operator-cmd-btn:focus-visible,
+.switchboard-operator-cmd-btn:focus-visible,
 .switchboard-patch-line:focus-visible,
-.incoming-call-btn:focus-visible,
-.call-log-btn-skip:focus-visible,
-.goal-prompt-btn-secondary:focus-visible,
-.timeup-disconnect:focus-visible,
-.quick-switch-line:focus-visible,
-.quick-switch-disconnect:focus-visible,
+.switchboard-incoming-call-btn:focus-visible,
+.switchboard-call-log-btn-skip:focus-visible,
+.switchboard-goal-prompt-btn-secondary:focus-visible,
+.switchboard-timeup-disconnect:focus-visible,
+.switchboard-quick-switch-line:focus-visible,
+.switchboard-quick-switch-disconnect:focus-visible,
 .switchboard-disconnect-btn:focus-visible,
-.session-card-disconnect:focus-visible {
+.switchboard-session-card-disconnect:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 2px;
 }
@@ -1949,16 +1978,16 @@
 /* Small interactive controls */
 .switchboard-color-swatch:focus-visible,
 .switchboard-line-btn:focus-visible,
-.schedule-block-delete:focus-visible,
-.custom-command-delete:focus-visible,
-.session-editor-session-actions button:focus-visible {
+.switchboard-schedule-block-delete:focus-visible,
+.switchboard-custom-command-delete:focus-visible,
+.switchboard-session-editor-session-actions button:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 1px;
 }
 
 /* Text inputs — ring for keyboard nav, keep existing border-color change */
-.call-log-textarea:focus-visible,
-.goal-prompt-input:focus-visible {
+.switchboard-call-log-textarea:focus-visible,
+.switchboard-goal-prompt-input:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: -1px;
 }

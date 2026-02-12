@@ -1,4 +1,4 @@
-import { Plugin, Notice, Menu } from "obsidian";
+import { Plugin, Notice, Menu, TFile } from "obsidian";
 import { SwitchboardSettings, DEFAULT_SETTINGS, SwitchboardLine, OperatorCommand } from "./types";
 import { SwitchboardSettingTab } from "./settings/SwitchboardSettingTab";
 import { PatchInModal } from "./modals/PatchInModal";
@@ -36,7 +36,6 @@ export default class SwitchboardPlugin extends Plugin {
     private registeredCommandIds: Set<string> = new Set();
 
     async onload() {
-        Logger.info("Plugin", "Loading plugin...");
 
         // Fix #35 / A3: Load settings BEFORE initializing services
         // so AudioService.loadAudioFile() has access to settings
@@ -137,11 +136,6 @@ export default class SwitchboardPlugin extends Plugin {
             },
         });
 
-        // Add operator menu ribbon icon
-        this.addRibbonIcon("headphones", "Operator Menu", () => {
-            this.openOperatorModal();
-        });
-
         // Restore active line state on plugin load (don't refocus folders)
         const activeLine = this.getActiveLine();
         if (activeLine) {
@@ -164,7 +158,6 @@ export default class SwitchboardPlugin extends Plugin {
         // Register commands for each Line (Speed Dial)
         this.registerLineCommands();
 
-        Logger.info("Plugin", "Plugin loaded successfully.");
     }
 
     onunload() {
@@ -181,7 +174,6 @@ export default class SwitchboardPlugin extends Plugin {
             this.chronosStartupTimer = null;
         }
 
-        Logger.info("Plugin", "Unloading plugin...");
     }
 
     /**
@@ -255,10 +247,11 @@ export default class SwitchboardPlugin extends Plugin {
                 file = this.app.vault.getAbstractFileByPath(filePath);
             }
 
-            if (file) {
-                const leaf = this.app.workspace.getLeaf();
-                // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
-                await leaf.openFile(file as any);
+            if (file instanceof TFile) {
+                const leaf = this.app.workspace.getLeaf('tab');
+                await leaf.openFile(file);
+            } else if (file) {
+                Logger.warn("Plugin", "Expected file but got folder:", filePath);
             }
         } catch (e) {
             Logger.error("Plugin", "Error opening Call Waiting:", e);
@@ -354,10 +347,11 @@ export default class SwitchboardPlugin extends Plugin {
             // Open landing page if specified
             if (line.landingPage) {
                 const file = this.app.vault.getAbstractFileByPath(line.landingPage);
-                if (file) {
-                    const leaf = this.app.workspace.getLeaf();
-                    // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
-                    await leaf.openFile(file as any);
+                if (file instanceof TFile) {
+                    const leaf = this.app.workspace.getLeaf('tab');
+                    await leaf.openFile(file);
+                } else if (file) {
+                    Logger.warn("Plugin", "Expected file but got folder:", line.landingPage);
                 } else {
                     new Notice(`Landing page not found: ${line.landingPage}`);
                 }
@@ -506,6 +500,15 @@ export default class SwitchboardPlugin extends Plugin {
     /**
      * Register commands for each Line (Speed Dial)
      * Allows users to bind hotkeys to specific Lines
+     *
+     * Known limitation: When Lines are deleted or renamed, their previously
+     * registered commands persist until the plugin is reloaded. Obsidian does
+     * not expose a public removeCommand() API, and using the undocumented
+     * internal (this.app as any).commands.removeCommand(id) is intentionally
+     * avoided to prevent breakage on Obsidian updates.
+     *
+     * Impact is minimal — users rarely delete Lines, and a plugin reload
+     * (Settings → Community Plugins → toggle off/on) clears stale commands.
      */
     registerLineCommands(): void {
         // Fix A2: Prevent duplicate command registration
@@ -574,9 +577,11 @@ export default class SwitchboardPlugin extends Plugin {
                         break;
                     }
                     const file = this.app.vault.getAbstractFileByPath(cmd.value);
-                    if (file) {
-                        // as any: openFile expects TFile but getAbstractFileByPath returns TAbstractFile
-                        this.app.workspace.getLeaf().openFile(file as any);
+                    if (file instanceof TFile) {
+                        this.app.workspace.getLeaf('tab').openFile(file);
+                    } else if (file) {
+                        Logger.warn("Operator", "Expected file but got folder:", cmd.value);
+                        new Notice(`Cannot open folder: ${cmd.value}`);
                     } else {
                         new Notice(`File not found: ${cmd.value}\n\nTip: Use the full path from vault root`);
                     }

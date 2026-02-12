@@ -20,7 +20,7 @@ vi.mock("obsidian", () => ({
 }));
 
 // Mock IncomingCallModal
-vi.mock("../src/modals/IncomingCallModal", () => ({
+vi.mock("../../src/modals/IncomingCallModal", () => ({
     IncomingCallModal: class {
         constructor(...args: any[]) { }
         open() { }
@@ -28,7 +28,7 @@ vi.mock("../src/modals/IncomingCallModal", () => ({
 }));
 
 // Mock Logger
-vi.mock("../src/services/Logger", () => ({
+vi.mock("../../src/services/Logger", () => ({
     Logger: {
         debug: vi.fn(),
         info: vi.fn(),
@@ -38,7 +38,7 @@ vi.mock("../src/services/Logger", () => ({
     },
 }));
 
-import { WireService } from "../src/services/WireService";
+import { WireService } from "../../src/services/WireService";
 
 function createMockPlugin(): any {
     return {

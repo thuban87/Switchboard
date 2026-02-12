@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateId } from "../src/types";
+import { generateId } from "../../src/types";
 
 describe("generateId", () => {
     it("creates a basic slug from a name", () => {

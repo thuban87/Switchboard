@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatDuration } from "../src/types";
+import { formatDuration } from "../../src/types";
 
 /**
  * formatDuration() tests

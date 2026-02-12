@@ -3,23 +3,9 @@
  * Tests DOM manipulation: style injection, body class management, CSS generation
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { App } from "./__mocks__/obsidian";
-import { CircuitManager } from "../src/services/CircuitManager";
-import { SwitchboardLine } from "../src/types";
-
-// Polyfill Obsidian's DOM extensions (addClass/removeClass/hasClass)
-// These are monkey-patched onto HTMLElement by Obsidian at runtime
-if (typeof HTMLElement.prototype.addClass !== "function") {
-    HTMLElement.prototype.addClass = function (cls: string) {
-        this.classList.add(cls);
-    };
-    HTMLElement.prototype.removeClass = function (cls: string) {
-        this.classList.remove(cls);
-    };
-    HTMLElement.prototype.hasClass = function (cls: string) {
-        return this.classList.contains(cls);
-    };
-}
+import { App } from "../__mocks__/obsidian";
+import { CircuitManager } from "../../src/services/CircuitManager";
+import { SwitchboardLine } from "../../src/types";
 
 function createMockLine(overrides: Partial<SwitchboardLine> = {}): SwitchboardLine {
     return {

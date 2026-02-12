@@ -16,7 +16,7 @@ vi.mock("obsidian", () => ({
 }));
 
 // Mock TimeUpModal to avoid pulling in full modal dependency chain
-vi.mock("../src/modals/TimeUpModal", () => ({
+vi.mock("../../src/modals/TimeUpModal", () => ({
     TimeUpModal: class {
         constructor(public app: any, public plugin: any, public line: any) { }
         open() { }
@@ -24,7 +24,7 @@ vi.mock("../src/modals/TimeUpModal", () => ({
 }));
 
 // Mock Logger to prevent console noise
-vi.mock("../src/services/Logger", () => ({
+vi.mock("../../src/services/Logger", () => ({
     Logger: {
         debug: vi.fn(),
         info: vi.fn(),
@@ -34,7 +34,7 @@ vi.mock("../src/services/Logger", () => ({
     },
 }));
 
-import { TimerManager } from "../src/services/TimerManager";
+import { TimerManager } from "../../src/services/TimerManager";
 
 function createMockPlugin(overrides: Record<string, any> = {}): any {
     return {

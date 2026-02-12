@@ -3,9 +3,9 @@
  * Tests state management, tag matching, and timer cleanup
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { createMockPlugin } from "./__mocks__/plugin";
-import { WireService } from "../src/services/WireService";
-import { SwitchboardLine } from "../src/types";
+import { createMockPlugin } from "../__mocks__/plugin";
+import { WireService } from "../../src/services/WireService";
+import { SwitchboardLine } from "../../src/types";
 
 function createMockLine(overrides: Partial<SwitchboardLine> = {}): SwitchboardLine {
     return {

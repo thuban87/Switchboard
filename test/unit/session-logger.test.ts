@@ -3,10 +3,10 @@
  * Tests file I/O, heading detection, write queue, history pruning, path validation
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { TFile } from "./__mocks__/obsidian";
-import { createMockPlugin } from "./__mocks__/plugin";
-import { SessionLogger, SessionInfo } from "../src/services/SessionLogger";
-import { SwitchboardLine } from "../src/types";
+import { TFile } from "../__mocks__/obsidian";
+import { createMockPlugin } from "../__mocks__/plugin";
+import { SessionLogger, SessionInfo } from "../../src/services/SessionLogger";
+import { SwitchboardLine } from "../../src/types";
 
 function createMockLine(overrides: Partial<SwitchboardLine> = {}): SwitchboardLine {
     return {

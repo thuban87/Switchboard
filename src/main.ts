@@ -412,38 +412,45 @@ export default class SwitchboardPlugin extends Plugin {
             // Deactivate the circuit (remove CSS)
             this.circuitManager.deactivate();
 
-            // Get duration before ending session (endSession clears it)
-            const sessionDuration = this.sessionLogger.getCurrentDuration();
+            // Session logging — wrapped separately so cleanup always runs
+            let sessionDuration = 0;
+            try {
+                // Get duration before ending session (endSession clears it)
+                sessionDuration = this.sessionLogger.getCurrentDuration();
 
-            // End session and check for call log
-            const sessionInfo = this.sessionLogger.endSession();
+                // End session and check for call log
+                const sessionInfo = this.sessionLogger.endSession();
 
-            // Stop status bar timer updates
+                if (sessionInfo) {
+                    // Session was 5+ minutes, show call log modal with goal reflection
+                    new CallLogModal(this.app, sessionInfo, async (summary) => {
+                        if (summary) {
+                            // Include goal in summary if it was set
+                            const fullSummary = sessionGoal
+                                ? `Goal: ${sessionGoal}\n${summary}`
+                                : summary;
+                            await this.sessionLogger.logSession(sessionInfo, fullSummary);
+                            new Notice("📝 Session logged");
+                        }
+                        // Log to daily note with summary (after modal)
+                        await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
+                    }, sessionGoal).open();
+                } else {
+                    // Session was < 5 minutes, log to daily note without summary
+                    await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
+                }
+            } catch (e) {
+                Logger.error("Plugin", "Error logging session:", e);
+                new Notice("⚠️ Error saving session log — see console");
+            }
+
+            // Guaranteed cleanup — in-memory operations that must always run
             this.statusBarManager.stopTimerUpdates();
             this.statusBarManager.update();
 
             // Cancel any pending auto-disconnect and break reminder
             this.timerManager.cancelAutoDisconnect();
             this.timerManager.stopBreakReminder();
-
-            if (sessionInfo) {
-                // Session was 5+ minutes, show call log modal with goal reflection
-                new CallLogModal(this.app, sessionInfo, async (summary) => {
-                    if (summary) {
-                        // Include goal in summary if it was set
-                        const fullSummary = sessionGoal
-                            ? `Goal: ${sessionGoal}\n${summary}`
-                            : summary;
-                        await this.sessionLogger.logSession(sessionInfo, fullSummary);
-                        new Notice("📝 Session logged");
-                    }
-                    // Log to daily note with summary (after modal)
-                    await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
-                }, sessionGoal).open();
-            } else {
-                // Session was < 5 minutes, log to daily note without summary
-                await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration);
-            }
 
             // Show notice
             new Notice(`🔌 Disconnected from: ${activeLine.name}`);

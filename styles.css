@@ -766,21 +766,6 @@
 	padding: 16px;
 }
 
-/* Issue 2: Commented out — h4 replaced with setHeading(), class no longer used
-.switchboard-schedule-overview-section-title {
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: var(--text-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin: 12px 0 8px 0;
-	padding: 0;
-}
-
-.switchboard-schedule-overview-section-title:first-child {
-	margin-top: 0;
-}
-*/
 
 .switchboard-schedule-overview-chronos-task {
 	border-left: 3px solid var(--interactive-accent);

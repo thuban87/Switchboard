@@ -58,8 +58,8 @@ export class SessionLogger {
 
         this.currentSession = null;
 
-        // Only return if session was 1+ minutes (lowered from 5 for testing)
-        if (durationMinutes < 1) return null;
+        // Only return if session was 5+ minutes
+        if (durationMinutes < 5) return null;
 
         return sessionInfo;
     }

@@ -268,7 +268,7 @@ export class LineEditorModal extends Modal {
         });
 
         // Container for schedule blocks
-        const scheduleContainer = containerEl.createDiv("schedule-blocks-container");
+        const scheduleContainer = containerEl.createDiv("switchboard-schedule-blocks-container");
         this.scheduleContainer = scheduleContainer;
         this.renderScheduleBlocks(scheduleContainer);
 
@@ -299,14 +299,14 @@ export class LineEditorModal extends Modal {
 
         for (let i = 0; i < this.line.scheduledBlocks.length; i++) {
             const block = this.line.scheduledBlocks[i];
-            const blockEl = containerEl.createDiv("schedule-block");
+            const blockEl = containerEl.createDiv("switchboard-schedule-block");
 
             // Block header with summary and delete
-            const headerEl = blockEl.createDiv("schedule-block-header");
+            const headerEl = blockEl.createDiv("switchboard-schedule-block-header");
 
             // Icon based on type
             const icon = block.recurring ? "🔁" : "📅";
-            headerEl.createSpan({ text: icon, cls: "schedule-block-icon" });
+            headerEl.createSpan({ text: icon, cls: "switchboard-schedule-block-icon" });
 
             // Summary text
             let summary = "";
@@ -317,10 +317,10 @@ export class LineEditorModal extends Modal {
                 summary = date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
             }
             summary += ` ${formatTime12h(block.startTime)} - ${formatTime12h(block.endTime)}`;
-            headerEl.createSpan({ text: summary, cls: "schedule-block-summary" });
+            headerEl.createSpan({ text: summary, cls: "switchboard-schedule-block-summary" });
 
             // Delete button
-            const deleteBtn = headerEl.createEl("button", { cls: "schedule-block-delete" });
+            const deleteBtn = headerEl.createEl("button", { cls: "switchboard-schedule-block-delete" });
             deleteBtn.textContent = "×";
             deleteBtn.addEventListener("click", () => {
                 const idx = this.line.scheduledBlocks.findIndex(b => b.id === block.id);
@@ -329,7 +329,7 @@ export class LineEditorModal extends Modal {
             });
 
             // Editable fields
-            const fieldsEl = blockEl.createDiv("schedule-block-fields");
+            const fieldsEl = blockEl.createDiv("switchboard-schedule-block-fields");
 
             // Type toggle (recurring vs one-time)
             new Setting(fieldsEl)
@@ -357,12 +357,12 @@ export class LineEditorModal extends Modal {
 
             // Recurring: day checkboxes
             if (block.recurring) {
-                const daysEl = fieldsEl.createDiv("schedule-days");
-                daysEl.createSpan({ text: "Days:", cls: "schedule-days-label" });
-                const checkboxesEl = daysEl.createDiv("schedule-days-checkboxes");
+                const daysEl = fieldsEl.createDiv("switchboard-schedule-days");
+                daysEl.createSpan({ text: "Days:", cls: "switchboard-schedule-days-label" });
+                const checkboxesEl = daysEl.createDiv("switchboard-schedule-days-checkboxes");
 
                 DAYS.forEach((dayName, dayIndex) => {
-                    const label = checkboxesEl.createEl("label", { cls: "schedule-day-label" });
+                    const label = checkboxesEl.createEl("label", { cls: "switchboard-schedule-day-label" });
                     const checkbox = label.createEl("input", { type: "checkbox" });
                     checkbox.checked = block.days?.includes(dayIndex) ?? false;
                     checkbox.addEventListener("change", () => {
@@ -397,7 +397,7 @@ export class LineEditorModal extends Modal {
             }
 
             // Time inputs (12h format)
-            const timeEl = fieldsEl.createDiv("schedule-times");
+            const timeEl = fieldsEl.createDiv("switchboard-schedule-times");
 
             new Setting(timeEl)
                 .setName("Start")
@@ -441,7 +441,7 @@ export class LineEditorModal extends Modal {
         if (this.line.scheduledBlocks.length === 0) {
             containerEl.createEl("p", {
                 text: "No scheduled blocks. Add one to receive automatic reminders.",
-                cls: "schedule-empty-message",
+                cls: "switchboard-schedule-empty-message",
             });
         }
     }
@@ -533,7 +533,7 @@ export class LineEditorModal extends Modal {
             cls: "setting-item-description",
         });
 
-        const commandsContainer = containerEl.createDiv("custom-commands-container");
+        const commandsContainer = containerEl.createDiv("switchboard-custom-commands-container");
         this.renderCustomCommands(commandsContainer);
 
         new Setting(containerEl)
@@ -559,12 +559,12 @@ export class LineEditorModal extends Modal {
 
         for (let i = 0; i < this.line.customCommands.length; i++) {
             const cmd = this.line.customCommands[i];
-            const cmdEl = containerEl.createDiv("custom-command-item");
+            const cmdEl = containerEl.createDiv("switchboard-custom-command-item");
 
             // Icon input
             const iconInput = cmdEl.createEl("input", {
                 type: "text",
-                cls: "custom-command-icon",
+                cls: "switchboard-custom-command-icon",
                 value: cmd.icon,
             });
             iconInput.maxLength = 4;
@@ -575,7 +575,7 @@ export class LineEditorModal extends Modal {
             // Name input
             const nameInput = cmdEl.createEl("input", {
                 type: "text",
-                cls: "custom-command-name",
+                cls: "switchboard-custom-command-name",
                 placeholder: "Command name",
                 value: cmd.name,
             });
@@ -585,7 +585,7 @@ export class LineEditorModal extends Modal {
 
             // Action type select
             const actionSelect = cmdEl.createEl("select", {
-                cls: "custom-command-action",
+                cls: "switchboard-custom-command-action",
             });
             const actions = [
                 { value: "insert", label: "Insert text" },
@@ -619,7 +619,7 @@ export class LineEditorModal extends Modal {
 
             const valueInput = cmdEl.createEl("input", {
                 type: "text",
-                cls: "custom-command-value",
+                cls: "switchboard-custom-command-value",
                 placeholder: getPlaceholder(cmd.action),
                 value: cmd.value,
             });
@@ -634,7 +634,7 @@ export class LineEditorModal extends Modal {
 
             // Delete button
             const deleteBtn = cmdEl.createEl("button", {
-                cls: "custom-command-delete",
+                cls: "switchboard-custom-command-delete",
                 text: "×",
             });
             deleteBtn.addEventListener("click", () => {

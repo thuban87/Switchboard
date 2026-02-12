@@ -140,11 +140,11 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                             .slice(0, 10);
 
                         // Clear existing suggestions
-                        const existingPopover = containerEl.querySelector(".daily-note-folder-suggestions");
+                        const existingPopover = containerEl.querySelector(".switchboard-daily-note-folder-suggestions");
                         if (existingPopover) existingPopover.remove();
 
                         if (folders.length > 0 && value.length > 0) {
-                            const popover = containerEl.createDiv("daily-note-folder-suggestions suggestion-container");
+                            const popover = containerEl.createDiv("switchboard-daily-note-folder-suggestions suggestion-container");
                             popover.style.position = "fixed";
                             popover.style.zIndex = "1000";
 
@@ -171,7 +171,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     inputEl.addEventListener("blur", () => {
                         setTimeout(() => {
                             if (!inputEl.isConnected) return;
-                            const popover = containerEl.querySelector(".daily-note-folder-suggestions");
+                            const popover = containerEl.querySelector(".switchboard-daily-note-folder-suggestions");
                             if (popover) popover.remove();
                         }, 200);
                     });
@@ -299,11 +299,11 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
     private renderScheduleOverview(containerEl: HTMLElement) {
         const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const overviewEl = containerEl.createDiv("schedule-overview");
+        const overviewEl = containerEl.createDiv("switchboard-schedule-overview");
 
         // Create collapsible container
-        const detailsEl = overviewEl.createEl("details", { cls: "schedule-overview-details" });
-        const summaryEl = detailsEl.createEl("summary", { cls: "schedule-overview-summary" });
+        const detailsEl = overviewEl.createEl("details", { cls: "switchboard-schedule-overview-details" });
+        const summaryEl = detailsEl.createEl("summary", { cls: "switchboard-schedule-overview-summary" });
 
         // Count total native blocks
         let nativeBlocks = 0;
@@ -313,7 +313,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
 
         summaryEl.textContent = `📅 View All Scheduled Blocks (${nativeBlocks} scheduled)`;
 
-        const contentEl = detailsEl.createDiv("schedule-overview-content");
+        const contentEl = detailsEl.createDiv("switchboard-schedule-overview-content");
 
         // Native blocks by Line
         if (nativeBlocks > 0) {
@@ -322,18 +322,18 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             for (const line of this.plugin.settings.lines) {
                 if (!line.scheduledBlocks || line.scheduledBlocks.length === 0) continue;
 
-                const lineSection = contentEl.createDiv("schedule-overview-line");
-                const lineHeader = lineSection.createDiv("schedule-overview-line-header");
+                const lineSection = contentEl.createDiv("switchboard-schedule-overview-line");
+                const lineHeader = lineSection.createDiv("switchboard-schedule-overview-line-header");
 
-                const colorDot = lineHeader.createSpan("schedule-overview-color-dot");
+                const colorDot = lineHeader.createSpan("switchboard-schedule-overview-color-dot");
                 lineSection.style.setProperty("--line-color", line.color);
                 lineHeader.createSpan({ text: line.name });
 
                 for (const block of line.scheduledBlocks) {
-                    const blockEl = lineSection.createDiv("schedule-overview-block");
+                    const blockEl = lineSection.createDiv("switchboard-schedule-overview-block");
 
                     const icon = block.recurring ? "🔁" : "📅";
-                    blockEl.createSpan({ text: icon, cls: "schedule-overview-type" });
+                    blockEl.createSpan({ text: icon, cls: "switchboard-schedule-overview-type" });
 
                     let desc = "";
                     if (block.recurring && block.days) {
@@ -347,7 +347,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     const timeEnd = formatTime12h(block.endTime);
                     desc += ` ${timeStart} - ${timeEnd}`;
 
-                    blockEl.createSpan({ text: desc, cls: "schedule-overview-desc" });
+                    blockEl.createSpan({ text: desc, cls: "switchboard-schedule-overview-desc" });
                 }
             }
         }
@@ -355,7 +355,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         if (nativeBlocks === 0) {
             contentEl.createEl("p", {
                 text: "No scheduled blocks configured. Add them when editing a Line.",
-                cls: "schedule-overview-empty",
+                cls: "switchboard-schedule-overview-empty",
             });
         }
     }

@@ -574,37 +574,37 @@
    Schedule Blocks (Line Editor)
    ======================================== */
 
-.schedule-blocks-container {
+.switchboard-schedule-blocks-container {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 	margin-bottom: 12px;
 }
 
-.schedule-block {
+.switchboard-schedule-block {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	padding: 12px;
 	border: 1px solid var(--background-modifier-border);
 }
 
-.schedule-block-header {
+.switchboard-schedule-block-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 10px;
 }
 
-.schedule-block-icon {
+.switchboard-schedule-block-icon {
 	font-size: 1.2rem;
 }
 
-.schedule-block-summary {
+.switchboard-schedule-block-summary {
 	flex: 1;
 	font-weight: 500;
 }
 
-.schedule-block-delete {
+.switchboard-schedule-block-delete {
 	background: transparent;
 	border: none;
 	color: var(--text-muted);
@@ -614,40 +614,40 @@
 	border-radius: 4px;
 }
 
-.schedule-block-delete:hover {
+.switchboard-schedule-block-delete:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
 
-.schedule-block-fields {
+.switchboard-schedule-block-fields {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.schedule-block-fields .setting-item {
+.switchboard-schedule-block-fields .setting-item {
 	border-top: none;
 	padding-top: 0;
 }
 
-.schedule-days {
+.switchboard-schedule-days {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	padding: 8px 0;
 }
 
-.schedule-days-label {
+.switchboard-schedule-days-label {
 	font-weight: 500;
 	color: var(--text-muted);
 }
 
-.schedule-days-checkboxes {
+.switchboard-schedule-days-checkboxes {
 	display: flex;
 	gap: 4px;
 }
 
-.schedule-day-label {
+.switchboard-schedule-day-label {
 	display: flex;
 	align-items: center;
 	gap: 2px;
@@ -658,25 +658,25 @@
 	font-size: 0.85rem;
 }
 
-.schedule-day-label:has(input:checked) {
+.switchboard-schedule-day-label:has(input:checked) {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
 }
 
-.schedule-day-label input {
+.switchboard-schedule-day-label input {
 	display: none;
 }
 
-.schedule-times {
+.switchboard-schedule-times {
 	display: flex;
 	gap: 12px;
 }
 
-.schedule-times .setting-item {
+.switchboard-schedule-times .setting-item {
 	flex: 1;
 }
 
-.schedule-empty-message {
+.switchboard-schedule-empty-message {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
@@ -687,36 +687,36 @@
    Schedule Overview (Settings)
    ======================================== */
 
-.schedule-overview {
+.switchboard-schedule-overview {
 	margin-bottom: 16px;
 }
 
-.schedule-overview-details {
+.switchboard-schedule-overview-details {
 	background: var(--background-secondary);
 	border-radius: 8px;
 	border: 1px solid var(--background-modifier-border);
 }
 
-.schedule-overview-summary {
+.switchboard-schedule-overview-summary {
 	padding: 12px 16px;
 	cursor: pointer;
 	font-weight: 500;
 	user-select: none;
 }
 
-.schedule-overview-summary:hover {
+.switchboard-schedule-overview-summary:hover {
 	background: var(--background-secondary-alt);
 }
 
-.schedule-overview-content {
+.switchboard-schedule-overview-content {
 	padding: 0 16px 16px;
 }
 
-.schedule-overview-line {
+.switchboard-schedule-overview-line {
 	margin-bottom: 12px;
 }
 
-.schedule-overview-line-header {
+.switchboard-schedule-overview-line-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -724,14 +724,14 @@
 	margin-bottom: 8px;
 }
 
-.schedule-overview-color-dot {
+.switchboard-schedule-overview-color-dot {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
 	background-color: var(--line-color);
 }
 
-.schedule-overview-block {
+.switchboard-schedule-overview-block {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -742,15 +742,15 @@
 	font-size: 0.9rem;
 }
 
-.schedule-overview-type {
+.switchboard-schedule-overview-type {
 	font-size: 0.9rem;
 }
 
-.schedule-overview-desc {
+.switchboard-schedule-overview-desc {
 	color: var(--text-muted);
 }
 
-.schedule-overview-chronos-note {
+.switchboard-schedule-overview-chronos-note {
 	margin-top: 12px;
 	padding: 10px;
 	background: var(--background-primary);
@@ -759,7 +759,7 @@
 	color: var(--text-muted);
 }
 
-.schedule-overview-empty {
+.switchboard-schedule-overview-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
@@ -767,7 +767,7 @@
 }
 
 /* Issue 2: Commented out — h4 replaced with setHeading(), class no longer used
-.schedule-overview-section-title {
+.switchboard-schedule-overview-section-title {
 	font-size: 0.85rem;
 	font-weight: 600;
 	color: var(--text-muted);
@@ -777,16 +777,16 @@
 	padding: 0;
 }
 
-.schedule-overview-section-title:first-child {
+.switchboard-schedule-overview-section-title:first-child {
 	margin-top: 0;
 }
 */
 
-.schedule-overview-chronos-task {
+.switchboard-schedule-overview-chronos-task {
 	border-left: 3px solid var(--interactive-accent);
 }
 
-.schedule-overview-line-tag {
+.switchboard-schedule-overview-line-tag {
 	background: var(--background-secondary-alt);
 	padding: 2px 8px;
 	border-radius: 12px;
@@ -795,12 +795,12 @@
 	margin-left: auto;
 }
 
-.schedule-overview-clickable {
+.switchboard-schedule-overview-clickable {
 	cursor: pointer;
 	transition: background 0.15s ease;
 }
 
-.schedule-overview-clickable:hover {
+.switchboard-schedule-overview-clickable:hover {
 	background: var(--background-modifier-hover);
 }
 
@@ -928,14 +928,14 @@
    Custom Commands Editor
    ============================================ */
 
-.custom-commands-container {
+.switchboard-custom-commands-container {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 	margin-bottom: 12px;
 }
 
-.custom-command-item {
+.switchboard-custom-command-item {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -944,7 +944,7 @@
 	border-radius: 8px;
 }
 
-.custom-command-icon {
+.switchboard-custom-command-icon {
 	width: 40px;
 	text-align: center;
 	font-size: 1.2rem;
@@ -954,7 +954,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-name {
+.switchboard-custom-command-name {
 	flex: 1;
 	min-width: 100px;
 	padding: 6px 10px;
@@ -963,7 +963,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-action {
+.switchboard-custom-command-action {
 	width: 110px;
 	padding: 6px 8px;
 	border: 1px solid var(--background-modifier-border);
@@ -971,7 +971,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-value {
+.switchboard-custom-command-value {
 	flex: 2;
 	min-width: 120px;
 	padding: 6px 10px;
@@ -980,7 +980,7 @@
 	background: var(--background-primary);
 }
 
-.custom-command-delete {
+.switchboard-custom-command-delete {
 	width: 28px;
 	height: 28px;
 	padding: 0;
@@ -993,7 +993,7 @@
 	transition: all 0.15s ease;
 }
 
-.custom-command-delete:hover {
+.switchboard-custom-command-delete:hover {
 	background: var(--background-modifier-error);
 	color: var(--text-on-accent);
 }
@@ -1993,8 +1993,8 @@
 /* Small interactive controls */
 .switchboard-color-swatch:focus-visible,
 .switchboard-line-btn:focus-visible,
-.schedule-block-delete:focus-visible,
-.custom-command-delete:focus-visible,
+.switchboard-schedule-block-delete:focus-visible,
+.switchboard-custom-command-delete:focus-visible,
 .switchboard-session-editor-session-actions button:focus-visible {
 	outline: 2px solid var(--interactive-accent);
 	outline-offset: 1px;

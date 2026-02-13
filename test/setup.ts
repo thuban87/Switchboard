@@ -39,13 +39,31 @@ if (typeof HTMLElement.prototype.addClass !== "function") {
         this.appendChild(div);
         return div;
     };
-    HTMLElement.prototype.createEl = function (tag: string, options?: { text?: string; cls?: string }) {
+    HTMLElement.prototype.createEl = function (
+        tag: string,
+        o?: string | { text?: string; cls?: string; attr?: Record<string, string>; value?: string; title?: string }
+    ): HTMLElement {
         const el = document.createElement(tag);
-        if (options) {
-            if (options.text) el.textContent = options.text;
-            if (options.cls) el.className = options.cls;
+        if (typeof o === "string") {
+            el.className = o;
+        } else if (o) {
+            if (o.text) el.textContent = o.text;
+            if (o.cls) el.className = o.cls;
+            if (o.attr) {
+                for (const [k, v] of Object.entries(o.attr)) {
+                    el.setAttribute(k, v);
+                }
+            }
+            if (o.title) el.title = o.title;
+            if (o.value && el instanceof HTMLOptionElement) {
+                el.value = o.value;
+            }
         }
         this.appendChild(el);
         return el;
+    };
+
+    HTMLElement.prototype.setText = function (text: string): void {
+        this.textContent = text;
     };
 }

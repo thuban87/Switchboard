@@ -53,14 +53,19 @@ export class TFolder {
     path = "";
 }
 
-// Modal — add contentEl for modal tests
+export class Scope {
+    register = vi.fn();
+}
+
+// Modal — add contentEl, modalEl, scope for modal tests
 export class Modal {
     app: App;
     contentEl = document.createElement("div");
     modalEl = document.createElement("div");
+    scope = new Scope();
     constructor(app: App) { this.app = app; }
-    open() { }
-    close() { }
+    open = vi.fn();
+    close = vi.fn();
 }
 
 export class Menu {
@@ -83,16 +88,56 @@ export class Plugin {
     registerInterval = vi.fn((id: number) => id);
 }
 
-// Setting class — add builder methods
+// Setting class — DOM tree: settingEl > controlEl, functional addText/addDropdown
 export class Setting {
     settingEl = document.createElement("div");
-    constructor(containerEl: any) { }
+    controlEl = document.createElement("div");
+    constructor(containerEl: HTMLElement) {
+        this.settingEl.appendChild(this.controlEl);
+        containerEl.appendChild(this.settingEl);
+    }
     setName(name: string) { return this; }
     setDesc(desc: string) { return this; }
     setHeading() { return this; }
-    addText(cb: any) { return this; }
+    setClass(cls: string) { this.settingEl.className = cls; return this; }
+    addText(cb: (text: any) => any) {
+        const input = document.createElement("input");
+        input.type = "text";
+        const textComponent = {
+            inputEl: input,
+            setPlaceholder: (p: string) => { input.placeholder = p; return textComponent; },
+            onChange: (fn: (v: string) => void) => {
+                input.addEventListener("input", () => fn(input.value));
+                return textComponent;
+            },
+            setValue: (v: string) => { input.value = v; return textComponent; },
+        };
+        this.controlEl.appendChild(input);
+        cb(textComponent);
+        return this;
+    }
+    addDropdown(cb: (dropdown: any) => any) {
+        const select = document.createElement("select");
+        const dropdown = {
+            selectEl: select,
+            addOption: (value: string, display: string) => {
+                const opt = document.createElement("option");
+                opt.value = value;
+                opt.textContent = display;
+                select.appendChild(opt);
+                return dropdown;
+            },
+            setValue: (v: string) => { select.value = v; return dropdown; },
+            onChange: (fn: (v: string) => void) => {
+                select.addEventListener("change", () => fn(select.value));
+                return dropdown;
+            },
+        };
+        this.controlEl.appendChild(select);
+        cb(dropdown);
+        return this;
+    }
     addToggle(cb: any) { return this; }
-    addDropdown(cb: any) { return this; }
     addButton(cb: any) { return this; }
 }
 

@@ -3,6 +3,7 @@
  * 
  * Usage:
  *   node scripts/deploy.mjs test        — Deploy to test vault
+ *   node scripts/deploy.mjs staging     — Deploy to staging vault
  *   node scripts/deploy.mjs production  — Deploy to production (requires confirmation)
  */
 
@@ -12,6 +13,7 @@ import readline from "readline";
 
 const targets = {
     test: "C:/Quest-Board-Test-Vault/.obsidian/plugins/switchboard",
+    staging: "C:/Quest-Board-Staging-Vault/Staging Vault/.obsidian/plugins/switchboard",
     production: "G:/My Drive/IT/Obsidian Vault/My Notebooks/.obsidian/plugins/switchboard",
 };
 
@@ -20,7 +22,7 @@ const filesToCopy = ["main.js", "manifest.json", "styles.css"];
 const target = process.argv[2];
 
 if (!target || !targets[target]) {
-    console.error("❌ Usage: node scripts/deploy.mjs [test|production]");
+    console.error("❌ Usage: node scripts/deploy.mjs [test|staging|production]");
     process.exit(1);
 }
 

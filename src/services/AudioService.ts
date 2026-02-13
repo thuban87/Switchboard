@@ -162,7 +162,11 @@ export class AudioService {
             this.audioElement = null;
         }
         if (this.audioContext) {
-            this.audioContext.close();
+            try {
+                this.audioContext.close();
+            } catch (e) {
+                Logger.warn("Audio", "Error closing AudioContext", e);
+            }
             this.audioContext = null;
         }
     }

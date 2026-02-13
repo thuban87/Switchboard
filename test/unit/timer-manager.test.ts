@@ -16,7 +16,7 @@ vi.mock("obsidian", () => ({
 }));
 
 // Mock TimeUpModal to avoid pulling in full modal dependency chain
-vi.mock("../src/modals/TimeUpModal", () => ({
+vi.mock("../../src/modals/TimeUpModal", () => ({
     TimeUpModal: class {
         constructor(public app: any, public plugin: any, public line: any) { }
         open() { }
@@ -24,7 +24,7 @@ vi.mock("../src/modals/TimeUpModal", () => ({
 }));
 
 // Mock Logger to prevent console noise
-vi.mock("../src/services/Logger", () => ({
+vi.mock("../../src/services/Logger", () => ({
     Logger: {
         debug: vi.fn(),
         info: vi.fn(),
@@ -34,7 +34,7 @@ vi.mock("../src/services/Logger", () => ({
     },
 }));
 
-import { TimerManager } from "../src/services/TimerManager";
+import { TimerManager } from "../../src/services/TimerManager";
 
 function createMockPlugin(overrides: Record<string, any> = {}): any {
     return {
@@ -166,5 +166,65 @@ describe("TimerManager", () => {
         // but the absence of a TimeUpModal is the real check here)
 
         manager.destroy();
+    });
+
+    /**
+     * Phase J: Final 2 uncovered lines + recursive timer
+     */
+    describe("scheduleAutoDisconnect — edge cases", () => {
+        it("calls plugin.disconnect when no active line at trigger time", () => {
+            const plugin = createMockPlugin();
+            // Return null — no active line when timer fires
+            plugin.getActiveLine.mockReturnValue(null);
+            const manager = new TimerManager(plugin);
+
+            const futureTime = new Date(Date.now() + 60000);
+            manager.scheduleAutoDisconnect(futureTime);
+
+            vi.advanceTimersByTime(61000);
+
+            // Should call disconnect (not TimeUpModal) when no active line
+            expect(plugin.disconnect).toHaveBeenCalled();
+
+            manager.destroy();
+        });
+    });
+
+    describe("startBreakReminder — edge cases", () => {
+        it("returns early when breakReminderMinutes is 0", () => {
+            const plugin = createMockPlugin({
+                settings: { autoDisconnect: true, breakReminderMinutes: 0 },
+            });
+            const manager = new TimerManager(plugin);
+
+            manager.startBreakReminder();
+
+            // Advance well past any reasonable timer
+            vi.advanceTimersByTime(3600000);
+
+            // getActiveLine should never be called — timer was never set
+            expect(plugin.getActiveLine).not.toHaveBeenCalled();
+
+            manager.destroy();
+        });
+
+        it("restarts itself after firing (recursive timer)", () => {
+            const plugin = createMockPlugin({
+                settings: { autoDisconnect: true, breakReminderMinutes: 30 },
+            });
+            const manager = new TimerManager(plugin);
+
+            manager.startBreakReminder();
+
+            // First fire at 30 minutes
+            vi.advanceTimersByTime(30 * 60 * 1000);
+            expect(plugin.getActiveLine).toHaveBeenCalledTimes(1);
+
+            // Should have re-scheduled — fire again at 60 minutes total
+            vi.advanceTimersByTime(30 * 60 * 1000);
+            expect(plugin.getActiveLine).toHaveBeenCalledTimes(2);
+
+            manager.destroy();
+        });
     });
 });

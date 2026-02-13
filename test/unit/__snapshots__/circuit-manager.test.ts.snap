@@ -1,0 +1,205 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CircuitManager > generateCSS snapshots > accent color override → snapshot matches 1`] = `
+"
+/* Switchboard Circuit - Writing */
+
+/* Accent Color Override */
+body.switchboard-active-writing {
+	--interactive-accent: #9b59b6 !important;
+	--interactive-accent-hover: #82409d !important;
+}
+
+/* Signal Isolation - Fade non-safe folders */
+body.switchboard-active-writing .nav-folder-title,
+body.switchboard-active-writing .nav-file-title {
+	opacity: 0.15;
+	filter: grayscale(80%);
+	transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+/* Keep safe paths visible */
+
+/* Safe path: Creative/Writing */
+body.switchboard-active-writing .nav-folder-title[data-path="Creative\\/Writing"],
+body.switchboard-active-writing .nav-folder-title[data-path^="Creative\\/Writing/"],
+body.switchboard-active-writing .nav-file-title[data-path^="Creative\\/Writing/"],
+body.switchboard-active-writing .nav-folder-title[data-path="Creative\\/Writing"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-writing .nav-folder-title[data-path="Creative\\/Writing"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
+}
+
+/* Fade effect for folder children */
+body.switchboard-active-writing .nav-folder-title:hover,
+body.switchboard-active-writing .nav-file-title:hover {
+	opacity: 0.6;
+	filter: grayscale(40%);
+}
+
+/* Active file should always be visible */
+body.switchboard-active-writing .nav-file-title.is-active,
+body.switchboard-active-writing .nav-folder-title.is-active {
+	opacity: 1;
+	filter: none;
+}
+"
+`;
+
+exports[`CircuitManager > generateCSS snapshots > basic line → snapshot matches 1`] = `
+"
+/* Switchboard Circuit - Math 140 */
+
+/* Accent Color Override */
+body.switchboard-active-math-140 {
+	--interactive-accent: #3498db !important;
+	--interactive-accent-hover: #1b7fc2 !important;
+}
+
+/* Signal Isolation - Fade non-safe folders */
+body.switchboard-active-math-140 .nav-folder-title,
+body.switchboard-active-math-140 .nav-file-title {
+	opacity: 0.15;
+	filter: grayscale(80%);
+	transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+/* Keep safe paths visible */
+
+/* Safe path: Career/School/Math 140 */
+body.switchboard-active-math-140 .nav-folder-title[data-path="Career\\/School\\/Math\\ 140"],
+body.switchboard-active-math-140 .nav-folder-title[data-path^="Career\\/School\\/Math\\ 140/"],
+body.switchboard-active-math-140 .nav-file-title[data-path^="Career\\/School\\/Math\\ 140/"],
+body.switchboard-active-math-140 .nav-folder-title[data-path="Career\\/School\\/Math\\ 140"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-math-140 .nav-folder-title[data-path="Career\\/School\\/Math\\ 140"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
+}
+
+/* Fade effect for folder children */
+body.switchboard-active-math-140 .nav-folder-title:hover,
+body.switchboard-active-math-140 .nav-file-title:hover {
+	opacity: 0.6;
+	filter: grayscale(40%);
+}
+
+/* Active file should always be visible */
+body.switchboard-active-math-140 .nav-file-title.is-active,
+body.switchboard-active-math-140 .nav-folder-title.is-active {
+	opacity: 1;
+	filter: none;
+}
+"
+`;
+
+exports[`CircuitManager > generateCSS snapshots > line with multiple safe paths → snapshot matches 1`] = `
+"
+/* Switchboard Circuit - Work */
+
+/* Accent Color Override */
+body.switchboard-active-work {
+	--interactive-accent: #e74c3c !important;
+	--interactive-accent-hover: #ce3323 !important;
+}
+
+/* Signal Isolation - Fade non-safe folders */
+body.switchboard-active-work .nav-folder-title,
+body.switchboard-active-work .nav-file-title {
+	opacity: 0.15;
+	filter: grayscale(80%);
+	transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+/* Keep safe paths visible */
+
+/* Safe path: Projects/Alpha */
+body.switchboard-active-work .nav-folder-title[data-path="Projects\\/Alpha"],
+body.switchboard-active-work .nav-folder-title[data-path^="Projects\\/Alpha/"],
+body.switchboard-active-work .nav-file-title[data-path^="Projects\\/Alpha/"],
+body.switchboard-active-work .nav-folder-title[data-path="Projects\\/Alpha"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-work .nav-folder-title[data-path="Projects\\/Alpha"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
+}
+
+/* Safe path: Projects/Beta */
+body.switchboard-active-work .nav-folder-title[data-path="Projects\\/Beta"],
+body.switchboard-active-work .nav-folder-title[data-path^="Projects\\/Beta/"],
+body.switchboard-active-work .nav-file-title[data-path^="Projects\\/Beta/"],
+body.switchboard-active-work .nav-folder-title[data-path="Projects\\/Beta"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-work .nav-folder-title[data-path="Projects\\/Beta"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
+}
+
+/* Safe path: Shared/Resources */
+body.switchboard-active-work .nav-folder-title[data-path="Shared\\/Resources"],
+body.switchboard-active-work .nav-folder-title[data-path^="Shared\\/Resources/"],
+body.switchboard-active-work .nav-file-title[data-path^="Shared\\/Resources/"],
+body.switchboard-active-work .nav-folder-title[data-path="Shared\\/Resources"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-work .nav-folder-title[data-path="Shared\\/Resources"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
+}
+
+/* Fade effect for folder children */
+body.switchboard-active-work .nav-folder-title:hover,
+body.switchboard-active-work .nav-file-title:hover {
+	opacity: 0.6;
+	filter: grayscale(40%);
+}
+
+/* Active file should always be visible */
+body.switchboard-active-work .nav-file-title.is-active,
+body.switchboard-active-work .nav-folder-title.is-active {
+	opacity: 1;
+	filter: none;
+}
+"
+`;
+
+exports[`CircuitManager > generateCSS snapshots > line with special characters in path → CSS.escape applied 1`] = `
+"
+/* Switchboard Circuit - Special */
+
+/* Accent Color Override */
+body.switchboard-active-special {
+	--interactive-accent: #3498db !important;
+	--interactive-accent-hover: #1b7fc2 !important;
+}
+
+/* Signal Isolation - Fade non-safe folders */
+body.switchboard-active-special .nav-folder-title,
+body.switchboard-active-special .nav-file-title {
+	opacity: 0.15;
+	filter: grayscale(80%);
+	transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+/* Keep safe paths visible */
+
+/* Safe path: Path (with parens)/Sub [brackets] */
+body.switchboard-active-special .nav-folder-title[data-path="Path\\ \\(with\\ parens\\)\\/Sub\\ \\[brackets\\]"],
+body.switchboard-active-special .nav-folder-title[data-path^="Path\\ \\(with\\ parens\\)\\/Sub\\ \\[brackets\\]/"],
+body.switchboard-active-special .nav-file-title[data-path^="Path\\ \\(with\\ parens\\)\\/Sub\\ \\[brackets\\]/"],
+body.switchboard-active-special .nav-folder-title[data-path="Path\\ \\(with\\ parens\\)\\/Sub\\ \\[brackets\\]"] ~ .nav-folder-children .nav-folder-title,
+body.switchboard-active-special .nav-folder-title[data-path="Path\\ \\(with\\ parens\\)\\/Sub\\ \\[brackets\\]"] ~ .nav-folder-children .nav-file-title {
+	opacity: 1;
+	filter: none;
+}
+
+/* Fade effect for folder children */
+body.switchboard-active-special .nav-folder-title:hover,
+body.switchboard-active-special .nav-file-title:hover {
+	opacity: 0.6;
+	filter: grayscale(40%);
+}
+
+/* Active file should always be visible */
+body.switchboard-active-special .nav-file-title.is-active,
+body.switchboard-active-special .nav-folder-title.is-active {
+	opacity: 1;
+	filter: none;
+}
+"
+`;

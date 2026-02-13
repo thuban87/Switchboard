@@ -4,10 +4,15 @@
  */
 import { vi } from "vitest";
 
+// App — add commands registry for executeOperatorCommand tests
 export class App {
     vault = new Vault();
     workspace = new Workspace();
     plugins = { getPlugin: vi.fn(() => null) };
+    commands = {
+        executeCommandById: vi.fn(),
+        commands: {} as Record<string, any>,
+    };
 }
 
 export class Vault {
@@ -25,9 +30,18 @@ export class Vault {
     getAllLoadedFiles = vi.fn(() => []);
 }
 
+// Workspace — add getLeaf for landing page tests, revealLeaf + getRightLeaf for dashboard tests
 export class Workspace {
     getLeavesOfType = vi.fn(() => []);
     getActiveViewOfType = vi.fn();
+    getLeaf = vi.fn(() => ({
+        openFile: vi.fn().mockResolvedValue(undefined),
+    }));
+    revealLeaf = vi.fn();
+    getRightLeaf = vi.fn(() => ({
+        setViewState: vi.fn().mockResolvedValue(undefined),
+        view: null,
+    }));
     activeEditor = null;
 }
 
@@ -44,19 +58,222 @@ export class TFolder {
     path = "";
 }
 
+export class Scope {
+    register = vi.fn();
+}
+
+// Modal — add contentEl, modalEl, scope for modal tests
 export class Modal {
     app: App;
+    contentEl = document.createElement("div");
+    modalEl = document.createElement("div");
+    scope = new Scope();
     constructor(app: App) { this.app = app; }
-    open() { }
-    close() { }
+    open = vi.fn();
+    close = vi.fn();
 }
 
 export class Menu {
-    addItem(cb: any) { return this; }
+    items: any[] = [];
+    addItem(cb: (item: any) => any) {
+        const item = {
+            setTitle: vi.fn().mockReturnThis(),
+            setIcon: vi.fn().mockReturnThis(),
+            setDisabled: vi.fn().mockReturnThis(),
+            onClick: vi.fn().mockReturnThis(),
+            _onClick: null as any,
+        };
+        // Capture onClick handler for testing
+        item.onClick = vi.fn((handler: any) => {
+            item._onClick = handler;
+            return item;
+        });
+        cb(item);
+        this.items.push(item);
+        return this;
+    }
     addSeparator() { return this; }
     showAtMouseEvent(e: any) { }
 }
 
+// Plugin base class — add lifecycle methods
+export class Plugin {
+    app: App;
+    constructor(app: App) { this.app = app; }
+    loadData = vi.fn().mockResolvedValue(null);
+    saveData = vi.fn().mockResolvedValue(undefined);
+    addCommand = vi.fn();
+    addRibbonIcon = vi.fn(() => document.createElement("div"));
+    addSettingTab = vi.fn();
+    addStatusBarItem = vi.fn(() => document.createElement("div"));
+    registerView = vi.fn();
+    registerInterval = vi.fn((id: number) => id);
+}
+
+// Setting class — DOM tree: settingEl > controlEl, functional addText/addDropdown
+export class Setting {
+    settingEl = document.createElement("div");
+    controlEl = document.createElement("div");
+    constructor(containerEl: HTMLElement) {
+        this.settingEl.appendChild(this.controlEl);
+        containerEl.appendChild(this.settingEl);
+    }
+    setName(name: string) {
+        const nameEl = document.createElement("div");
+        nameEl.className = "setting-item-name";
+        nameEl.textContent = name;
+        this.settingEl.prepend(nameEl);
+        return this;
+    }
+    setDesc(desc: string) {
+        const descEl = document.createElement("div");
+        descEl.className = "setting-item-description";
+        descEl.textContent = desc;
+        this.settingEl.appendChild(descEl);
+        return this;
+    }
+    setHeading() { return this; }
+    setClass(cls: string) { this.settingEl.className = cls; return this; }
+    addText(cb: (text: any) => any) {
+        const input = document.createElement("input");
+        input.type = "text";
+        const textComponent = {
+            inputEl: input,
+            setPlaceholder: (p: string) => { input.placeholder = p; return textComponent; },
+            onChange: (fn: (v: string) => void) => {
+                input.addEventListener("input", () => fn(input.value));
+                return textComponent;
+            },
+            setValue: (v: string) => { input.value = v; return textComponent; },
+        };
+        this.controlEl.appendChild(input);
+        cb(textComponent);
+        return this;
+    }
+    addDropdown(cb: (dropdown: any) => any) {
+        const select = document.createElement("select");
+        const dropdown = {
+            selectEl: select,
+            addOption: (value: string, display: string) => {
+                const opt = document.createElement("option");
+                opt.value = value;
+                opt.textContent = display;
+                select.appendChild(opt);
+                return dropdown;
+            },
+            setValue: (v: string) => { select.value = v; return dropdown; },
+            onChange: (fn: (v: string) => void) => {
+                select.addEventListener("change", () => fn(select.value));
+                return dropdown;
+            },
+        };
+        this.controlEl.appendChild(select);
+        cb(dropdown);
+        return this;
+    }
+    addToggle(cb: any) {
+        const toggle = {
+            toggleEl: document.createElement("div"),
+            _value: false,
+            _onChange: null as any,
+            setValue: vi.fn(function (this: any, v: boolean) { this._value = v; return this; }),
+            onChange: vi.fn(function (this: any, fn: any) { this._onChange = fn; return this; }),
+        };
+        cb(toggle);
+        return this;
+    }
+    addButton(cb: any) {
+        const btn = document.createElement("button");
+        const buttonComponent = {
+            buttonEl: btn,
+            setButtonText: (t: string) => { btn.textContent = t; return buttonComponent; },
+            setCta: () => { btn.addClass("mod-cta"); return buttonComponent; },
+            onClick: (fn: () => void) => { btn.addEventListener("click", fn); return buttonComponent; },
+            setIcon: vi.fn().mockReturnThis(),
+            setTooltip: vi.fn().mockReturnThis(),
+        };
+        this.controlEl.appendChild(btn);
+        cb(buttonComponent);
+        return this;
+    }
+    addSearch(cb: any) {
+        const input = document.createElement("input");
+        input.type = "search";
+        const searchComponent = {
+            inputEl: input,
+            setPlaceholder: (p: string) => { input.placeholder = p; return searchComponent; },
+            setValue: (v: string) => { input.value = v; return searchComponent; },
+            onChange: (fn: (v: string) => void) => {
+                input.addEventListener("input", () => fn(input.value));
+                return searchComponent;
+            },
+        };
+        this.controlEl.appendChild(input);
+        cb(searchComponent);
+        return this;
+    }
+    addExtraButton(cb: any) {
+        const btn = document.createElement("button");
+        const extraBtn = {
+            extraButtonEl: btn,
+            setIcon: (icon: string) => { btn.dataset.icon = icon; return extraBtn; },
+            setTooltip: vi.fn().mockReturnThis(),
+            onClick: (fn: () => void) => { btn.addEventListener("click", fn); return extraBtn; },
+        };
+        this.controlEl.appendChild(btn);
+        cb(extraBtn);
+        return this;
+    }
+}
+
+// PluginSettingTab — stub with containerEl for display() tests
+export class PluginSettingTab {
+    app: App;
+    containerEl = document.createElement("div");
+    constructor(app: App, plugin: any) { this.app = app; }
+    display() { }
+    hide() { }
+}
+
+export class TAbstractFile {
+    path = "";
+}
+
+export class AbstractInputSuggest<T> {
+    app: App;
+    constructor(app: App, inputEl: HTMLInputElement) { this.app = app; }
+    close() { }
+    getSuggestions(query: string): T[] { return []; }
+    renderSuggestion(value: T, el: HTMLElement): void { }
+    selectSuggestion(value: T): void { }
+}
+
+export class TextComponent {
+    inputEl = document.createElement("input");
+    setValue(val: string) { this.inputEl.value = val; return this; }
+    setPlaceholder(ph: string) { return this; }
+    onChange(cb: (value: string) => void) { return this; }
+}
+
+export class WorkspaceLeaf {
+    view: any;
+}
+
+export class ItemView {
+    containerEl = document.createElement("div");
+    contentEl = document.createElement("div");
+    leaf: WorkspaceLeaf;
+    constructor(leaf: WorkspaceLeaf) {
+        this.leaf = leaf;
+        this.containerEl.appendChild(this.contentEl);
+    }
+    registerInterval(id: number) { return id; }
+}
+
 export function normalizePath(path: string): string {
     return path;
+}
+
+export function setIcon(el: HTMLElement, iconId: string): void {
+    el.dataset.icon = iconId;
 }

@@ -90,18 +90,7 @@ export class IncomingCallModal extends Modal {
         // Hold button with dropdown
         const holdContainer = actionsEl.createDiv("switchboard-incoming-call-hold-container");
 
-        const holdBtn = holdContainer.createEl("button", {
-            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-hold",
-        });
-        holdBtn.createEl("span", { text: `🕒 Hold (${this.defaultSnoozeMinutes}m)` });
-        holdBtn.addEventListener("click", () => {
-            if (this.actionTaken) return;
-            this.actionTaken = true;
-            this.close();
-            this.onAction("hold", this.defaultSnoozeMinutes);
-        });
-
-        // Dropdown for snooze options
+        // Snooze dropdown (must be created before hold button so click handler can read its value)
         const snoozeSelect = holdContainer.createEl("select", {
             cls: "switchboard-incoming-call-snooze-select",
         });
@@ -110,6 +99,17 @@ export class IncomingCallModal extends Modal {
         snoozeSelect.createEl("option", { text: "15m", value: "15" });
         snoozeSelect.createEl("option", { text: "30m", value: "30" });
         snoozeSelect.value = this.defaultSnoozeMinutes.toString();
+
+        const holdBtn = holdContainer.createEl("button", {
+            cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-hold",
+        });
+        holdBtn.createEl("span", { text: `🕒 Hold (${this.defaultSnoozeMinutes}m)` });
+        holdBtn.addEventListener("click", () => {
+            if (this.actionTaken) return;
+            this.actionTaken = true;
+            this.close();
+            this.onAction("hold", parseInt(snoozeSelect.value));
+        });
 
         snoozeSelect.addEventListener("change", () => {
             const minutes = parseInt(snoozeSelect.value);

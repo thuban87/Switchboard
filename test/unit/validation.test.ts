@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { validatePath, isValidHexColor, isValidTime, isValidDate, generateId, sanitizePath, sanitizeFileName } from "../src/types";
+import { validatePath, isValidHexColor, isValidTime, isValidDate, generateId, sanitizePath, sanitizeFileName } from "../../src/types";
 
 // Mock obsidian's normalizePath — mimics slash normalization and leading/trailing slash stripping
 vi.mock("obsidian", () => ({

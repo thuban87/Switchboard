@@ -30,12 +30,17 @@ export class Vault {
     getAllLoadedFiles = vi.fn(() => []);
 }
 
-// Workspace — add getLeaf for landing page tests
+// Workspace — add getLeaf for landing page tests, revealLeaf + getRightLeaf for dashboard tests
 export class Workspace {
     getLeavesOfType = vi.fn(() => []);
     getActiveViewOfType = vi.fn();
     getLeaf = vi.fn(() => ({
         openFile: vi.fn().mockResolvedValue(undefined),
+    }));
+    revealLeaf = vi.fn();
+    getRightLeaf = vi.fn(() => ({
+        setViewState: vi.fn().mockResolvedValue(undefined),
+        view: null,
     }));
     activeEditor = null;
 }

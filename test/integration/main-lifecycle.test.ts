@@ -10,10 +10,12 @@ import { DEFAULT_SETTINGS } from "../../src/types";
 // === Module Mocks ===
 
 // Variables used inside vi.mock factories must be declared via vi.hoisted()
-const { NoticeSpy, captureGoalCallback, captureCallLogCallback } = vi.hoisted(() => ({
+const { NoticeSpy, captureGoalCallback, captureCallLogCallback, capturePatchInCallback, captureQuickSwitchCallback } = vi.hoisted(() => ({
     NoticeSpy: vi.fn(),
     captureGoalCallback: { current: null as ((goal: string | null) => void) | null },
     captureCallLogCallback: { current: null as ((summary: string) => Promise<void>) | null },
+    capturePatchInCallback: { current: null as ((line: any) => void) | null },
+    captureQuickSwitchCallback: { current: null as ((line: any) => void) | null },
 }));
 
 // Partial mock obsidian — override Notice with a spy
@@ -90,12 +92,34 @@ vi.mock("../../src/views/DashboardView", () => ({
     DASHBOARD_VIEW_TYPE: "switchboard-dashboard",
 }));
 
-// Modals — auto-mock those not directly inspected
-vi.mock("../../src/modals/PatchInModal");
-vi.mock("../../src/modals/OperatorModal");
-vi.mock("../../src/modals/StatisticsModal");
-vi.mock("../../src/modals/SessionEditorModal");
-vi.mock("../../src/modals/QuickSwitchModal");
+// Modals — mock with callback capture for openers that delegate to patchIn/disconnect
+vi.mock("../../src/modals/PatchInModal", () => ({
+    PatchInModal: vi.fn().mockImplementation(function (this: any, _app: any, _lines: any, _activeLine: any, cb: (line: any) => void) {
+        capturePatchInCallback.current = cb;
+        this.open = vi.fn();
+    }),
+}));
+vi.mock("../../src/modals/OperatorModal", () => ({
+    OperatorModal: vi.fn().mockImplementation(function (this: any) {
+        this.open = vi.fn();
+    }),
+}));
+vi.mock("../../src/modals/StatisticsModal", () => ({
+    StatisticsModal: vi.fn().mockImplementation(function (this: any) {
+        this.open = vi.fn();
+    }),
+}));
+vi.mock("../../src/modals/SessionEditorModal", () => ({
+    SessionEditorModal: vi.fn().mockImplementation(function (this: any) {
+        this.open = vi.fn();
+    }),
+}));
+vi.mock("../../src/modals/QuickSwitchModal", () => ({
+    QuickSwitchModal: vi.fn().mockImplementation(function (this: any, _app: any, _lines: any, _activeLine: any, _goal: any, cb: (line: any) => void) {
+        captureQuickSwitchCallback.current = cb;
+        this.open = vi.fn();
+    }),
+}));
 
 // GoalPromptModal — capture callback for patchInWithGoal tests
 vi.mock("../../src/modals/GoalPromptModal", () => ({
@@ -124,6 +148,12 @@ import SwitchboardPlugin from "../../src/main";
 import { App, TFile, TFolder } from "obsidian";
 import { GoalPromptModal } from "../../src/modals/GoalPromptModal";
 import { CallLogModal } from "../../src/modals/CallLogModal";
+import { PatchInModal } from "../../src/modals/PatchInModal";
+import { OperatorModal } from "../../src/modals/OperatorModal";
+import { StatisticsModal } from "../../src/modals/StatisticsModal";
+import { SessionEditorModal } from "../../src/modals/SessionEditorModal";
+import { QuickSwitchModal } from "../../src/modals/QuickSwitchModal";
+import { Logger } from "../../src/services/Logger";
 
 // === Test Suite ===
 
@@ -135,6 +165,8 @@ describe("main.ts lifecycle", () => {
         vi.clearAllMocks();
         captureGoalCallback.current = null;
         captureCallLogCallback.current = null;
+        capturePatchInCallback.current = null;
+        captureQuickSwitchCallback.current = null;
 
         plugin = new SwitchboardPlugin(new App(), { id: "switchboard" } as any);
         await plugin.onload();
@@ -686,6 +718,356 @@ describe("main.ts lifecycle", () => {
             expect(NoticeSpy).toHaveBeenCalledWith(
                 expect.stringContaining("Settings corrupted")
             );
+        });
+    });
+
+    // -------------------------------------------------------
+    // openPatchInModal (Phase B)
+    // -------------------------------------------------------
+    describe("openPatchInModal", () => {
+        it("creates PatchInModal with correct args (lines, activeLine, callback)", () => {
+            plugin.settings.activeLine = "math-140";
+
+            plugin.openPatchInModal();
+
+            expect(PatchInModal).toHaveBeenCalledWith(
+                plugin.app,
+                plugin.settings.lines,
+                "math-140",
+                expect.any(Function)
+            );
+        });
+
+        it("callback with null calls disconnect", async () => {
+            const disconnectSpy = vi.spyOn(plugin, "disconnect").mockResolvedValue(undefined);
+
+            plugin.openPatchInModal();
+            expect(capturePatchInCallback.current).not.toBeNull();
+            capturePatchInCallback.current!(null);
+
+            expect(disconnectSpy).toHaveBeenCalled();
+        });
+
+        it("callback with line calls patchInWithGoal", async () => {
+            const patchInWithGoalSpy = vi.spyOn(plugin, "patchInWithGoal").mockResolvedValue(undefined);
+
+            plugin.openPatchInModal();
+            expect(capturePatchInCallback.current).not.toBeNull();
+            capturePatchInCallback.current!(testLine);
+
+            expect(patchInWithGoalSpy).toHaveBeenCalledWith(testLine);
+        });
+    });
+
+    // -------------------------------------------------------
+    // openOperatorModal (Phase B)
+    // -------------------------------------------------------
+    describe("openOperatorModal", () => {
+        it("creates OperatorModal when line is active", () => {
+            plugin.settings.activeLine = testLine.id;
+
+            plugin.openOperatorModal();
+
+            expect(OperatorModal).toHaveBeenCalledWith(
+                plugin.app,
+                plugin,
+                testLine
+            );
+        });
+
+        it("shows notice when no active line", () => {
+            plugin.settings.activeLine = null;
+
+            plugin.openOperatorModal();
+
+            expect(NoticeSpy).toHaveBeenCalledWith("Switchboard: Patch into a line first");
+            expect(OperatorModal).not.toHaveBeenCalled();
+        });
+    });
+
+    // -------------------------------------------------------
+    // openStatistics (Phase B)
+    // -------------------------------------------------------
+    describe("openStatistics", () => {
+        it("creates StatisticsModal", () => {
+            plugin.openStatistics();
+
+            expect(StatisticsModal).toHaveBeenCalledWith(plugin.app, plugin);
+        });
+    });
+
+    // -------------------------------------------------------
+    // openSessionEditor (Phase B)
+    // -------------------------------------------------------
+    describe("openSessionEditor", () => {
+        it("creates SessionEditorModal", () => {
+            plugin.openSessionEditor();
+
+            expect(SessionEditorModal).toHaveBeenCalledWith(plugin.app, plugin);
+        });
+    });
+
+    // -------------------------------------------------------
+    // openQuickSwitchModal (Phase B)
+    // -------------------------------------------------------
+    describe("openQuickSwitchModal", () => {
+        it("creates QuickSwitchModal with correct args", () => {
+            plugin.settings.activeLine = "math-140";
+
+            plugin.openQuickSwitchModal();
+
+            expect(QuickSwitchModal).toHaveBeenCalledWith(
+                plugin.app,
+                plugin.settings.lines,
+                "math-140",
+                plugin.currentGoal,
+                expect.any(Function)
+            );
+        });
+
+        it("passes currentGoal as the fourth argument", () => {
+            plugin.settings.activeLine = "math-140";
+            plugin.currentGoal = "Study calculus";
+
+            plugin.openQuickSwitchModal();
+
+            expect(QuickSwitchModal).toHaveBeenCalledWith(
+                plugin.app,
+                plugin.settings.lines,
+                "math-140",
+                "Study calculus",
+                expect.any(Function)
+            );
+        });
+
+        it("callback with null calls disconnect", async () => {
+            const disconnectSpy = vi.spyOn(plugin, "disconnect").mockResolvedValue(undefined);
+
+            plugin.openQuickSwitchModal();
+            expect(captureQuickSwitchCallback.current).not.toBeNull();
+            captureQuickSwitchCallback.current!(null);
+
+            expect(disconnectSpy).toHaveBeenCalled();
+        });
+
+        it("callback with line calls patchInWithGoal", async () => {
+            const patchInWithGoalSpy = vi.spyOn(plugin, "patchInWithGoal").mockResolvedValue(undefined);
+
+            plugin.openQuickSwitchModal();
+            expect(captureQuickSwitchCallback.current).not.toBeNull();
+            captureQuickSwitchCallback.current!(testLine);
+
+            expect(patchInWithGoalSpy).toHaveBeenCalledWith(testLine);
+        });
+    });
+
+    // -------------------------------------------------------
+    // openCallWaiting (Phase B)
+    // -------------------------------------------------------
+    describe("openCallWaiting", () => {
+        it("opens existing Call Waiting file", async () => {
+            const mockFile = new TFile();
+            mockFile.path = "Call Waiting.md";
+            vi.mocked(plugin.app.vault.getAbstractFileByPath).mockReturnValue(mockFile);
+            const mockLeaf = { openFile: vi.fn().mockResolvedValue(undefined) };
+            vi.mocked(plugin.app.workspace.getLeaf).mockReturnValue(mockLeaf as any);
+
+            await plugin.openCallWaiting();
+
+            expect(plugin.app.vault.getAbstractFileByPath).toHaveBeenCalledWith("Call Waiting.md");
+            expect(plugin.app.workspace.getLeaf).toHaveBeenCalledWith("tab");
+            expect(mockLeaf.openFile).toHaveBeenCalledWith(mockFile);
+        });
+
+        it("creates Call Waiting file when missing", async () => {
+            const mockFile = new TFile();
+            mockFile.path = "Call Waiting.md";
+            // First call returns null (file doesn't exist), second call returns file (after create)
+            vi.mocked(plugin.app.vault.getAbstractFileByPath)
+                .mockReturnValueOnce(null)
+                .mockReturnValueOnce(mockFile);
+            vi.mocked(plugin.app.vault.create).mockResolvedValue(mockFile);
+            const mockLeaf = { openFile: vi.fn().mockResolvedValue(undefined) };
+            vi.mocked(plugin.app.workspace.getLeaf).mockReturnValue(mockLeaf as any);
+
+            await plugin.openCallWaiting();
+
+            expect(plugin.app.vault.create).toHaveBeenCalledWith(
+                "Call Waiting.md",
+                expect.stringContaining("# Call Waiting")
+            );
+            expect(mockLeaf.openFile).toHaveBeenCalledWith(mockFile);
+        });
+
+        it("handles file being a folder (logs warning)", async () => {
+            const mockFolder = new TFolder();
+            vi.mocked(plugin.app.vault.getAbstractFileByPath).mockReturnValue(mockFolder as any);
+
+            await plugin.openCallWaiting();
+
+            expect(Logger.warn).toHaveBeenCalledWith(
+                "Plugin",
+                "Expected file but got folder:",
+                "Call Waiting.md"
+            );
+        });
+
+        it("wraps errors in try/catch with notice", async () => {
+            vi.mocked(plugin.app.vault.getAbstractFileByPath).mockImplementation(() => {
+                throw new Error("vault error");
+            });
+
+            await plugin.openCallWaiting();
+
+            expect(NoticeSpy).toHaveBeenCalledWith(
+                expect.stringContaining("Error opening Call Waiting")
+            );
+        });
+    });
+
+    // -------------------------------------------------------
+    // activateDashboard (Phase B)
+    // -------------------------------------------------------
+    describe("activateDashboard", () => {
+        it("reveals existing dashboard leaf if already open", async () => {
+            const existingLeaf = { view: {} };
+            vi.mocked(plugin.app.workspace.getLeavesOfType).mockReturnValue([existingLeaf] as any);
+
+            await plugin.activateDashboard();
+
+            expect(plugin.app.workspace.revealLeaf).toHaveBeenCalledWith(existingLeaf);
+            // Should NOT create a new leaf
+            expect(plugin.app.workspace.getRightLeaf).not.toHaveBeenCalled();
+        });
+
+        it("creates new leaf in right sidebar if not open", async () => {
+            vi.mocked(plugin.app.workspace.getLeavesOfType).mockReturnValue([]);
+            const newLeaf = {
+                setViewState: vi.fn().mockResolvedValue(undefined),
+                view: null,
+            };
+            vi.mocked(plugin.app.workspace.getRightLeaf).mockReturnValue(newLeaf as any);
+
+            await plugin.activateDashboard();
+
+            expect(plugin.app.workspace.getRightLeaf).toHaveBeenCalledWith(false);
+            expect(newLeaf.setViewState).toHaveBeenCalledWith({
+                type: "switchboard-dashboard",
+                active: true,
+            });
+            expect(plugin.app.workspace.revealLeaf).toHaveBeenCalledWith(newLeaf);
+        });
+
+        it("handles getRightLeaf returning null", async () => {
+            vi.mocked(plugin.app.workspace.getLeavesOfType).mockReturnValue([]);
+            vi.mocked(plugin.app.workspace.getRightLeaf).mockReturnValue(null as any);
+
+            // Should not throw
+            await plugin.activateDashboard();
+
+            // revealLeaf should not be called since leaf is null
+            expect(plugin.app.workspace.revealLeaf).not.toHaveBeenCalled();
+        });
+    });
+
+    // -------------------------------------------------------
+    // restartWireService (Phase B)
+    // -------------------------------------------------------
+    describe("restartWireService", () => {
+        it("stops then starts wire service when chronos enabled", () => {
+            plugin.settings.chronosIntegrationEnabled = true;
+
+            plugin.restartWireService();
+
+            expect(plugin.wireService.stop).toHaveBeenCalled();
+            expect(plugin.wireService.start).toHaveBeenCalled();
+        });
+
+        it("stops but does not start when chronos disabled", () => {
+            plugin.settings.chronosIntegrationEnabled = false;
+
+            plugin.restartWireService();
+
+            expect(plugin.wireService.stop).toHaveBeenCalled();
+            expect(plugin.wireService.start).not.toHaveBeenCalled();
+        });
+    });
+
+    // -------------------------------------------------------
+    // scheduleAutoDisconnect / cancelAutoDisconnect (Phase B)
+    // -------------------------------------------------------
+    describe("scheduleAutoDisconnect / cancelAutoDisconnect", () => {
+        it("delegates to timerManager.scheduleAutoDisconnect", () => {
+            const endTime = new Date("2026-02-13T12:00:00");
+
+            plugin.scheduleAutoDisconnect(endTime);
+
+            expect(plugin.timerManager.scheduleAutoDisconnect).toHaveBeenCalledWith(endTime);
+        });
+
+        it("delegates to timerManager.cancelAutoDisconnect", () => {
+            plugin.cancelAutoDisconnect();
+
+            expect(plugin.timerManager.cancelAutoDisconnect).toHaveBeenCalled();
+        });
+    });
+
+    // -------------------------------------------------------
+    // onload — restore active line (Phase B)
+    // -------------------------------------------------------
+    describe("onload — restore active line", () => {
+        it("restores CircuitManager activation when activeLine is set in settings", async () => {
+            const freshPlugin = new SwitchboardPlugin(new App(), { id: "switchboard" } as any);
+            vi.mocked(freshPlugin.loadData).mockResolvedValue({
+                ...DEFAULT_SETTINGS,
+                lines: [testLine],
+                activeLine: "math-140",
+            });
+
+            await freshPlugin.onload();
+
+            expect(freshPlugin.circuitManager.activate).toHaveBeenCalledWith(testLine, false);
+        });
+
+        it("does not activate CircuitManager when no activeLine", async () => {
+            const freshPlugin = new SwitchboardPlugin(new App(), { id: "switchboard" } as any);
+            vi.mocked(freshPlugin.loadData).mockResolvedValue({
+                ...DEFAULT_SETTINGS,
+                activeLine: null,
+            });
+
+            await freshPlugin.onload();
+
+            expect(freshPlugin.circuitManager.activate).not.toHaveBeenCalled();
+        });
+    });
+
+    // -------------------------------------------------------
+    // refreshDashboard (Phase B)
+    // -------------------------------------------------------
+    describe("refreshDashboard", () => {
+        it("calls DashboardView.refresh() on all open dashboard leaves", async () => {
+            const mockRefresh = vi.fn();
+            const { DashboardView } = await import("../../src/views/DashboardView");
+            const mockView = Object.create(DashboardView.prototype);
+            mockView.refresh = mockRefresh;
+            const mockLeaf = { view: mockView };
+            vi.mocked(plugin.app.workspace.getLeavesOfType).mockReturnValue([mockLeaf] as any);
+
+            // refreshDashboard is private — exercise via patchIn
+            await plugin.patchIn(testLine);
+
+            expect(mockRefresh).toHaveBeenCalled();
+        });
+
+        it("no-op when no dashboard leaves exist", async () => {
+            vi.mocked(plugin.app.workspace.getLeavesOfType).mockReturnValue([]);
+
+            // refreshDashboard is private — exercise via patchIn
+            await plugin.patchIn(testLine);
+
+            // No error should be thrown, getLeavesOfType should be checked
+            expect(plugin.app.workspace.getLeavesOfType).toHaveBeenCalledWith("switchboard-dashboard");
         });
     });
 });

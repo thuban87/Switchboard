@@ -74,7 +74,24 @@ export class Modal {
 }
 
 export class Menu {
-    addItem(cb: any) { return this; }
+    items: any[] = [];
+    addItem(cb: (item: any) => any) {
+        const item = {
+            setTitle: vi.fn().mockReturnThis(),
+            setIcon: vi.fn().mockReturnThis(),
+            setDisabled: vi.fn().mockReturnThis(),
+            onClick: vi.fn().mockReturnThis(),
+            _onClick: null as any,
+        };
+        // Capture onClick handler for testing
+        item.onClick = vi.fn((handler: any) => {
+            item._onClick = handler;
+            return item;
+        });
+        cb(item);
+        this.items.push(item);
+        return this;
+    }
     addSeparator() { return this; }
     showAtMouseEvent(e: any) { }
 }

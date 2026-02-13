@@ -41,7 +41,7 @@ if (typeof HTMLElement.prototype.addClass !== "function") {
     };
     HTMLElement.prototype.createEl = function (
         tag: string,
-        o?: string | { text?: string; cls?: string; attr?: Record<string, string>; value?: string; title?: string }
+        o?: string | { text?: string; cls?: string; attr?: Record<string, string>; value?: string; title?: string; type?: string; placeholder?: string }
     ): HTMLElement {
         const el = document.createElement(tag);
         if (typeof o === "string") {
@@ -55,8 +55,16 @@ if (typeof HTMLElement.prototype.addClass !== "function") {
                 }
             }
             if (o.title) el.title = o.title;
-            if (o.value && el instanceof HTMLOptionElement) {
-                el.value = o.value;
+            if (o.type && el instanceof HTMLInputElement) {
+                el.type = o.type;
+            }
+            if (o.value) {
+                if (el instanceof HTMLInputElement || el instanceof HTMLOptionElement) {
+                    el.value = o.value;
+                }
+            }
+            if (o.placeholder && el instanceof HTMLInputElement) {
+                el.placeholder = o.placeholder;
             }
         }
         this.appendChild(el);
@@ -65,5 +73,9 @@ if (typeof HTMLElement.prototype.addClass !== "function") {
 
     HTMLElement.prototype.setText = function (text: string): void {
         this.textContent = text;
+    };
+
+    HTMLElement.prototype.trigger = function (eventType: string): void {
+        this.dispatchEvent(new Event(eventType, { bubbles: true }));
     };
 }

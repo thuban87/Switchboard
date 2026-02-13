@@ -118,8 +118,20 @@ export class Setting {
         this.settingEl.appendChild(this.controlEl);
         containerEl.appendChild(this.settingEl);
     }
-    setName(name: string) { return this; }
-    setDesc(desc: string) { return this; }
+    setName(name: string) {
+        const nameEl = document.createElement("div");
+        nameEl.className = "setting-item-name";
+        nameEl.textContent = name;
+        this.settingEl.prepend(nameEl);
+        return this;
+    }
+    setDesc(desc: string) {
+        const descEl = document.createElement("div");
+        descEl.className = "setting-item-description";
+        descEl.textContent = desc;
+        this.settingEl.appendChild(descEl);
+        return this;
+    }
     setHeading() { return this; }
     setClass(cls: string) { this.settingEl.className = cls; return this; }
     addText(cb: (text: any) => any) {
@@ -159,13 +171,63 @@ export class Setting {
         cb(dropdown);
         return this;
     }
-    addToggle(cb: any) { return this; }
-    addButton(cb: any) { return this; }
+    addToggle(cb: any) {
+        const toggle = {
+            toggleEl: document.createElement("div"),
+            setValue: vi.fn().mockReturnThis(),
+            onChange: vi.fn().mockReturnThis(),
+        };
+        cb(toggle);
+        return this;
+    }
+    addButton(cb: any) {
+        const btn = document.createElement("button");
+        const buttonComponent = {
+            buttonEl: btn,
+            setButtonText: (t: string) => { btn.textContent = t; return buttonComponent; },
+            setCta: () => { btn.addClass("mod-cta"); return buttonComponent; },
+            onClick: (fn: () => void) => { btn.addEventListener("click", fn); return buttonComponent; },
+            setIcon: vi.fn().mockReturnThis(),
+            setTooltip: vi.fn().mockReturnThis(),
+        };
+        this.controlEl.appendChild(btn);
+        cb(buttonComponent);
+        return this;
+    }
+    addSearch(cb: any) {
+        const input = document.createElement("input");
+        input.type = "search";
+        const searchComponent = {
+            inputEl: input,
+            setPlaceholder: (p: string) => { input.placeholder = p; return searchComponent; },
+            setValue: (v: string) => { input.value = v; return searchComponent; },
+            onChange: (fn: (v: string) => void) => {
+                input.addEventListener("input", () => fn(input.value));
+                return searchComponent;
+            },
+        };
+        this.controlEl.appendChild(input);
+        cb(searchComponent);
+        return this;
+    }
+    addExtraButton(cb: any) {
+        const btn = document.createElement("button");
+        const extraBtn = {
+            extraButtonEl: btn,
+            setIcon: (icon: string) => { btn.dataset.icon = icon; return extraBtn; },
+            setTooltip: vi.fn().mockReturnThis(),
+            onClick: (fn: () => void) => { btn.addEventListener("click", fn); return extraBtn; },
+        };
+        this.controlEl.appendChild(btn);
+        cb(extraBtn);
+        return this;
+    }
 }
 
-// PluginSettingTab — stub
+// PluginSettingTab — stub with containerEl for display() tests
 export class PluginSettingTab {
     app: App;
+    containerEl = document.createElement("div");
     constructor(app: App, plugin: any) { this.app = app; }
     display() { }
     hide() { }
@@ -208,4 +270,8 @@ export class ItemView {
 
 export function normalizePath(path: string): string {
     return path;
+}
+
+export function setIcon(el: HTMLElement, iconId: string): void {
+    el.dataset.icon = iconId;
 }

@@ -28,4 +28,24 @@ if (typeof HTMLElement.prototype.addClass !== "function") {
         this.appendChild(span);
         return span;
     };
+    HTMLElement.prototype.createDiv = function (clsOrOptions?: string | { text?: string; cls?: string }) {
+        const div = document.createElement("div");
+        if (typeof clsOrOptions === "string") {
+            div.className = clsOrOptions;
+        } else if (clsOrOptions) {
+            if (clsOrOptions.text) div.textContent = clsOrOptions.text;
+            if (clsOrOptions.cls) div.className = clsOrOptions.cls;
+        }
+        this.appendChild(div);
+        return div;
+    };
+    HTMLElement.prototype.createEl = function (tag: string, options?: { text?: string; cls?: string }) {
+        const el = document.createElement(tag);
+        if (options) {
+            if (options.text) el.textContent = options.text;
+            if (options.cls) el.className = options.cls;
+        }
+        this.appendChild(el);
+        return el;
+    };
 }

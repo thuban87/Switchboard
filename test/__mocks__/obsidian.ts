@@ -124,6 +124,21 @@ export class TextComponent {
     onChange(cb: (value: string) => void) { return this; }
 }
 
+export class WorkspaceLeaf {
+    view: any;
+}
+
+export class ItemView {
+    containerEl = document.createElement("div");
+    contentEl = document.createElement("div");
+    leaf: WorkspaceLeaf;
+    constructor(leaf: WorkspaceLeaf) {
+        this.leaf = leaf;
+        this.containerEl.appendChild(this.contentEl);
+    }
+    registerInterval(id: number) { return id; }
+}
+
 export function normalizePath(path: string): string {
     return path;
 }

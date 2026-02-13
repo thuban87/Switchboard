@@ -174,8 +174,10 @@ export class Setting {
     addToggle(cb: any) {
         const toggle = {
             toggleEl: document.createElement("div"),
-            setValue: vi.fn().mockReturnThis(),
-            onChange: vi.fn().mockReturnThis(),
+            _value: false,
+            _onChange: null as any,
+            setValue: vi.fn(function (this: any, v: boolean) { this._value = v; return this; }),
+            onChange: vi.fn(function (this: any, fn: any) { this._onChange = fn; return this; }),
         };
         cb(toggle);
         return this;

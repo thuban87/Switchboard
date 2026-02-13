@@ -53,4 +53,42 @@ describe("ConfirmModal", () => {
         expect(closeSpy).toHaveBeenCalled();
         expect(onConfirm).not.toHaveBeenCalled();
     });
+
+    // === NEW (Addendum) ===
+
+    describe("onOpen — rendering details", () => {
+        it("Delete button has mod-warning class", () => {
+            const app = new App();
+            const modal = new ConfirmModal(app as any, "Delete?", vi.fn());
+
+            modal.onOpen();
+
+            const deleteBtn = modal.contentEl.querySelectorAll("button")[1];
+            expect(deleteBtn.classList.contains("mod-warning")).toBe(true);
+        });
+    });
+
+    describe("onClose", () => {
+        it("onClose empties contentEl", () => {
+            const app = new App();
+            const modal = new ConfirmModal(app as any, "Delete?", vi.fn());
+
+            modal.onOpen();
+            expect(modal.contentEl.children.length).toBeGreaterThan(0);
+
+            modal.onClose();
+            expect(modal.contentEl.children.length).toBe(0);
+        });
+
+        it("onClose does not call onConfirm", () => {
+            const app = new App();
+            const onConfirm = vi.fn();
+            const modal = new ConfirmModal(app as any, "Delete?", onConfirm);
+
+            modal.onOpen();
+            modal.onClose();
+
+            expect(onConfirm).not.toHaveBeenCalled();
+        });
+    });
 });

@@ -1,0 +1,44 @@
+name: Test & Coverage
+
+# Trigger on Pull Requests and Pushes to main
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  pull-requests: write # Needed to post the comment on your PR
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out your code
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # 2. Install Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Install Dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. Run Tests & Generate Coverage
+      # This runs Vitest and sets the 'CI=true' flag so your config uses the simple path
+      - name: Run Tests
+        run: npm test -- --coverage
+        env:
+          CI: true
+
+      # 5. Report Results to PR
+      # This reads the 'coverage/coverage-summary.json' file and posts a comment
+      - name: Report Coverage
+        if: always() # Run this even if tests fail
+        uses: davelosert/vitest-coverage-report-action@v2

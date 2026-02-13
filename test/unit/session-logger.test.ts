@@ -255,4 +255,97 @@ describe("SessionLogger", () => {
             }
         });
     });
+
+    describe("formatLogEntry()", () => {
+        it("produces correct markdown with all fields", () => {
+            const session = createSession({
+                startTime: new Date(2026, 1, 10, 14, 0, 0),  // Feb 10, 2026 2:00 PM
+                endTime: new Date(2026, 1, 10, 15, 30, 0),    // Feb 10, 2026 3:30 PM
+                durationMinutes: 90,
+            });
+            const result = (logger as any).formatLogEntry(session, "Studied integration techniques");
+            // Should contain the markdown header with date, time range, duration
+            expect(result).toContain("### 📞");
+            expect(result).toContain("(1h 30m)");
+            expect(result).toContain("- Studied integration techniques");
+        });
+
+        it("includes summary text as bullet point", () => {
+            const session = createSession();
+            const result = (logger as any).formatLogEntry(session, "Completed chapter 5 review");
+            expect(result).toContain("- Completed chapter 5 review");
+        });
+
+        it("handles empty string summary", () => {
+            const session = createSession();
+            const result = (logger as any).formatLogEntry(session, "");
+            // Should still produce a valid entry with empty bullet
+            expect(result).toContain("### 📞");
+            expect(result).toContain("- ");
+        });
+
+        it("formats duration using formatDuration()", () => {
+            const session = createSession({ durationMinutes: 45 });
+            const result = (logger as any).formatLogEntry(session, "Quick session");
+            expect(result).toContain("(45m)");
+        });
+
+        it("produces correct format for multi-hour sessions", () => {
+            const session = createSession({
+                startTime: new Date(2026, 1, 10, 8, 0, 0),
+                endTime: new Date(2026, 1, 10, 11, 15, 0),
+                durationMinutes: 195,
+            });
+            const result = (logger as any).formatLogEntry(session, "Long study block");
+            expect(result).toContain("(3h 15m)");
+            expect(result).toContain("- Long study block");
+        });
+    });
+
+    describe("formatTime24()", () => {
+        it("formats morning time correctly", () => {
+            const date = new Date(2026, 1, 10, 9, 30, 0);
+            const result = (logger as any).formatTime24(date);
+            expect(result).toBe("09:30");
+        });
+
+        it("formats afternoon time correctly", () => {
+            const date = new Date(2026, 1, 10, 14, 0, 0);
+            const result = (logger as any).formatTime24(date);
+            expect(result).toBe("14:00");
+        });
+
+        it("handles midnight (00:00)", () => {
+            const date = new Date(2026, 1, 10, 0, 0, 0);
+            const result = (logger as any).formatTime24(date);
+            expect(result).toBe("00:00");
+        });
+    });
+
+    describe("getCurrentDuration()", () => {
+        it("returns 0 when no active session", () => {
+            expect(logger.getCurrentDuration()).toBe(0);
+        });
+
+        it("calculates elapsed minutes correctly", () => {
+            vi.useFakeTimers();
+            try {
+                const baseTime = new Date(2026, 1, 10, 14, 0, 0);
+                vi.setSystemTime(baseTime);
+
+                const line = createMockLine();
+                logger.startSession(line);
+
+                // Advance 45 minutes
+                vi.setSystemTime(new Date(2026, 1, 10, 14, 45, 0));
+                expect(logger.getCurrentDuration()).toBe(45);
+
+                // Advance to 2 hours total
+                vi.setSystemTime(new Date(2026, 1, 10, 16, 0, 0));
+                expect(logger.getCurrentDuration()).toBe(120);
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+    });
 });

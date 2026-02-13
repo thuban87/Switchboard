@@ -117,4 +117,88 @@ describe("CircuitManager", () => {
             expect(() => cm.activate(line, true)).not.toThrow();
         });
     });
+
+    describe("generateCSS snapshots", () => {
+        it("basic line → snapshot matches", () => {
+            const line = createMockLine({ id: "math-140", color: "#3498db" });
+            cm.activate(line, false);
+            const styleEl = document.getElementById("switchboard-circuit-style");
+            expect(styleEl?.textContent).toMatchSnapshot();
+        });
+
+        it("line with multiple safe paths → snapshot matches", () => {
+            const line = createMockLine({
+                id: "work",
+                name: "Work",
+                color: "#e74c3c",
+                safePaths: ["Projects/Alpha", "Projects/Beta", "Shared/Resources"],
+            });
+            cm.activate(line, false);
+            const styleEl = document.getElementById("switchboard-circuit-style");
+            expect(styleEl?.textContent).toMatchSnapshot();
+        });
+
+        it("line with special characters in path → CSS.escape applied", () => {
+            const line = createMockLine({
+                id: "special",
+                name: "Special",
+                safePaths: ["Path (with parens)/Sub [brackets]"],
+            });
+            cm.activate(line, false);
+            const styleEl = document.getElementById("switchboard-circuit-style");
+            const css = styleEl?.textContent || "";
+            // CSS.escape should escape the special characters
+            expect(css).not.toContain('data-path="Path (with parens)');
+            expect(css).toContain("data-path");
+            expect(css).toMatchSnapshot();
+        });
+
+        it("accent color override → snapshot matches", () => {
+            const line = createMockLine({
+                id: "writing",
+                name: "Writing",
+                color: "#9b59b6",
+                safePaths: ["Creative/Writing"],
+            });
+            cm.activate(line, false);
+            const styleEl = document.getElementById("switchboard-circuit-style");
+            const css = styleEl?.textContent || "";
+            expect(css).toContain("--interactive-accent: #9b59b6");
+            expect(css).toMatchSnapshot();
+        });
+    });
+
+    describe("adjustBrightness()", () => {
+        it("darkens a color by percentage", () => {
+            // adjustBrightness is private — access via (cm as any)
+            const result = (cm as any).adjustBrightness("#ffffff", -10);
+            // Math.round(2.55 * -10) = -25 (JS rounds half-up), 255 - 25 = 230 = 0xe6
+            expect(result).toBe("#e6e6e6");
+        });
+
+        it("lightens a color by percentage", () => {
+            const result = (cm as any).adjustBrightness("#000000", 10);
+            // Math.round(2.55 * 10) = 26, 0 + 26 = 26 = 0x1a
+            expect(result).toBe("#1a1a1a");
+        });
+    });
+
+    describe("activate cleanup", () => {
+        it("activate() calls deactivate() first (prevents stale styles on rapid switch)", () => {
+            const line1 = createMockLine({ id: "line-a", name: "Line A", color: "#111111" });
+            const line2 = createMockLine({ id: "line-b", name: "Line B", color: "#222222" });
+
+            cm.activate(line1, false);
+            expect(document.body.classList.contains("switchboard-active-line-a")).toBe(true);
+
+            // Activate a different line — should remove line-a classes first
+            cm.activate(line2, false);
+            expect(document.body.classList.contains("switchboard-active-line-a")).toBe(false);
+            expect(document.body.classList.contains("switchboard-active-line-b")).toBe(true);
+
+            // Should only have one style element
+            const styleEls = document.head.querySelectorAll("#switchboard-circuit-style");
+            expect(styleEls.length).toBe(1);
+        });
+    });
 });

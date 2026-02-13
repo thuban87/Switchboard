@@ -198,6 +198,7 @@ describe("main.ts lifecycle", () => {
             await plugin.patchIn(lineWithLanding);
 
             expect(plugin.app.vault.getAbstractFileByPath).toHaveBeenCalledWith("School/Math/Dashboard.md");
+            expect(plugin.app.workspace.getLeaf).toHaveBeenCalledWith("tab");
             expect(mockLeaf.openFile).toHaveBeenCalledWith(mockFile);
         });
 
@@ -268,6 +269,8 @@ describe("main.ts lifecycle", () => {
             expect(GoalPromptModal).not.toHaveBeenCalled();
             // patchIn should have been called — verify via side effects
             expect(plugin.settings.activeLine).toBe("math-140");
+            // Else branch explicitly nulls out currentGoal (line 385)
+            expect(plugin.currentGoal).toBeNull();
         });
 
         it("stores goal in currentGoal when user provides one", async () => {
@@ -356,11 +359,13 @@ describe("main.ts lifecycle", () => {
 
         it("shows notice when no active line", async () => {
             plugin.settings.activeLine = null;
+            // Clear any calls from onload so the not-called assertion is airtight
+            vi.mocked(plugin.circuitManager.deactivate).mockClear();
 
             await plugin.disconnect();
 
             expect(NoticeSpy).toHaveBeenCalledWith("Switchboard: No active connection");
-            // Verify no cleanup was attempted
+            // Verify disconnect short-circuited — no cleanup was attempted
             expect(plugin.circuitManager.deactivate).not.toHaveBeenCalled();
         });
 
@@ -546,6 +551,48 @@ describe("main.ts lifecycle", () => {
             });
 
             expect(mockEditor.replaceRange).toHaveBeenCalledWith("Hello World", { line: 5, ch: 10 });
+        });
+
+        it('action "insert" — replaces {{date}} and {{time}} templates', () => {
+            const mockEditor = {
+                getCursor: vi.fn(() => ({ line: 0, ch: 0 })),
+                replaceRange: vi.fn(),
+                setCursor: vi.fn(),
+            };
+            (plugin.app.workspace as any).activeEditor = { editor: mockEditor };
+
+            plugin.executeOperatorCommand({
+                name: "Insert Template",
+                icon: "text",
+                action: "insert",
+                value: "Date: {{date}}, Time: {{time}}",
+            });
+
+            // Verify the template tokens were replaced (not left as-is)
+            const insertedText = mockEditor.replaceRange.mock.calls[0][0] as string;
+            expect(insertedText).not.toContain("{{date}}");
+            expect(insertedText).not.toContain("{{time}}");
+            expect(insertedText).toMatch(/^Date: .+, Time: .+$/);
+        });
+
+        it('action "insert" — repositions cursor inside $  $ math blocks', () => {
+            const mockEditor = {
+                getCursor: vi.fn(() => ({ line: 3, ch: 5 })),
+                replaceRange: vi.fn(),
+                setCursor: vi.fn(),
+            };
+            (plugin.app.workspace as any).activeEditor = { editor: mockEditor };
+
+            plugin.executeOperatorCommand({
+                name: "Insert Math",
+                icon: "text",
+                action: "insert",
+                value: "$  $",
+            });
+
+            expect(mockEditor.replaceRange).toHaveBeenCalledWith("$  $", { line: 3, ch: 5 });
+            // Cursor should reposition to ch + 2 (inside the dollar signs)
+            expect(mockEditor.setCursor).toHaveBeenCalledWith({ line: 3, ch: 7 });
         });
 
         it('action "insert" — shows notice when no active editor', () => {

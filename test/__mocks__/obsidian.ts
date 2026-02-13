@@ -42,6 +42,7 @@ export class Workspace {
         setViewState: vi.fn().mockResolvedValue(undefined),
         view: null,
     }));
+    detachLeavesOfType = vi.fn();
     activeEditor = null;
 }
 

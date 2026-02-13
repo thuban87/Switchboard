@@ -32,9 +32,9 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                     .setButtonText("+ Add Line")
                     .setCta()
                     .onClick(() => {
-                        new LineEditorModal(this.app, null, (line) => {
+                        new LineEditorModal(this.app, null, async (line) => {
                             this.plugin.settings.lines.push(line);
-                            this.plugin.saveSettings();
+                            await this.plugin.saveSettings();
                             this.plugin.restartWireService();
                             this.display();
                         }, this.plugin.settings.lines).open();
@@ -146,7 +146,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
                         if (folders.length > 0 && value.length > 0) {
                             const popover = containerEl.createDiv("switchboard-daily-note-folder-suggestions suggestion-container");
                             popover.style.position = "fixed";
-                            popover.style.zIndex = "1000";
+                            popover.style.zIndex = "var(--layer-popover)";
 
                             for (const folder of folders) {
                                 const item = popover.createDiv("suggestion-item");
@@ -262,13 +262,13 @@ export class SwitchboardSettingTab extends PluginSettingTab {
         setIcon(editBtn, "pencil");
         editBtn.setAttribute("aria-label", "Edit");
         editBtn.addEventListener("click", () => {
-            new LineEditorModal(this.app, { ...line }, (updatedLine) => {
+            new LineEditorModal(this.app, { ...line }, async (updatedLine) => {
                 const index = this.plugin.settings.lines.findIndex(
                     (l: SwitchboardLine) => l.id === line.id
                 );
                 if (index !== -1) {
                     this.plugin.settings.lines[index] = updatedLine;
-                    this.plugin.saveSettings();
+                    await this.plugin.saveSettings();
                     this.plugin.restartWireService();
                     this.display();
                 }
@@ -285,11 +285,11 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             new ConfirmModal(
                 this.app,
                 `Delete "${line.name}"? This cannot be undone.`,
-                () => {
+                async () => {
                     this.plugin.settings.lines = this.plugin.settings.lines.filter(
                         (l: SwitchboardLine) => l.id !== line.id
                     );
-                    this.plugin.saveSettings();
+                    await this.plugin.saveSettings();
                     this.plugin.restartWireService();
                     this.display();
                 }

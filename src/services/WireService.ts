@@ -192,8 +192,7 @@ export class WireService {
                 taskTitle: taskTitle,
                 time: new Date()
             });
-            // as any: missedCallsAcknowledged is private on SwitchboardPlugin but needed by WireService for status bar coordination
-            (this.plugin as any).missedCallsAcknowledged = false;
+            this.plugin.missedCallsAcknowledged = false;
             new Notice(`📞 ${line.name} is calling - Busy on ${activeLine.name}`);
             return;
         }

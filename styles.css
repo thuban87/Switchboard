@@ -819,7 +819,7 @@
    ============================================ */
 
 .switchboard-operator-modal {
-	--operator-color: #3498db;
+	--operator-color: var(--interactive-accent);
 }
 
 .switchboard-operator-modal .modal-content {

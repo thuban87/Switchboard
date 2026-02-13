@@ -31,7 +31,7 @@ export default class SwitchboardPlugin extends Plugin {
     timerManager!: TimerManager;
     missedCalls: Array<{ lineName: string; taskTitle: string; time: Date }> = [];
     currentGoal: string | null = null;
-    private missedCallsAcknowledged: boolean = true;
+    missedCallsAcknowledged: boolean = true;
     private chronosStartupTimer: ReturnType<typeof setTimeout> | null = null;
     private registeredCommandIds: Set<string> = new Set();
 
@@ -167,6 +167,9 @@ export default class SwitchboardPlugin extends Plugin {
         this.wireService.stop();
         this.circuitManager.deactivate();
         this.audioService.destroy();        // CRITICAL: was missing (audit #1)
+
+        // B34: Clean up dashboard view leaves
+        this.app.workspace.detachLeavesOfType(DASHBOARD_VIEW_TYPE);
 
         // Partial fix #20: clear Chronos startup timer
         if (this.chronosStartupTimer) {

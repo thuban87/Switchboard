@@ -452,6 +452,12 @@ describe("main.ts lifecycle", () => {
             expect(plugin.circuitManager.deactivate).toHaveBeenCalled();
         });
 
+        it("calls detachLeavesOfType for dashboard view (B34)", () => {
+            plugin.onunload();
+
+            expect(plugin.app.workspace.detachLeavesOfType).toHaveBeenCalledWith("switchboard-dashboard");
+        });
+
         it("clears chronosStartupTimer if set", async () => {
             // Re-create plugin with Chronos enabled to get a startup timer
             const chronosPlugin = new SwitchboardPlugin(new App(), { id: "switchboard" } as any);

@@ -159,6 +159,7 @@ export class AudioService {
      */
     destroy(): void {
         if (this.audioElement) {
+            this.audioElement.pause();
             this.audioElement = null;
         }
         if (this.audioContext) {

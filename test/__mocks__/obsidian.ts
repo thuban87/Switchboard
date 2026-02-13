@@ -104,6 +104,26 @@ export class PluginSettingTab {
     hide() { }
 }
 
+export class TAbstractFile {
+    path = "";
+}
+
+export class AbstractInputSuggest<T> {
+    app: App;
+    constructor(app: App, inputEl: HTMLInputElement) { this.app = app; }
+    close() { }
+    getSuggestions(query: string): T[] { return []; }
+    renderSuggestion(value: T, el: HTMLElement): void { }
+    selectSuggestion(value: T): void { }
+}
+
+export class TextComponent {
+    inputEl = document.createElement("input");
+    setValue(val: string) { this.inputEl.value = val; return this; }
+    setPlaceholder(ph: string) { return this; }
+    onChange(cb: (value: string) => void) { return this; }
+}
+
 export function normalizePath(path: string): string {
     return path;
 }

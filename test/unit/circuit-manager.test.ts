@@ -201,4 +201,86 @@ describe("CircuitManager", () => {
             expect(styleEls.length).toBe(1);
         });
     });
+
+    /**
+     * Phase F: Remaining branch coverage tests
+     */
+    describe("isActive()", () => {
+        it("returns true when switchboard-active class is on body", () => {
+            document.body.addClass("switchboard-active");
+            expect(cm.isActive()).toBe(true);
+        });
+
+        it("returns false when no switchboard-active class", () => {
+            // body is cleaned in beforeEach
+            expect(cm.isActive()).toBe(false);
+        });
+    });
+
+    describe("deactivate — cleanup edge cases", () => {
+        it("removes orphaned style element found by ID (reload scenario)", () => {
+            // Simulate a reload scenario: style element exists in DOM but not tracked by styleEl
+            const orphanedStyle = document.createElement("style");
+            orphanedStyle.id = "switchboard-circuit-style";
+            orphanedStyle.textContent = "/* orphaned */";
+            document.head.appendChild(orphanedStyle);
+
+            // Verify it's there
+            expect(document.getElementById("switchboard-circuit-style")).not.toBeNull();
+
+            // deactivate without prior activate — should still find and remove by ID
+            cm.deactivate();
+
+            expect(document.getElementById("switchboard-circuit-style")).toBeNull();
+        });
+
+        it("handles missing styleEl gracefully (already removed)", () => {
+            // No activate() called — styleEl is null
+            // Should not throw
+            expect(() => cm.deactivate()).not.toThrow();
+        });
+    });
+
+    describe("generateSafePathSelectors — edge cases", () => {
+        it("returns comment when safePaths is empty array", () => {
+            const result = (cm as any).generateSafePathSelectors([], "test-id");
+            expect(result).toBe("/* No safe paths defined */");
+        });
+
+        it("returns comment when safePaths has single empty string", () => {
+            const result = (cm as any).generateSafePathSelectors([""], "test-id");
+            expect(result).toBe("/* No safe paths defined */");
+        });
+
+        it("skips empty strings in mixed paths array", () => {
+            const result = (cm as any).generateSafePathSelectors(
+                ["Projects/Alpha", "", "Projects/Beta"],
+                "test-id"
+            );
+            expect(result).toContain("Projects/Alpha");
+            expect(result).toContain("Projects/Beta");
+            // Should not produce a selector for the empty string
+            expect(result).not.toContain('data-path=""');
+        });
+    });
+
+    describe("activate — focusFolders parameter", () => {
+        it("calls focusFolders when focusFolders=true (default)", () => {
+            const spy = vi.spyOn(cm as any, "focusFolders");
+            const line = createMockLine();
+
+            cm.activate(line); // default is true
+
+            expect(spy).toHaveBeenCalledWith(line.safePaths);
+        });
+
+        it("skips focusFolders when focusFolders=false", () => {
+            const spy = vi.spyOn(cm as any, "focusFolders");
+            const line = createMockLine();
+
+            cm.activate(line, false);
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+    });
 });

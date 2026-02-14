@@ -10,12 +10,12 @@ import { DEFAULT_SETTINGS } from "../../src/types";
 // === Module Mocks ===
 
 // Variables used inside vi.mock factories must be declared via vi.hoisted()
-const { NoticeSpy, captureGoalCallback, captureCallLogCallback, capturePatchInCallback, captureQuickSwitchCallback } = vi.hoisted(() => ({
+const { NoticeSpy, captureGoalCallback, captureCallLogCallback, capturePatchInCallback, captureLineSwitcherCallback } = vi.hoisted(() => ({
     NoticeSpy: vi.fn(),
     captureGoalCallback: { current: null as ((goal: string | null) => void) | null },
     captureCallLogCallback: { current: null as ((summary: string) => Promise<void>) | null },
     capturePatchInCallback: { current: null as ((line: any) => void) | null },
-    captureQuickSwitchCallback: { current: null as ((line: any) => void) | null },
+    captureLineSwitcherCallback: { current: null as ((line: any) => void) | null },
 }));
 
 // Partial mock obsidian — override Notice with a spy
@@ -115,9 +115,9 @@ vi.mock("../../src/modals/SessionEditorModal", () => ({
         this.open = vi.fn();
     }),
 }));
-vi.mock("../../src/modals/QuickSwitchModal", () => ({
-    QuickSwitchModal: vi.fn().mockImplementation(function (this: any, _app: any, _lines: any, _activeLine: any, _goal: any, cb: (line: any) => void) {
-        captureQuickSwitchCallback.current = cb;
+vi.mock("../../src/modals/LineSwitcherModal", () => ({
+    LineSwitcherModal: vi.fn().mockImplementation(function (this: any, _app: any, _lines: any, _activeLine: any, _goal: any, cb: (line: any) => void) {
+        captureLineSwitcherCallback.current = cb;
         this.open = vi.fn();
     }),
 }));
@@ -153,7 +153,7 @@ import { PatchInModal } from "../../src/modals/PatchInModal";
 import { OperatorModal } from "../../src/modals/OperatorModal";
 import { StatisticsModal } from "../../src/modals/StatisticsModal";
 import { SessionEditorModal } from "../../src/modals/SessionEditorModal";
-import { QuickSwitchModal } from "../../src/modals/QuickSwitchModal";
+import { LineSwitcherModal } from "../../src/modals/LineSwitcherModal";
 import { Logger } from "../../src/services/Logger";
 
 // === Test Suite ===
@@ -167,7 +167,7 @@ describe("main.ts lifecycle", () => {
         captureGoalCallback.current = null;
         captureCallLogCallback.current = null;
         capturePatchInCallback.current = null;
-        captureQuickSwitchCallback.current = null;
+        captureLineSwitcherCallback.current = null;
 
         plugin = new SwitchboardPlugin(new App(), { id: "switchboard" } as any);
         await plugin.onload();
@@ -815,15 +815,15 @@ describe("main.ts lifecycle", () => {
     });
 
     // -------------------------------------------------------
-    // openQuickSwitchModal (Phase B)
+    // openLineSwitcherModal (Phase B)
     // -------------------------------------------------------
-    describe("openQuickSwitchModal", () => {
-        it("creates QuickSwitchModal with correct args", () => {
+    describe("openLineSwitcherModal", () => {
+        it("creates LineSwitcherModal with correct args", () => {
             plugin.settings.activeLine = "math-140";
 
-            plugin.openQuickSwitchModal();
+            plugin.openLineSwitcherModal();
 
-            expect(QuickSwitchModal).toHaveBeenCalledWith(
+            expect(LineSwitcherModal).toHaveBeenCalledWith(
                 plugin.app,
                 plugin.settings.lines,
                 "math-140",
@@ -836,9 +836,9 @@ describe("main.ts lifecycle", () => {
             plugin.settings.activeLine = "math-140";
             plugin.currentGoal = "Study calculus";
 
-            plugin.openQuickSwitchModal();
+            plugin.openLineSwitcherModal();
 
-            expect(QuickSwitchModal).toHaveBeenCalledWith(
+            expect(LineSwitcherModal).toHaveBeenCalledWith(
                 plugin.app,
                 plugin.settings.lines,
                 "math-140",
@@ -850,9 +850,9 @@ describe("main.ts lifecycle", () => {
         it("callback with null calls disconnect", async () => {
             const disconnectSpy = vi.spyOn(plugin, "disconnect").mockResolvedValue(undefined);
 
-            plugin.openQuickSwitchModal();
-            expect(captureQuickSwitchCallback.current).not.toBeNull();
-            captureQuickSwitchCallback.current!(null);
+            plugin.openLineSwitcherModal();
+            expect(captureLineSwitcherCallback.current).not.toBeNull();
+            captureLineSwitcherCallback.current!(null);
 
             expect(disconnectSpy).toHaveBeenCalled();
         });
@@ -860,9 +860,9 @@ describe("main.ts lifecycle", () => {
         it("callback with line calls patchInWithGoal", async () => {
             const patchInWithGoalSpy = vi.spyOn(plugin, "patchInWithGoal").mockResolvedValue(undefined);
 
-            plugin.openQuickSwitchModal();
-            expect(captureQuickSwitchCallback.current).not.toBeNull();
-            captureQuickSwitchCallback.current!(testLine);
+            plugin.openLineSwitcherModal();
+            expect(captureLineSwitcherCallback.current).not.toBeNull();
+            captureLineSwitcherCallback.current!(testLine);
 
             expect(patchInWithGoalSpy).toHaveBeenCalledWith(testLine);
         });

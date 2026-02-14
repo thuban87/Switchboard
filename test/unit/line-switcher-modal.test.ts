@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import { App } from "../__mocks__/obsidian";
-import { QuickSwitchModal } from "../../src/modals/QuickSwitchModal";
+import { LineSwitcherModal } from "../../src/modals/LineSwitcherModal";
 import { createTestLine } from "../helpers";
 
-describe("QuickSwitchModal", () => {
+describe("LineSwitcherModal", () => {
     function createModal(
         lines = [
             createTestLine({ id: "a", name: "Line A", color: "#ff0000" }),
@@ -14,7 +14,7 @@ describe("QuickSwitchModal", () => {
         currentGoal: string | null = null,
         onSelect = vi.fn()
     ) {
-        const modal = new QuickSwitchModal(new App() as any, lines, activeLine, currentGoal, onSelect);
+        const modal = new LineSwitcherModal(new App() as any, lines, activeLine, currentGoal, onSelect);
         return { modal, onSelect, lines };
     }
 
@@ -23,13 +23,13 @@ describe("QuickSwitchModal", () => {
             const { modal } = createModal();
             modal.onOpen();
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect(lineEls.length).toBe(3);
 
             // Names
-            expect(lineEls[0].querySelector(".switchboard-quick-switch-line-name")!.textContent).toBe("Line A");
-            expect(lineEls[1].querySelector(".switchboard-quick-switch-line-name")!.textContent).toBe("Line B");
-            expect(lineEls[2].querySelector(".switchboard-quick-switch-line-name")!.textContent).toBe("Line C");
+            expect(lineEls[0].querySelector(".switchboard-line-switcher-line-name")!.textContent).toBe("Line A");
+            expect(lineEls[1].querySelector(".switchboard-line-switcher-line-name")!.textContent).toBe("Line B");
+            expect(lineEls[2].querySelector(".switchboard-line-switcher-line-name")!.textContent).toBe("Line C");
 
             // CSS variable --line-color
             expect((lineEls[0] as HTMLElement).style.getPropertyValue("--line-color")).toBe("#ff0000");
@@ -41,10 +41,10 @@ describe("QuickSwitchModal", () => {
             const { modal } = createModal(undefined, "a", "Finish homework");
             modal.onOpen();
 
-            const current = modal.contentEl.querySelector(".switchboard-quick-switch-current");
+            const current = modal.contentEl.querySelector(".switchboard-line-switcher-current");
             expect(current).not.toBeNull();
-            expect(current!.querySelector(".switchboard-quick-switch-current-name")!.textContent).toBe("Line A");
-            expect(current!.querySelector(".switchboard-quick-switch-current-goal")!.textContent).toContain("Finish homework");
+            expect(current!.querySelector(".switchboard-line-switcher-current-name")!.textContent).toBe("Line A");
+            expect(current!.querySelector(".switchboard-line-switcher-current-goal")!.textContent).toContain("Finish homework");
             expect((current as HTMLElement).style.getPropertyValue("--line-color")).toBe("#ff0000");
         });
 
@@ -52,7 +52,7 @@ describe("QuickSwitchModal", () => {
             const { modal } = createModal(undefined, "b");
             modal.onOpen();
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect((lineEls[0] as HTMLElement).classList.contains("is-current")).toBe(false);
             expect((lineEls[1] as HTMLElement).classList.contains("is-current")).toBe(true);
             expect((lineEls[2] as HTMLElement).classList.contains("is-current")).toBe(false);
@@ -62,7 +62,7 @@ describe("QuickSwitchModal", () => {
             const { modal } = createModal();
             modal.onOpen();
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect((lineEls[0] as HTMLElement).classList.contains("is-selected")).toBe(true);
             expect((lineEls[1] as HTMLElement).classList.contains("is-selected")).toBe(false);
         });
@@ -71,7 +71,7 @@ describe("QuickSwitchModal", () => {
             const { modal } = createModal([]);
             modal.onOpen();
 
-            const empty = modal.contentEl.querySelector(".switchboard-quick-switch-empty");
+            const empty = modal.contentEl.querySelector(".switchboard-line-switcher-empty");
             expect(empty).not.toBeNull();
             expect(empty!.textContent).toContain("No lines configured");
         });
@@ -79,18 +79,18 @@ describe("QuickSwitchModal", () => {
         it("shows disconnect button only when a Line is active", () => {
             const { modal: withActive } = createModal(undefined, "a");
             withActive.onOpen();
-            expect(withActive.contentEl.querySelector(".switchboard-quick-switch-disconnect")).not.toBeNull();
+            expect(withActive.contentEl.querySelector(".switchboard-line-switcher-disconnect")).not.toBeNull();
 
             const { modal: noActive } = createModal(undefined, null);
             noActive.onOpen();
-            expect(noActive.contentEl.querySelector(".switchboard-quick-switch-disconnect")).toBeNull();
+            expect(noActive.contentEl.querySelector(".switchboard-line-switcher-disconnect")).toBeNull();
         });
 
         it("renders keyboard hint bar", () => {
             const { modal } = createModal();
             modal.onOpen();
 
-            const hint = modal.contentEl.querySelector(".switchboard-quick-switch-hint");
+            const hint = modal.contentEl.querySelector(".switchboard-line-switcher-hint");
             expect(hint).not.toBeNull();
             expect(hint!.textContent).toContain("navigate");
             expect(hint!.textContent).toContain("select");
@@ -107,7 +107,7 @@ describe("QuickSwitchModal", () => {
             const { modal, onSelect } = createModal(lines, null);
             modal.onOpen();
 
-            const lineEl = modal.contentEl.querySelector(".switchboard-quick-switch-line") as HTMLElement;
+            const lineEl = modal.contentEl.querySelector(".switchboard-line-switcher-line") as HTMLElement;
             lineEl.click();
 
             expect(onSelect).toHaveBeenCalledWith(lines[0]);
@@ -118,7 +118,7 @@ describe("QuickSwitchModal", () => {
             const { modal, onSelect } = createModal(undefined, "a");
             modal.onOpen();
 
-            const lineEl = modal.contentEl.querySelector(".switchboard-quick-switch-line") as HTMLElement;
+            const lineEl = modal.contentEl.querySelector(".switchboard-line-switcher-line") as HTMLElement;
             lineEl.click();
 
             expect(onSelect).not.toHaveBeenCalled();
@@ -129,7 +129,7 @@ describe("QuickSwitchModal", () => {
             const { modal, onSelect } = createModal(undefined, "a");
             modal.onOpen();
 
-            const disconnectBtn = modal.contentEl.querySelector(".switchboard-quick-switch-disconnect") as HTMLElement;
+            const disconnectBtn = modal.contentEl.querySelector(".switchboard-line-switcher-disconnect") as HTMLElement;
             disconnectBtn.click();
 
             expect(onSelect).toHaveBeenCalledWith(null);
@@ -144,7 +144,7 @@ describe("QuickSwitchModal", () => {
 
             (modal as any).moveSelection(1);
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect((lineEls[0] as HTMLElement).classList.contains("is-selected")).toBe(false);
             expect((lineEls[1] as HTMLElement).classList.contains("is-selected")).toBe(true);
         });
@@ -157,7 +157,7 @@ describe("QuickSwitchModal", () => {
             (modal as any).moveSelection(1);
             (modal as any).moveSelection(-1);
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect((lineEls[0] as HTMLElement).classList.contains("is-selected")).toBe(true);
         });
 
@@ -170,7 +170,7 @@ describe("QuickSwitchModal", () => {
             (modal as any).moveSelection(1); // index 2 (last)
             (modal as any).moveSelection(1); // should wrap to 0
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect((lineEls[0] as HTMLElement).classList.contains("is-selected")).toBe(true);
         });
 
@@ -181,7 +181,7 @@ describe("QuickSwitchModal", () => {
             // From first, go backward
             (modal as any).moveSelection(-1);
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
             expect((lineEls[2] as HTMLElement).classList.contains("is-selected")).toBe(true);
         });
 
@@ -229,7 +229,7 @@ describe("QuickSwitchModal", () => {
             const { modal } = createModal();
             modal.onOpen();
 
-            const lineEls = modal.contentEl.querySelectorAll(".switchboard-quick-switch-line");
+            const lineEls = modal.contentEl.querySelectorAll(".switchboard-line-switcher-line");
 
             // Hover over the third line
             (lineEls[2] as HTMLElement).dispatchEvent(new Event("mouseenter"));

@@ -2,10 +2,10 @@ import { Modal, App, setIcon } from "obsidian";
 import { SwitchboardLine } from "../types";
 
 /**
- * Quick Switch Modal (Party Line)
+ * Line Switcher Modal
  * Lightweight modal for fast Line switching with keyboard navigation
  */
-export class QuickSwitchModal extends Modal {
+export class LineSwitcherModal extends Modal {
     private lines: SwitchboardLine[];
     private activeLine: string | null;
     private currentGoal: string | null;
@@ -31,36 +31,36 @@ export class QuickSwitchModal extends Modal {
     onOpen() {
         const { contentEl, modalEl } = this;
         contentEl.empty();
-        modalEl.addClass("switchboard-quick-switch-modal");
+        modalEl.addClass("switchboard-line-switcher-modal");
 
         // Header
-        const header = contentEl.createDiv("switchboard-quick-switch-header");
-        const iconEl = header.createEl("span", { cls: "switchboard-quick-switch-icon" });
+        const header = contentEl.createDiv("switchboard-line-switcher-header");
+        const iconEl = header.createEl("span", { cls: "switchboard-line-switcher-icon" });
         setIcon(iconEl, "phone");
-        header.createEl("span", { text: "Quick Switch", cls: "switchboard-quick-switch-title" });
+        header.createEl("span", { text: "Line Switcher", cls: "switchboard-line-switcher-title" });
 
         // Show current session if active
         if (this.activeLine) {
             const activeLine = this.lines.find(l => l.id === this.activeLine);
             if (activeLine) {
-                const current = contentEl.createDiv("switchboard-quick-switch-current");
-                const dot = current.createSpan("switchboard-quick-switch-current-dot");
+                const current = contentEl.createDiv("switchboard-line-switcher-current");
+                const dot = current.createSpan("switchboard-line-switcher-current-dot");
                 current.style.setProperty("--line-color", activeLine.color);
-                current.createSpan({ text: activeLine.name, cls: "switchboard-quick-switch-current-name" });
+                current.createSpan({ text: activeLine.name, cls: "switchboard-line-switcher-current-name" });
                 if (this.currentGoal) {
-                    current.createSpan({ text: `• ${this.currentGoal}`, cls: "switchboard-quick-switch-current-goal" });
+                    current.createSpan({ text: `• ${this.currentGoal}`, cls: "switchboard-line-switcher-current-goal" });
                 }
             }
         }
 
         // Lines list
-        const linesContainer = contentEl.createDiv("switchboard-quick-switch-lines");
+        const linesContainer = contentEl.createDiv("switchboard-line-switcher-lines");
         this.lineElements = [];
 
         if (this.lines.length === 0) {
             linesContainer.createEl("p", {
                 text: "No lines configured",
-                cls: "switchboard-quick-switch-empty",
+                cls: "switchboard-line-switcher-empty",
             });
             return;
         }
@@ -69,7 +69,7 @@ export class QuickSwitchModal extends Modal {
             const line = this.lines[i];
             const isActive = line.id === this.activeLine;
 
-            const lineEl = linesContainer.createDiv("switchboard-quick-switch-line");
+            const lineEl = linesContainer.createDiv("switchboard-line-switcher-line");
             if (isActive) {
                 lineEl.addClass("is-current");
             }
@@ -78,20 +78,20 @@ export class QuickSwitchModal extends Modal {
             }
 
             // Color indicator
-            const colorEl = lineEl.createDiv("switchboard-quick-switch-line-color");
+            const colorEl = lineEl.createDiv("switchboard-line-switcher-line-color");
             lineEl.style.setProperty("--line-color", line.color);
 
             // Name
             lineEl.createEl("span", {
                 text: line.name,
-                cls: "switchboard-quick-switch-line-name",
+                cls: "switchboard-line-switcher-line-name",
             });
 
             // Status for active line
             if (isActive) {
                 lineEl.createEl("span", {
                     text: "●",
-                    cls: "switchboard-quick-switch-line-active",
+                    cls: "switchboard-line-switcher-line-active",
                 });
             }
 
@@ -115,7 +115,7 @@ export class QuickSwitchModal extends Modal {
         if (this.activeLine) {
             const disconnectBtn = contentEl.createEl("button", {
                 text: "Disconnect",
-                cls: "switchboard-quick-switch-disconnect",
+                cls: "switchboard-line-switcher-disconnect",
             });
             disconnectBtn.addEventListener("click", () => {
                 this.onSelect(null);
@@ -124,7 +124,7 @@ export class QuickSwitchModal extends Modal {
         }
 
         // Keyboard navigation hint
-        const hint = contentEl.createDiv("switchboard-quick-switch-hint");
+        const hint = contentEl.createDiv("switchboard-line-switcher-hint");
         hint.createEl("span", { text: "↑↓" });
         hint.createEl("span", { text: "navigate" });
         hint.createEl("span", { text: "↵" });

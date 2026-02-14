@@ -18,7 +18,7 @@ First public release via BRAT.
 - **Operator Menu** — Context-specific command grid with support for file, command, and insert actions
 - **Custom Operator Commands** — Define your own per-Line commands
 - **Scheduled Blocks** — Recurring and one-time time blocks per Line with auto-disconnect and extend options
-- **Quick Switch** — Keyboard-driven Line switcher for instant context switching
+- **Line Switcher** — Keyboard-driven Line switcher for instant context switching
 - **Session Goals** — Optional goal prompt on patch-in with reflection on disconnect
 - **Statistics Dashboard** — Session history with summary cards, per-line breakdown, and CSV export
 - **Session Editor** — Browse, edit, and delete past session records

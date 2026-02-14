@@ -150,7 +150,7 @@ export class StatisticsModal extends Modal {
 
     private renderExportButton(containerEl: HTMLElement, history: SessionRecord[]) {
         const buttonEl = containerEl.createDiv("switchboard-stats-export");
-        const btn = buttonEl.createEl("button", { text: "Export for AI Analysis", cls: "switchboard-stats-export-btn" });
+        const btn = buttonEl.createEl("button", { text: "Export for Analysis", cls: "switchboard-stats-export-btn" });
         btn.addEventListener("click", async () => {
             const markdown = this.generateExport(history);
             try {

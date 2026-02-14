@@ -7,7 +7,7 @@ import { OperatorModal } from "./modals/OperatorModal";
 import { StatisticsModal } from "./modals/StatisticsModal";
 import { SessionEditorModal } from "./modals/SessionEditorModal";
 import { GoalPromptModal } from "./modals/GoalPromptModal";
-import { QuickSwitchModal } from "./modals/QuickSwitchModal";
+import { LineSwitcherModal } from "./modals/LineSwitcherModal";
 import { CircuitManager } from "./services/CircuitManager";
 import { WireService } from "./services/WireService";
 import { SessionLogger } from "./services/SessionLogger";
@@ -114,12 +114,12 @@ export default class SwitchboardPlugin extends Plugin {
             },
         });
 
-        // Register quick switch command
+        // Register line switcher command
         this.addCommand({
-            id: "quick-switch",
-            name: "Quick Switch",
+            id: "line-switcher",
+            name: "Line Switcher",
             callback: () => {
-                this.openQuickSwitchModal();
+                this.openLineSwitcherModal();
             },
         });
 
@@ -266,10 +266,10 @@ export default class SwitchboardPlugin extends Plugin {
     }
 
     /**
-     * Opens the Quick Switch modal (Party Line)
+     * Opens the Line Switcher modal
      */
-    openQuickSwitchModal() {
-        new QuickSwitchModal(
+    openLineSwitcherModal() {
+        new LineSwitcherModal(
             this.app,
             this.settings.lines,
             this.settings.activeLine,

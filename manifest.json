@@ -3,7 +3,7 @@
 	"name": "Switchboard",
 	"version": "0.9.0",
 	"minAppVersion": "1.10.0",
-	"description": "Context manager for the distracted brain. Patch into your focus.",
+	"description": "Control your context and patch into your focus. Context manager for the distracted brain.",
 	"author": "Brad Wales",
 	"authorUrl": "https://github.com/thuban87",
 	"isDesktopOnly": false

@@ -1523,34 +1523,34 @@
 }
 
 /* ========================================
-   Quick Switch Modal (Party Line)
+   Line Switcher Modal
    ======================================== */
 
-.switchboard-quick-switch-modal {
+.switchboard-line-switcher-modal {
 	max-width: 400px;
 }
 
-.switchboard-quick-switch-modal .modal-content {
+.switchboard-line-switcher-modal .modal-content {
 	padding: 16px;
 }
 
-.switchboard-quick-switch-header {
+.switchboard-line-switcher-header {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 12px;
 }
 
-.switchboard-quick-switch-icon {
+.switchboard-line-switcher-icon {
 	font-size: 1.25rem;
 }
 
-.switchboard-quick-switch-title {
+.switchboard-line-switcher-title {
 	font-size: 1.1rem;
 	font-weight: 600;
 }
 
-.switchboard-quick-switch-current {
+.switchboard-line-switcher-current {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1561,7 +1561,7 @@
 	font-size: 0.9rem;
 }
 
-.switchboard-quick-switch-current-dot {
+.switchboard-line-switcher-current-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -1569,18 +1569,18 @@
 	background-color: var(--line-color);
 }
 
-.switchboard-quick-switch-current-name {
+.switchboard-line-switcher-current-name {
 	font-weight: 500;
 }
 
-.switchboard-quick-switch-current-goal {
+.switchboard-line-switcher-current-goal {
 	color: var(--text-muted);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.switchboard-quick-switch-lines {
+.switchboard-line-switcher-lines {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -1588,7 +1588,7 @@
 	overflow-y: auto;
 }
 
-.switchboard-quick-switch-line {
+.switchboard-line-switcher-line {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1600,24 +1600,24 @@
 	border: 2px solid transparent;
 }
 
-.switchboard-quick-switch-line:hover,
-.switchboard-quick-switch-line.is-selected {
+.switchboard-line-switcher-line:hover,
+.switchboard-line-switcher-line.is-selected {
 	background: var(--background-secondary-alt);
 	border-color: var(--interactive-accent);
 }
 
-.switchboard-quick-switch-line.is-current {
+.switchboard-line-switcher-line.is-current {
 	opacity: 0.5;
 	cursor: default;
 }
 
-.switchboard-quick-switch-line.is-current:hover,
-.switchboard-quick-switch-line.is-current.is-selected {
+.switchboard-line-switcher-line.is-current:hover,
+.switchboard-line-switcher-line.is-current.is-selected {
 	background: var(--background-secondary);
 	border-color: transparent;
 }
 
-.switchboard-quick-switch-line-color {
+.switchboard-line-switcher-line-color {
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
@@ -1625,17 +1625,17 @@
 	background-color: var(--line-color);
 }
 
-.switchboard-quick-switch-line-name {
+.switchboard-line-switcher-line-name {
 	flex: 1;
 	font-weight: 500;
 }
 
-.switchboard-quick-switch-line-active {
+.switchboard-line-switcher-line-active {
 	color: var(--interactive-accent);
 	font-size: 0.8rem;
 }
 
-.switchboard-quick-switch-disconnect {
+.switchboard-line-switcher-disconnect {
 	width: 100%;
 	margin-top: 12px;
 	padding: 8px;
@@ -1648,11 +1648,11 @@
 	transition: opacity 0.1s ease;
 }
 
-.switchboard-quick-switch-disconnect:hover {
+.switchboard-line-switcher-disconnect:hover {
 	opacity: 0.9;
 }
 
-.switchboard-quick-switch-hint {
+.switchboard-line-switcher-hint {
 	display: flex;
 	justify-content: center;
 	gap: 12px;
@@ -1661,14 +1661,14 @@
 	color: var(--text-muted);
 }
 
-.switchboard-quick-switch-hint span:nth-child(odd) {
+.switchboard-line-switcher-hint span:nth-child(odd) {
 	background: var(--background-modifier-border);
 	padding: 2px 6px;
 	border-radius: 3px;
 	font-family: var(--font-monospace);
 }
 
-.switchboard-quick-switch-empty {
+.switchboard-line-switcher-empty {
 	color: var(--text-muted);
 	font-style: italic;
 	text-align: center;
@@ -1967,8 +1967,8 @@
 .switchboard-call-log-btn-skip:focus-visible,
 .switchboard-goal-prompt-btn-secondary:focus-visible,
 .switchboard-timeup-disconnect:focus-visible,
-.switchboard-quick-switch-line:focus-visible,
-.switchboard-quick-switch-disconnect:focus-visible,
+.switchboard-line-switcher-line:focus-visible,
+.switchboard-line-switcher-disconnect:focus-visible,
 .switchboard-disconnect-btn:focus-visible,
 .switchboard-session-card-disconnect:focus-visible {
 	outline: 2px solid var(--interactive-accent);

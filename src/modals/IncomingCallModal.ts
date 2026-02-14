@@ -1,4 +1,4 @@
-import { App, Modal } from "obsidian";
+import { App, Modal, setIcon } from "obsidian";
 
 /**
  * Actions available in the Incoming Call modal
@@ -52,7 +52,8 @@ export class IncomingCallModal extends Modal {
 
         // Header with ringing icon
         const headerEl = contentEl.createDiv("switchboard-incoming-call-header");
-        headerEl.createEl("span", { text: "📞", cls: "switchboard-incoming-call-icon switchboard-ringing" });
+        const iconEl = headerEl.createEl("span", { cls: "switchboard-incoming-call-icon switchboard-ringing" });
+        setIcon(iconEl, "phone");
         headerEl.createEl("h2", { text: "Incoming Call" });
 
         // Line info
@@ -65,11 +66,17 @@ export class IncomingCallModal extends Modal {
         taskEl.createEl("p", { text: this.data.taskTitle, cls: "switchboard-incoming-call-task-title" });
 
         const timeStr = this.formatTime(this.data.taskTime);
-        taskEl.createEl("p", { text: `⏰ ${timeStr}`, cls: "switchboard-incoming-call-task-time" });
+        const timeEl = taskEl.createEl("p", { cls: "switchboard-incoming-call-task-time" });
+        const timeIcon = timeEl.createSpan();
+        setIcon(timeIcon, "clock");
+        timeEl.appendText(` ${timeStr}`);
 
         if (this.data.filePath) {
             const fileName = this.data.filePath.split(/[\\/]/).pop() || this.data.filePath;
-            taskEl.createEl("p", { text: `📄 ${fileName}`, cls: "switchboard-incoming-call-task-file" });
+            const fileEl = taskEl.createEl("p", { cls: "switchboard-incoming-call-task-file" });
+            const fileIcon = fileEl.createSpan();
+            setIcon(fileIcon, "file");
+            fileEl.appendText(` ${fileName}`);
         }
 
         // Action buttons container
@@ -79,7 +86,9 @@ export class IncomingCallModal extends Modal {
         const connectBtn = actionsEl.createEl("button", {
             cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-connect",
         });
-        connectBtn.createEl("span", { text: "📞 Connect" });
+        const connectIconEl = connectBtn.createSpan();
+        setIcon(connectIconEl, "phone");
+        connectBtn.createSpan({ text: " Connect" });
         connectBtn.addEventListener("click", () => {
             if (this.actionTaken) return;
             this.actionTaken = true;
@@ -103,7 +112,9 @@ export class IncomingCallModal extends Modal {
         const holdBtn = holdContainer.createEl("button", {
             cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-hold",
         });
-        holdBtn.createEl("span", { text: `🕒 Hold (${this.defaultSnoozeMinutes}m)` });
+        const holdIconEl = holdBtn.createSpan();
+        setIcon(holdIconEl, "pause");
+        holdBtn.createSpan({ text: ` Hold (${this.defaultSnoozeMinutes}m)` });
         holdBtn.addEventListener("click", () => {
             if (this.actionTaken) return;
             this.actionTaken = true;
@@ -114,14 +125,18 @@ export class IncomingCallModal extends Modal {
         snoozeSelect.addEventListener("change", () => {
             const minutes = parseInt(snoozeSelect.value);
             holdBtn.empty();
-            holdBtn.createEl("span", { text: `🕒 Hold (${minutes}m)` });
+            const icon = holdBtn.createSpan();
+            setIcon(icon, "pause");
+            holdBtn.createSpan({ text: ` Hold (${minutes}m)` });
         });
 
         // Decline button - now toggles options
         const declineBtn = actionsEl.createEl("button", {
             cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-decline",
         });
-        declineBtn.createEl("span", { text: "❌ Decline" });
+        const declineIconEl = declineBtn.createSpan();
+        setIcon(declineIconEl, "x");
+        declineBtn.createSpan({ text: " Decline" });
 
         // Decline options container (hidden initially via CSS)
         const declineOptionsEl = contentEl.createDiv("switchboard-incoming-call-decline-options");
@@ -138,7 +153,9 @@ export class IncomingCallModal extends Modal {
                 this.showingDeclineOptions = true;
                 declineOptionsEl.addClass("is-visible");
                 declineBtn.empty();
-                declineBtn.createEl("span", { text: "❌ Just Dismiss" });
+                const icon = declineBtn.createSpan();
+                setIcon(icon, "x");
+                declineBtn.createSpan({ text: " Just Dismiss" });
             }
         });
 
@@ -154,7 +171,9 @@ export class IncomingCallModal extends Modal {
         const thirtyMinBtn = container.createEl("button", {
             cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-secondary",
         });
-        thirtyMinBtn.createEl("span", { text: "⏰ Call back in 30 minutes" });
+        const cbIcon = thirtyMinBtn.createSpan();
+        setIcon(cbIcon, "clock");
+        thirtyMinBtn.createSpan({ text: " Call back in 30 minutes" });
         thirtyMinBtn.addEventListener("click", () => {
             if (this.actionTaken) return;
             this.actionTaken = true;
@@ -166,7 +185,9 @@ export class IncomingCallModal extends Modal {
         const oneHourBtn = container.createEl("button", {
             cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-secondary",
         });
-        oneHourBtn.createEl("span", { text: "⏰ Call back in 1 hour" });
+        const ohIcon = oneHourBtn.createSpan();
+        setIcon(ohIcon, "clock");
+        oneHourBtn.createSpan({ text: " Call back in 1 hour" });
         oneHourBtn.addEventListener("click", () => {
             if (this.actionTaken) return;
             this.actionTaken = true;
@@ -178,7 +199,9 @@ export class IncomingCallModal extends Modal {
         const tomorrowBtn = container.createEl("button", {
             cls: "switchboard-incoming-call-btn switchboard-incoming-call-btn-secondary",
         });
-        tomorrowBtn.createEl("span", { text: "📅 Call back tomorrow" });
+        const tmIcon = tomorrowBtn.createSpan();
+        setIcon(tmIcon, "calendar");
+        tomorrowBtn.createSpan({ text: " Call back tomorrow" });
         tomorrowBtn.addEventListener("click", () => {
             if (this.actionTaken) return;
             this.actionTaken = true;

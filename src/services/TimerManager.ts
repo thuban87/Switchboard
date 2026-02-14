@@ -65,7 +65,7 @@ export class TimerManager {
         this.breakReminderTimer = setTimeout(() => {
             const activeLine = this.plugin.getActiveLine();
             if (activeLine) {
-                new Notice(`☕ You've been on ${activeLine.name} for ${minutes} minutes - consider a break!`, 10000);
+                new Notice(`You've been on ${activeLine.name} for ${minutes} minutes - consider a break!`, 10000);
                 // Restart timer for another interval
                 this.startBreakReminder();
             }

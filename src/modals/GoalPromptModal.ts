@@ -1,4 +1,4 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Setting, setIcon } from "obsidian";
 
 /**
  * GoalPromptModal - Shown on patch-in to set a session goal
@@ -75,7 +75,9 @@ export class GoalPromptModal extends Modal {
         const startBtn = actionsEl.createEl("button", {
             cls: "switchboard-goal-prompt-btn switchboard-goal-prompt-btn-primary",
         });
-        startBtn.createEl("span", { text: "🎯 Start Session" });
+        const startIcon = startBtn.createSpan();
+        setIcon(startIcon, "target");
+        startBtn.createSpan({ text: " Start Session" });
         startBtn.addEventListener("click", () => {
             this.close();
             this.onSubmit(this.goal.trim() || null);

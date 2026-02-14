@@ -385,19 +385,19 @@ describe("StatusBarManager", () => {
         it("shows abbreviated goal when currentGoal is set", () => {
             mockPlugin.currentGoal = "Study chapter 5";
             manager.update();
-            expect(statusBarEl.textContent).toContain("🎯 Study chapter 5");
+            expect(statusBarEl.textContent).toContain("Study chapter 5");
         });
 
         it("truncates goal at 20 characters with '...'", () => {
             mockPlugin.currentGoal = "This is a very long goal that exceeds twenty chars";
             manager.update();
-            expect(statusBarEl.textContent).toContain("🎯 This is a very long ...");
+            expect(statusBarEl.textContent).toContain("This is a very long ...");
         });
 
         it("does not show goal section when currentGoal is null", () => {
             mockPlugin.currentGoal = null;
             manager.update();
-            expect(statusBarEl.textContent).not.toContain("🎯");
+            expect(statusBarEl.textContent).not.toContain("Study");
         });
     });
 });

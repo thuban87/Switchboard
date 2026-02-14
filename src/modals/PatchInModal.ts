@@ -79,7 +79,7 @@ export class PatchInModal extends Modal {
         // Disconnect button if there's an active line
         if (this.activeLine) {
             const disconnectBtn = contentEl.createEl("button", {
-                text: "🔌 Disconnect",
+                text: "Disconnect",
                 cls: "switchboard-disconnect-btn",
             });
             disconnectBtn.addEventListener("click", () => {

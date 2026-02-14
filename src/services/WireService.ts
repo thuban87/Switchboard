@@ -192,9 +192,8 @@ export class WireService {
                 taskTitle: taskTitle,
                 time: new Date()
             });
-            // as any: missedCallsAcknowledged is private on SwitchboardPlugin but needed by WireService for status bar coordination
-            (this.plugin as any).missedCallsAcknowledged = false;
-            new Notice(`📞 ${line.name} is calling - Busy on ${activeLine.name}`);
+            this.plugin.missedCallsAcknowledged = false;
+            new Notice(`${line.name} is calling - Busy on ${activeLine.name}`);
             return;
         }
 
@@ -272,7 +271,7 @@ export class WireService {
                 }
                 // Mark as declined (won't trigger again this session)
                 this.declinedCalls.add(taskId);
-                new Notice(`📞 Call declined: ${line.name}`);
+                new Notice(`Call declined: ${line.name}`);
                 break;
             }
 
@@ -293,7 +292,7 @@ export class WireService {
                     // Format the time for display
                     const timeStr = callbackTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
                     const dateStr = callbackTime.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
-                    new Notice(`⏰ Will call back at ${timeStr} on ${dateStr}`);
+                    new Notice(`Will call back at ${timeStr} on ${dateStr}`);
                 }
                 break;
         }

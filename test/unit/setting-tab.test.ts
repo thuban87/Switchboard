@@ -606,7 +606,7 @@ describe("SwitchboardSettingTab", () => {
     // ── Group C: Button click handlers ──────────────────────
 
     describe("button click handlers", () => {
-        it("Add Line button opens LineEditorModal and callback pushes new line", () => {
+        it("Add Line button opens LineEditorModal and callback pushes new line", async () => {
             plugin.settings.lines = [];
             tab.display();
 
@@ -619,9 +619,9 @@ describe("SwitchboardSettingTab", () => {
             expect(mockLineEditorOpen).toHaveBeenCalled();
             expect(capturedLineEditorLine).toBeNull();
 
-            // Simulate saving a new line via the callback
+            // Simulate saving a new line via the callback (now async)
             const newLine = makeTestLine({ id: "new", name: "New Line" });
-            capturedLineEditorOnSave!(newLine);
+            await capturedLineEditorOnSave!(newLine);
 
             expect(plugin.settings.lines).toHaveLength(1);
             expect(plugin.settings.lines[0].id).toBe("new");
@@ -629,7 +629,7 @@ describe("SwitchboardSettingTab", () => {
             expect(plugin.restartWireService).toHaveBeenCalled();
         });
 
-        it("Edit button opens LineEditorModal with line copy and updates on save", () => {
+        it("Edit button opens LineEditorModal with line copy and updates on save", async () => {
             const line = makeTestLine({ id: "math", name: "Math" });
             plugin.settings.lines = [line];
             tab.display();
@@ -644,9 +644,9 @@ describe("SwitchboardSettingTab", () => {
             expect(capturedLineEditorLine).toEqual(line);
             expect(capturedLineEditorLine).not.toBe(line); // It's a copy
 
-            // Simulate saving the edited line
+            // Simulate saving the edited line (now async)
             const updatedLine = makeTestLine({ id: "math", name: "Math 140" });
-            capturedLineEditorOnSave!(updatedLine);
+            await capturedLineEditorOnSave!(updatedLine);
 
             expect(plugin.settings.lines[0].name).toBe("Math 140");
             expect(plugin.saveSettings).toHaveBeenCalled();
@@ -672,7 +672,7 @@ describe("SwitchboardSettingTab", () => {
             expect(plugin.saveSettings).not.toHaveBeenCalled();
         });
 
-        it("Delete button opens ConfirmModal and confirmation removes line", () => {
+        it("Delete button opens ConfirmModal and confirmation removes line", async () => {
             const line = makeTestLine({ id: "math", name: "Math" });
             plugin.settings.lines = [line];
             tab.display();
@@ -683,15 +683,15 @@ describe("SwitchboardSettingTab", () => {
 
             expect(mockConfirmOpen).toHaveBeenCalled();
 
-            // Simulate confirmation
-            capturedConfirmCallback!();
+            // Simulate confirmation (now async)
+            await capturedConfirmCallback!();
 
             expect(plugin.settings.lines).toHaveLength(0);
             expect(plugin.saveSettings).toHaveBeenCalled();
             expect(plugin.restartWireService).toHaveBeenCalled();
         });
 
-        it("Delete confirmation calls restartWireService for re-sync", () => {
+        it("Delete confirmation calls restartWireService for re-sync", async () => {
             plugin.settings.lines = [
                 makeTestLine({ id: "math", name: "Math" }),
                 makeTestLine({ id: "bio", name: "Bio" }),
@@ -701,7 +701,7 @@ describe("SwitchboardSettingTab", () => {
             // Delete first line
             const deleteBtn = tab.containerEl.querySelector("button[aria-label='Delete']") as HTMLButtonElement;
             deleteBtn.click();
-            capturedConfirmCallback!();
+            await capturedConfirmCallback!();
 
             expect(plugin.settings.lines).toHaveLength(1);
             expect(plugin.settings.lines[0].id).toBe("bio");

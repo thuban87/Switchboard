@@ -46,6 +46,7 @@ vi.mock("../../src/services/SessionLogger", () => ({
         this.getCurrentDuration = vi.fn(() => 0);
         this.logSession = vi.fn().mockResolvedValue(undefined);
         this.logToDailyNote = vi.fn().mockResolvedValue(undefined);
+        this.destroy = vi.fn();
     }),
 }));
 
@@ -450,6 +451,12 @@ describe("main.ts lifecycle", () => {
             plugin.onunload();
 
             expect(plugin.circuitManager.deactivate).toHaveBeenCalled();
+        });
+
+        it("calls detachLeavesOfType for dashboard view (B34)", () => {
+            plugin.onunload();
+
+            expect(plugin.app.workspace.detachLeavesOfType).toHaveBeenCalledWith("switchboard-dashboard");
         });
 
         it("clears chronosStartupTimer if set", async () => {

@@ -61,12 +61,11 @@ export class StatusBarManager {
             const goalAbbrev = this.plugin.currentGoal.length > 20
                 ? this.plugin.currentGoal.substring(0, 20) + "..."
                 : this.plugin.currentGoal;
-            statusText += ` • 🎯 ${goalAbbrev}`;
+            statusText += ` • ${goalAbbrev}`;
         }
         this.statusBarItem.createSpan({ text: statusText });
 
-        // as any: missedCallsAcknowledged is private on SwitchboardPlugin but needed here for UI coordination
-        if (this.plugin.missedCalls.length > 0 && !(this.plugin as any).missedCallsAcknowledged) {
+        if (this.plugin.missedCalls.length > 0 && !this.plugin.missedCallsAcknowledged) {
             this.statusBarItem.addClass("switchboard-status-blink");
         } else {
             this.statusBarItem.removeClass("switchboard-status-blink");
@@ -79,10 +78,11 @@ export class StatusBarManager {
     startTimerUpdates(): void {
         this.stopTimerUpdates();
         this.update();
-        // Update every 30 seconds
-        this.timerInterval = this.plugin.registerInterval(window.setInterval(() => {
+        // Update every 30 seconds (managed manually, not via registerInterval,
+        // because we need to dynamically stop/start mid-session)
+        this.timerInterval = window.setInterval(() => {
             this.update();
-        }, 30000));
+        }, 30000);
     }
 
     /**
@@ -108,14 +108,13 @@ export class StatusBarManager {
 
         // When menu is opened, acknowledge missed calls (stop blinking)
         if (this.plugin.missedCalls.length > 0) {
-            // as any: missedCallsAcknowledged is private on SwitchboardPlugin
-            (this.plugin as any).missedCallsAcknowledged = true;
+            this.plugin.missedCallsAcknowledged = true;
             this.update();
         }
 
         menu.addItem((item) =>
             item
-                .setTitle(`🔌 Disconnect from ${activeLine.name}`)
+                .setTitle(`Disconnect from ${activeLine.name}`)
                 .setIcon("unplug")
                 .onClick(() => {
                     this.plugin.disconnect();
@@ -124,7 +123,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle("🏛️ Open Operator Menu")
+                .setTitle("Open Operator Menu")
                 .setIcon("headphones")
                 .onClick(() => {
                     this.plugin.openOperatorModal();
@@ -133,7 +132,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle("📊 Statistics")
+                .setTitle("Statistics")
                 .setIcon("bar-chart-2")
                 .onClick(() => {
                     this.plugin.openStatistics();
@@ -142,7 +141,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle("📝 Edit Sessions")
+                .setTitle("Edit Sessions")
                 .setIcon("pencil")
                 .onClick(() => {
                     this.plugin.openSessionEditor();
@@ -154,7 +153,7 @@ export class StatusBarManager {
             menu.addSeparator();
             menu.addItem((item) =>
                 item
-                    .setTitle(`📞 Missed Calls (${this.plugin.missedCalls.length})`)
+                    .setTitle(`Missed Calls (${this.plugin.missedCalls.length})`)
                     .setIcon("phone-missed")
                     .setDisabled(true)
             );

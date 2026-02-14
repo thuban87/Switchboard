@@ -22,10 +22,29 @@ export class SessionLogger {
     private currentSession: { line: SwitchboardLine; startTime: Date } | null = null;
     /** Fix #25: Promise queue to prevent concurrent write interleaving */
     private writeQueue: Promise<void> = Promise.resolve();
+    /** Fix #7: Cache case-insensitive file lookups to avoid O(N) vault scan */
+    private caseInsensitiveCache: Map<string, TFile> = new Map();
+    private vaultEventRefs: any[] = [];
 
     constructor(app: App, plugin: SwitchboardPlugin) {
         this.app = app;
         this.plugin = plugin;
+
+        // Invalidate cache when files are renamed or deleted
+        const renameRef = this.app.vault.on("rename", () => this.caseInsensitiveCache.clear());
+        const deleteRef = this.app.vault.on("delete", () => this.caseInsensitiveCache.clear());
+        this.vaultEventRefs = [renameRef, deleteRef];
+    }
+
+    /**
+     * Clean up event listeners and cache
+     */
+    destroy(): void {
+        for (const ref of this.vaultEventRefs) {
+            this.app.vault.offref(ref);
+        }
+        this.vaultEventRefs = [];
+        this.caseInsensitiveCache.clear();
     }
 
     /**
@@ -178,7 +197,7 @@ export class SessionLogger {
         const endStr = this.formatTime(session.endTime);
         const durationStr = formatDuration(session.durationMinutes);
 
-        return `### 📞 ${dateStr} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
+        return `### ${dateStr} | ${startStr} - ${endStr} (${durationStr})\n- ${summary}`;
     }
 
     /**
@@ -229,13 +248,18 @@ export class SessionLogger {
         }
 
         // Fallback: case-insensitive search for vaults with case-mismatched paths.
-        // This iterates all files which is not ideal, but only runs when the
-        // direct lookup fails (rare edge case).
-        const allFiles = this.app.vault.getFiles();
+        // Fix #7: Check cache first, then scan and cache result.
         const lowerLogPath = normalizedPath.toLowerCase();
+        const cached = this.caseInsensitiveCache.get(lowerLogPath);
+        if (cached && this.app.vault.getAbstractFileByPath(cached.path) instanceof TFile) {
+            Logger.debug("Session", "Found file via cached case-insensitive match:", cached.path);
+            return cached;
+        }
+        const allFiles = this.app.vault.getFiles();
         const matchingFile = allFiles.find(f => f.path.toLowerCase() === lowerLogPath);
         if (matchingFile) {
-            Logger.debug("Session", "Found file via case-insensitive match:", matchingFile.path);
+            this.caseInsensitiveCache.set(lowerLogPath, matchingFile);
+            Logger.debug("Session", "Found file via case-insensitive match (cached):", matchingFile.path);
             return matchingFile;
         }
 

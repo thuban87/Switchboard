@@ -75,6 +75,10 @@ if (typeof HTMLElement.prototype.addClass !== "function") {
         this.textContent = text;
     };
 
+    HTMLElement.prototype.appendText = function (text: string): void {
+        this.appendChild(document.createTextNode(text));
+    };
+
     HTMLElement.prototype.trigger = function (eventType: string): void {
         this.dispatchEvent(new Event(eventType, { bubbles: true }));
     };

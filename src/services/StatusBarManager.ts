@@ -61,7 +61,7 @@ export class StatusBarManager {
             const goalAbbrev = this.plugin.currentGoal.length > 20
                 ? this.plugin.currentGoal.substring(0, 20) + "..."
                 : this.plugin.currentGoal;
-            statusText += ` • 🎯 ${goalAbbrev}`;
+            statusText += ` • ${goalAbbrev}`;
         }
         this.statusBarItem.createSpan({ text: statusText });
 
@@ -114,7 +114,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle(`🔌 Disconnect from ${activeLine.name}`)
+                .setTitle(`Disconnect from ${activeLine.name}`)
                 .setIcon("unplug")
                 .onClick(() => {
                     this.plugin.disconnect();
@@ -123,7 +123,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle("🏛️ Open Operator Menu")
+                .setTitle("Open Operator Menu")
                 .setIcon("headphones")
                 .onClick(() => {
                     this.plugin.openOperatorModal();
@@ -132,7 +132,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle("📊 Statistics")
+                .setTitle("Statistics")
                 .setIcon("bar-chart-2")
                 .onClick(() => {
                     this.plugin.openStatistics();
@@ -141,7 +141,7 @@ export class StatusBarManager {
 
         menu.addItem((item) =>
             item
-                .setTitle("📝 Edit Sessions")
+                .setTitle("Edit Sessions")
                 .setIcon("pencil")
                 .onClick(() => {
                     this.plugin.openSessionEditor();
@@ -153,7 +153,7 @@ export class StatusBarManager {
             menu.addSeparator();
             menu.addItem((item) =>
                 item
-                    .setTitle(`📞 Missed Calls (${this.plugin.missedCalls.length})`)
+                    .setTitle(`Missed Calls (${this.plugin.missedCalls.length})`)
                     .setIcon("phone-missed")
                     .setDisabled(true)
             );

@@ -150,15 +150,15 @@ export class StatisticsModal extends Modal {
 
     private renderExportButton(containerEl: HTMLElement, history: SessionRecord[]) {
         const buttonEl = containerEl.createDiv("switchboard-stats-export");
-        const btn = buttonEl.createEl("button", { text: "📤 Export for AI Analysis", cls: "switchboard-stats-export-btn" });
+        const btn = buttonEl.createEl("button", { text: "Export for AI Analysis", cls: "switchboard-stats-export-btn" });
         btn.addEventListener("click", async () => {
             const markdown = this.generateExport(history);
             try {
                 await navigator.clipboard.writeText(markdown);
-                new Notice("📋 Statistics copied to clipboard!");
+                new Notice("Statistics copied to clipboard!");
             } catch (e) {
                 Logger.error("Statistics", "Failed to copy to clipboard:", e);
-                new Notice("⚠️ Failed to copy to clipboard");
+                new Notice("Failed to copy to clipboard");
             }
         });
     }

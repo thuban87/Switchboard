@@ -265,7 +265,7 @@ describe("SessionLogger", () => {
             });
             const result = (logger as any).formatLogEntry(session, "Studied integration techniques");
             // Should contain the markdown header with date, time range, duration
-            expect(result).toContain("### 📞");
+            expect(result).toContain("### ");
             expect(result).toContain("(1h 30m)");
             expect(result).toContain("- Studied integration techniques");
         });
@@ -280,7 +280,7 @@ describe("SessionLogger", () => {
             const session = createSession();
             const result = (logger as any).formatLogEntry(session, "");
             // Should still produce a valid entry with empty bullet
-            expect(result).toContain("### 📞");
+            expect(result).toContain("### ");
             expect(result).toContain("- ");
         });
 

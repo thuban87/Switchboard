@@ -100,8 +100,9 @@ describe("FolderSuggest", () => {
         expect(el.classList.contains("switchboard-folder-suggestion")).toBe(true);
         const spans = el.querySelectorAll("span");
         expect(spans).toHaveLength(2);
-        expect(spans[0].textContent).toBe("📁");
         expect(spans[0].className).toBe("suggestion-icon");
+        // setIcon() sets data-icon attribute via mock
+        expect((spans[0] as HTMLElement).dataset.icon).toBe("folder");
         expect(spans[1].textContent).toBe("Career/School");
         expect(spans[1].className).toBe("suggestion-content");
     });
@@ -191,12 +192,15 @@ describe("FileSuggest", () => {
         const fileEl = document.createElement("div");
         suggest.renderSuggestion(file, fileEl);
         const fileSpans = fileEl.querySelectorAll("span");
-        expect(fileSpans[0].textContent).toBe("📄");
+        // setIcon() sets data-icon attribute via mock
+        expect(fileSpans[0].className).toBe("suggestion-icon");
+        expect((fileSpans[0] as HTMLElement).dataset.icon).toBe("file");
 
         const folderEl = document.createElement("div");
         suggest.renderSuggestion(folder, folderEl);
         const folderSpans = folderEl.querySelectorAll("span");
-        expect(folderSpans[0].textContent).toBe("📁");
+        expect(folderSpans[0].className).toBe("suggestion-icon");
+        expect((folderSpans[0] as HTMLElement).dataset.icon).toBe("folder");
     });
 
     it("selectSuggestion sets input value and triggers input event", () => {

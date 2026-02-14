@@ -311,7 +311,7 @@ export class SwitchboardSettingTab extends PluginSettingTab {
             nativeBlocks += line.scheduledBlocks?.length || 0;
         }
 
-        summaryEl.textContent = `📅 View All Scheduled Blocks (${nativeBlocks} scheduled)`;
+        summaryEl.textContent = `View All Scheduled Blocks (${nativeBlocks} scheduled)`;
 
         const contentEl = detailsEl.createDiv("switchboard-schedule-overview-content");
 

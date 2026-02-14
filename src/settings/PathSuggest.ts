@@ -1,4 +1,4 @@
-import { App, AbstractInputSuggest, TFolder, TAbstractFile } from "obsidian";
+import { App, AbstractInputSuggest, TFolder, TAbstractFile, setIcon } from "obsidian";
 
 /**
  * Folder suggester that provides autocomplete for folder paths
@@ -58,7 +58,8 @@ export class FolderSuggest extends AbstractInputSuggest<TFolder> {
         el.addClass("switchboard-folder-suggestion");
 
         // Show folder icon + path
-        el.createSpan({ cls: "suggestion-icon", text: "📁" });
+        const iconEl = el.createSpan({ cls: "suggestion-icon" });
+        setIcon(iconEl, "folder");
         el.createSpan({ cls: "suggestion-content", text: folder.path });
     }
 
@@ -134,8 +135,8 @@ export class FileSuggest extends AbstractInputSuggest<TAbstractFile> {
     renderSuggestion(file: TAbstractFile, el: HTMLElement): void {
         el.addClass("switchboard-file-suggestion");
 
-        const icon = file instanceof TFolder ? "📁" : "📄";
-        el.createSpan({ cls: "suggestion-icon", text: icon });
+        const iconEl = el.createSpan({ cls: "suggestion-icon" });
+        setIcon(iconEl, file instanceof TFolder ? "folder" : "file");
         el.createSpan({ cls: "suggestion-content", text: file.path });
     }
 

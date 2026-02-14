@@ -1,4 +1,4 @@
-import { App, Modal } from "obsidian";
+import { App, Modal, setIcon } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine, OperatorCommand } from "../types";
 
@@ -67,7 +67,8 @@ export class OperatorModal extends Modal {
 
         // Header
         const headerEl = contentEl.createDiv("switchboard-operator-header");
-        headerEl.createEl("span", { text: "🎛️", cls: "switchboard-operator-icon" });
+        const iconEl = headerEl.createEl("span", { cls: "switchboard-operator-icon" });
+        setIcon(iconEl, "sliders-horizontal");
         headerEl.createEl("h2", { text: "Operator Menu" });
 
         // Line indicator

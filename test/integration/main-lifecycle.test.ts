@@ -46,6 +46,7 @@ vi.mock("../../src/services/SessionLogger", () => ({
         this.getCurrentDuration = vi.fn(() => 0);
         this.logSession = vi.fn().mockResolvedValue(undefined);
         this.logToDailyNote = vi.fn().mockResolvedValue(undefined);
+        this.destroy = vi.fn();
     }),
 }));
 

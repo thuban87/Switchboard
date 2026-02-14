@@ -28,6 +28,9 @@ export class Vault {
     getAbstractFileByPath = vi.fn();
     getFiles = vi.fn(() => []);
     getAllLoadedFiles = vi.fn(() => []);
+    on = vi.fn(() => ({ id: "mock-event-ref" }));
+    off = vi.fn();
+    offref = vi.fn();
 }
 
 // Workspace — add getLeaf for landing page tests, revealLeaf + getRightLeaf for dashboard tests

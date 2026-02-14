@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, Modal, Notice, Setting, setIcon } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { ConfirmModal } from "./ConfirmModal";
 import { SessionRecord, SwitchboardLine, formatDuration } from "../types";
@@ -115,14 +115,16 @@ export class SessionEditorModal extends Modal {
 
                 const actionsEl = sessionEl.createDiv("switchboard-session-editor-session-actions");
 
-                const editBtn = actionsEl.createEl("button", { text: "✏️", cls: "switchboard-session-btn-edit" });
+                const editBtn = actionsEl.createEl("button", { cls: "switchboard-session-btn-edit" });
+                setIcon(editBtn, "pencil");
                 editBtn.title = "Edit session";
                 editBtn.addEventListener("click", (e) => {
                     e.stopPropagation();
                     this.showEditForm(record, index);
                 });
 
-                const deleteBtn = actionsEl.createEl("button", { text: "🗑️", cls: "switchboard-session-btn-delete" });
+                const deleteBtn = actionsEl.createEl("button", { cls: "switchboard-session-btn-delete" });
+                setIcon(deleteBtn, "trash-2");
                 deleteBtn.title = "Delete session";
                 deleteBtn.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -200,7 +202,7 @@ export class SessionEditorModal extends Modal {
         saveBtn.addEventListener("click", async () => {
             this.plugin.settings.sessionHistory[index] = record;
             await this.plugin.saveSettings();
-            new Notice("✅ Session updated");
+            new Notice("Session updated");
             this.renderSessionList();
         });
     }
@@ -222,7 +224,7 @@ export class SessionEditorModal extends Modal {
             async () => {
                 this.plugin.settings.sessionHistory.splice(index, 1);
                 await this.plugin.saveSettings();
-                new Notice("🗑️ Session deleted");
+                new Notice("Session deleted");
                 this.renderSessionList();
             }
         ).open();

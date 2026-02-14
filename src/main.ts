@@ -34,6 +34,8 @@ export default class SwitchboardPlugin extends Plugin {
     missedCallsAcknowledged: boolean = true;
     private chronosStartupTimer: ReturnType<typeof setTimeout> | null = null;
     private registeredCommandIds: Set<string> = new Set();
+    private isPatchingIn = false;
+    private isDisconnecting = false;
 
     async onload() {
 
@@ -167,6 +169,7 @@ export default class SwitchboardPlugin extends Plugin {
         this.wireService.stop();
         this.circuitManager.deactivate();
         this.audioService.destroy();        // CRITICAL: was missing (audit #1)
+        this.sessionLogger.destroy();       // Fix #7: clean up vault event listeners
 
         // B34: Clean up dashboard view leaves
         this.app.workspace.detachLeavesOfType(DASHBOARD_VIEW_TYPE);
@@ -258,7 +261,7 @@ export default class SwitchboardPlugin extends Plugin {
             }
         } catch (e) {
             Logger.error("Plugin", "Error opening Call Waiting:", e);
-            new Notice("⚠️ Error opening Call Waiting — see console");
+            new Notice("Error opening Call Waiting — see console");
         }
     }
 
@@ -322,6 +325,8 @@ export default class SwitchboardPlugin extends Plugin {
      * Patches into a line (activates context)
      */
     async patchIn(line: SwitchboardLine) {
+        if (this.isPatchingIn) return;
+        this.isPatchingIn = true;
         try {
             Logger.debug("Plugin", `Patching in to "${line.name}"...`);
 
@@ -345,7 +350,7 @@ export default class SwitchboardPlugin extends Plugin {
             this.timerManager.startBreakReminder();
 
             // Show notice
-            new Notice(`📞 Patched in: ${line.name}`);
+            new Notice(`Patched in: ${line.name}`);
 
             // Open landing page if specified
             if (line.landingPage) {
@@ -366,7 +371,9 @@ export default class SwitchboardPlugin extends Plugin {
             this.refreshDashboard();
         } catch (e) {
             Logger.error("Plugin", "Error during patch-in:", e);
-            new Notice("⚠️ Error patching in — see console");
+            new Notice("Error patching in — see console");
+        } finally {
+            this.isPatchingIn = false;
         }
     }
 
@@ -394,9 +401,12 @@ export default class SwitchboardPlugin extends Plugin {
      * Disconnects from the current line
      */
     async disconnect() {
+        if (this.isDisconnecting) return;
+        this.isDisconnecting = true;
         const activeLine = this.getActiveLine();
 
         if (!activeLine) {
+            this.isDisconnecting = false;
             new Notice("Switchboard: No active connection");
             return;
         }
@@ -433,7 +443,7 @@ export default class SwitchboardPlugin extends Plugin {
                                 ? `Goal: ${sessionGoal}\n${summary}`
                                 : summary;
                             await this.sessionLogger.logSession(sessionInfo, fullSummary);
-                            new Notice("📝 Session logged");
+                            new Notice("Session logged");
                         }
                         // Log to daily note with summary (after modal)
                         await this.sessionLogger.logToDailyNote(activeLine.name, sessionDuration, summary || undefined);
@@ -444,7 +454,7 @@ export default class SwitchboardPlugin extends Plugin {
                 }
             } catch (e) {
                 Logger.error("Plugin", "Error logging session:", e);
-                new Notice("⚠️ Error saving session log — see console");
+                new Notice("Error saving session log — see console");
             }
 
             // Guaranteed cleanup — in-memory operations that must always run
@@ -456,7 +466,7 @@ export default class SwitchboardPlugin extends Plugin {
             this.timerManager.stopBreakReminder();
 
             // Show notice
-            new Notice(`🔌 Disconnected from: ${activeLine.name}`);
+            new Notice(`Disconnected from: ${activeLine.name}`);
 
             // Play disconnect sound
             this.audioService.playDisconnect();
@@ -467,7 +477,9 @@ export default class SwitchboardPlugin extends Plugin {
             this.refreshDashboard();
         } catch (e) {
             Logger.error("Plugin", "Error during disconnect:", e);
-            new Notice("⚠️ Error disconnecting — see console");
+            new Notice("Error disconnecting — see console");
+        } finally {
+            this.isDisconnecting = false;
         }
     }
 
@@ -554,7 +566,7 @@ export default class SwitchboardPlugin extends Plugin {
                     }
                 } catch (e) {
                     Logger.error("Operator", "Error executing command:", cmd.value, e);
-                    new Notice(`⚠️ Error executing command: ${cmd.name}`);
+                    new Notice(`Error executing command: ${cmd.name}`);
                 }
                 break;
 
@@ -576,7 +588,7 @@ export default class SwitchboardPlugin extends Plugin {
                     }
                 } catch (e) {
                     Logger.error("Operator", "Error inserting text:", cmd.name, e);
-                    new Notice(`⚠️ Error inserting text: ${cmd.name}`);
+                    new Notice(`Error inserting text: ${cmd.name}`);
                 }
                 break;
 
@@ -597,7 +609,7 @@ export default class SwitchboardPlugin extends Plugin {
                     }
                 } catch (e) {
                     Logger.error("Operator", "Error opening file:", cmd.value, e);
-                    new Notice(`⚠️ Error opening file: ${cmd.name}`);
+                    new Notice(`Error opening file: ${cmd.name}`);
                 }
                 break;
         }

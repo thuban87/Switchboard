@@ -1,4 +1,4 @@
-import { App, Modal } from "obsidian";
+import { App, Modal, setIcon } from "obsidian";
 import { SessionInfo } from "../services/SessionLogger";
 import { formatDuration } from "../types";
 
@@ -35,7 +35,8 @@ export class CallLogModal extends Modal {
 
         // Header
         const headerEl = contentEl.createDiv("switchboard-call-log-header");
-        headerEl.createEl("span", { text: "📝", cls: "switchboard-call-log-icon" });
+        const iconEl = headerEl.createEl("span", { cls: "switchboard-call-log-icon" });
+        setIcon(iconEl, "file-text");
         headerEl.createEl("h2", { text: "Call Ended" });
 
         // Session info
@@ -47,13 +48,13 @@ export class CallLogModal extends Modal {
 
         const durationStr = formatDuration(this.session.durationMinutes);
         const timeRange = `${this.formatTime(this.session.startTime)} - ${this.formatTime(this.session.endTime)}`;
-        infoEl.createEl("p", { text: `⏱️ ${durationStr} (${timeRange})`, cls: "switchboard-call-log-duration" });
+        infoEl.createEl("p", { text: `${durationStr} (${timeRange})`, cls: "switchboard-call-log-duration" });
 
         // Goal reflection if a goal was set
         if (this.goal) {
             const goalEl = contentEl.createDiv("switchboard-call-log-goal-reflection");
             goalEl.createEl("p", {
-                text: `🎯 Your goal: "${this.goal}"`,
+                text: `Your goal: "${this.goal}"`,
                 cls: "switchboard-call-log-goal-text"
             });
             goalEl.createEl("p", {
@@ -97,7 +98,7 @@ export class CallLogModal extends Modal {
         const doneBtn = buttonsEl.createEl("button", {
             cls: "switchboard-call-log-btn switchboard-call-log-btn-done",
         });
-        doneBtn.createEl("span", { text: "✓ Done" });
+        doneBtn.createEl("span", { text: "Done" });
         doneBtn.addEventListener("click", () => {
             const summary = this.textArea.value.trim();
             this.close();

@@ -9,7 +9,9 @@ export const DASHBOARD_VIEW_TYPE = "switchboard-dashboard";
  */
 export class DashboardView extends ItemView {
     plugin: SwitchboardPlugin;
-
+    /** Cached references for delta timer updates (Fix #12) */
+    private timerEl: HTMLElement | null = null;
+    private goalEl: HTMLElement | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: SwitchboardPlugin) {
         super(leaf);
@@ -33,10 +35,11 @@ export class DashboardView extends ItemView {
         this.render();
 
         // Refresh every 30 seconds to update timer
+        // Fix #12: Only update timer text, not full DOM rebuild
         // registerInterval() auto-cleans on view close AND plugin unload
         this.registerInterval(
             window.setInterval(() => {
-                this.render();
+                this.updateTimer();
             }, 30000)
         );
     }
@@ -52,6 +55,20 @@ export class DashboardView extends ItemView {
         this.render();
     }
 
+    /**
+     * Lightweight delta update — only refreshes time-sensitive text (Fix #12)
+     * Avoids full DOM rebuild every 30 seconds.
+     */
+    private updateTimer(): void {
+        const activeLine = this.plugin.getActiveLine();
+        if (!activeLine) return;
+
+        if (this.timerEl) {
+            const duration = this.plugin.sessionLogger.getCurrentDuration();
+            this.timerEl.textContent = formatDuration(duration);
+        }
+    }
+
     private render() {
         // Fix #33: Use contentEl if available (Obsidian ItemView internal), fall back to children[1]
         // Internal Obsidian API — ItemView exposes contentEl but it's not in the public type definitions
@@ -59,6 +76,10 @@ export class DashboardView extends ItemView {
         if (!container) return;
         container.empty();
         container.addClass("switchboard-dashboard-container");
+
+        // Reset cached element references
+        this.timerEl = null;
+        this.goalEl = null;
 
         // Current Session Card
         this.renderCurrentSession(container);
@@ -98,16 +119,18 @@ export class DashboardView extends ItemView {
             // Timer
             const duration = this.plugin.sessionLogger.getCurrentDuration();
             const durationStr = formatDuration(duration);
-            content.createDiv({ text: `⏱️ ${durationStr}`, cls: "switchboard-session-card-timer" });
+            this.timerEl = content.createDiv({ cls: "switchboard-session-card-timer" });
+            this.timerEl.textContent = durationStr;
 
             // Goal if set
             if (this.plugin.currentGoal) {
-                content.createDiv({ text: `🎯 ${this.plugin.currentGoal}`, cls: "switchboard-session-card-goal" });
+                this.goalEl = content.createDiv({ cls: "switchboard-session-card-goal" });
+                this.goalEl.textContent = this.plugin.currentGoal;
             }
 
             // Disconnect button
             const disconnectBtn = content.createEl("button", {
-                text: "🔌 Disconnect",
+                text: "Disconnect",
                 cls: "switchboard-session-card-disconnect",
             });
             disconnectBtn.addEventListener("click", () => {

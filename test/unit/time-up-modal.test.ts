@@ -54,15 +54,15 @@ describe("TimeUpModal", () => {
             expect(message!.textContent).toContain("Math 140");
         });
 
-        it("renders three extend buttons (\"📞 +15 min\", \"📞 +30 min\", \"📞 +1 hour\")", () => {
+        it("renders three extend buttons (\"+15 min\", \"+30 min\", \"+1 hour\")", () => {
             const modal = createModal();
             modal.onOpen();
 
             const buttons = getExtendButtons(modal);
             expect(buttons.length).toBe(3);
-            expect(buttons[0].textContent).toBe("📞 +15 min");
-            expect(buttons[1].textContent).toBe("📞 +30 min");
-            expect(buttons[2].textContent).toBe("📞 +1 hour");
+            expect(buttons[0].textContent).toBe("+15 min");
+            expect(buttons[1].textContent).toBe("+30 min");
+            expect(buttons[2].textContent).toBe("+1 hour");
         });
 
         it("renders Hang Up button", () => {
@@ -71,7 +71,7 @@ describe("TimeUpModal", () => {
 
             const hangUp = getHangUpButton(modal);
             expect(hangUp).not.toBeNull();
-            expect(hangUp.textContent).toBe("🔌 Hang Up");
+            expect(hangUp.textContent).toBe("Hang Up");
         });
     });
 

@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, Modal, Notice, Setting, setIcon } from "obsidian";
 import type SwitchboardPlugin from "../main";
 import { SwitchboardLine } from "../types";
 
@@ -25,7 +25,8 @@ export class TimeUpModal extends Modal {
 
         // Header
         const headerEl = contentEl.createDiv("switchboard-timeup-header");
-        headerEl.createEl("span", { text: "⏰", cls: "switchboard-timeup-icon" });
+        const iconEl = headerEl.createEl("span", { cls: "switchboard-timeup-icon" });
+        setIcon(iconEl, "clock");
         headerEl.createEl("h2", { text: "Time's Up!" });
 
         // Message
@@ -45,7 +46,7 @@ export class TimeUpModal extends Modal {
         const extendRow = buttonsEl.createDiv("switchboard-timeup-extend-row");
 
         const extend15Btn = extendRow.createEl("button", {
-            text: "📞 +15 min",
+            text: "+15 min",
             cls: "switchboard-timeup-btn switchboard-timeup-extend",
         });
         extend15Btn.addEventListener("click", () => {
@@ -53,7 +54,7 @@ export class TimeUpModal extends Modal {
         });
 
         const extend30Btn = extendRow.createEl("button", {
-            text: "📞 +30 min",
+            text: "+30 min",
             cls: "switchboard-timeup-btn switchboard-timeup-extend",
         });
         extend30Btn.addEventListener("click", () => {
@@ -61,7 +62,7 @@ export class TimeUpModal extends Modal {
         });
 
         const extend60Btn = extendRow.createEl("button", {
-            text: "📞 +1 hour",
+            text: "+1 hour",
             cls: "switchboard-timeup-btn switchboard-timeup-extend",
         });
         extend60Btn.addEventListener("click", () => {
@@ -70,7 +71,7 @@ export class TimeUpModal extends Modal {
 
         // Disconnect button
         const disconnectBtn = buttonsEl.createEl("button", {
-            text: "🔌 Hang Up",
+            text: "Hang Up",
             cls: "switchboard-timeup-btn switchboard-timeup-disconnect",
         });
         disconnectBtn.addEventListener("click", () => {
@@ -84,7 +85,7 @@ export class TimeUpModal extends Modal {
         extendUntil.setMinutes(extendUntil.getMinutes() + minutes);
 
         this.plugin.scheduleAutoDisconnect(extendUntil);
-        new Notice(`📞 Session extended by ${minutes} minutes`);
+        new Notice(`Session extended by ${minutes} minutes`);
         this.close();
     }
 

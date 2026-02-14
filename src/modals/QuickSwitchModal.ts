@@ -1,4 +1,4 @@
-import { Modal, App } from "obsidian";
+import { Modal, App, setIcon } from "obsidian";
 import { SwitchboardLine } from "../types";
 
 /**
@@ -35,7 +35,8 @@ export class QuickSwitchModal extends Modal {
 
         // Header
         const header = contentEl.createDiv("switchboard-quick-switch-header");
-        header.createEl("span", { text: "📞", cls: "switchboard-quick-switch-icon" });
+        const iconEl = header.createEl("span", { cls: "switchboard-quick-switch-icon" });
+        setIcon(iconEl, "phone");
         header.createEl("span", { text: "Quick Switch", cls: "switchboard-quick-switch-title" });
 
         // Show current session if active
@@ -113,7 +114,7 @@ export class QuickSwitchModal extends Modal {
         // Disconnect button if active
         if (this.activeLine) {
             const disconnectBtn = contentEl.createEl("button", {
-                text: "🔌 Disconnect",
+                text: "Disconnect",
                 cls: "switchboard-quick-switch-disconnect",
             });
             disconnectBtn.addEventListener("click", () => {

@@ -46,8 +46,8 @@ describe("IncomingCallModal", () => {
 
             const time = modal.contentEl.querySelector(".switchboard-incoming-call-task-time");
             expect(time).not.toBeNull();
-            // formatTime uses toLocaleTimeString — just verify it starts with the clock emoji
-            expect(time!.textContent).toContain("⏰");
+            // formatTime uses toLocaleTimeString — just verify the time element exists with content
+            expect(time!.textContent).toBeTruthy();
         });
 
         it("renders file path (basename only) when provided", () => {

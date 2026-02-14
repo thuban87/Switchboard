@@ -45,7 +45,7 @@ describe("CallLogModal", () => {
             expect(duration).not.toBeNull();
             // 90 minutes = "1h 30m" via formatDuration
             expect(duration!.textContent).toContain("1h 30m");
-            expect(duration!.textContent).toContain("⏱️");
+            expect(duration!.textContent).toContain("9:00");
         });
 
         it("shows goal reflection section when goal was set", () => {

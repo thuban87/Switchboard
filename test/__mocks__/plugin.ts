@@ -30,6 +30,7 @@ export function createMockPlugin(overrides: Record<string, any> = {}) {
             getCurrentDuration: vi.fn(() => 0),
             logSession: vi.fn().mockResolvedValue(undefined),
             logToDailyNote: vi.fn().mockResolvedValue(undefined),
+            destroy: vi.fn(),
         },
         audioService: {
             playPatchIn: vi.fn(),

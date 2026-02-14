@@ -5,7 +5,7 @@
 Switchboard reduces context-switching friction by visually transforming your Obsidian vault based on what you're working on. Define your contexts ("Lines"), patch in, and let Switchboard fade away everything else so you can focus on what matters.
 
 <p align="center">
-  <img src="assets/images/line-activation.gif" alt="Switchboard in action: folder fading and accent color shift" width="700">
+  <img src="assets/images/line-activation.gif" alt="Switchboard in action: folder fading and accent color shift" width="300">
 </p>
 
 ---
